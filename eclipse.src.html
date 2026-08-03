@@ -18,6 +18,8 @@
   /* mode switch lives on the photographer-panel heading row, and only once expanded */
   summary .modes{display:inline-flex; gap:5px; margin-left:12px; vertical-align:-2px;}
   summary .modes button{padding:4px 10px; font-size:10px; letter-spacing:.16em;}
+  /* in NOVICE every target is thumb-sized, and the way back to PRO is a target too */
+  body.novice summary .modes button{min-height:48px; padding:0 16px; font-size:11px;}
   details.photo:not([open]) summary .modes{display:none;}
   body.novice #photo .photosec{display:none;}
   body.pro #novice{display:none;}
@@ -35,6 +37,45 @@
   #novice .safety{border:1px solid var(--bad); border-left-width:3px; border-radius:5px; padding:11px 13px; color:#f0a5a5;}
   #novice .safety .lbl{color:var(--bad); letter-spacing:.24em;}
   #novice .safety b{color:#ff8f8f; font-weight:600;}
+  /* NOVICE controls: icon + two words, thumb-sized, and no millimetres on the face of
+     anything. These two rows ARE the mode — everything else on screen is an answer. */
+  #novice .nsel{display:flex; gap:6px;}
+  #novice .nsel button{flex:1 1 0; min-width:0; min-height:60px; display:flex; flex-direction:column;
+                       align-items:center; justify-content:center; gap:5px; padding:9px 4px;
+                       font-size:11.5px; letter-spacing:.06em; line-height:1.2; text-align:center;
+                       border:1px solid #333d54; border-radius:8px; background:#0f131b; color:#b3bdcf;}
+  #novice .nsel button i{display:block; font-style:normal; font-size:9.5px; color:var(--dim); letter-spacing:.04em;}
+  #novice .nsel button svg{width:26px; height:22px; flex:none; fill:none; stroke:currentColor;
+                           stroke-width:1.4; stroke-linejoin:round; stroke-linecap:round;}
+  #novice .nsel button:hover{border-color:#4a5670; color:var(--ink);}
+  #novice .nsel button.on{color:var(--accent); border-color:var(--accent); background:#141822;}
+  #novice .nsel button.on i{color:#b08a45;}
+  #novice .nsel button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  #novice .adv{margin-top:8px; color:var(--dim); font-size:12.5px;}
+  /* the one recommendation: no formula, no ladder, no way to tweak it */
+  #novice .setbig{border:1px solid var(--line); border-left:3px solid var(--good); border-radius:6px;
+                  padding:12px 13px; background:#0a0c10;}
+  #novice .setbig .bigv{font-family:var(--mono); font-size:clamp(20px,6.2vw,28px); line-height:1.15; color:#d8ffe4;}
+  #novice .setbig .bigs{font-family:var(--mono); font-size:13px; margin-top:7px; color:var(--ink);}
+  #novice .setbig .bigl{font-size:12.5px; margin-top:9px; color:var(--dim);}
+  /* schedule: the time is the point, so it is the biggest thing in the row */
+  #novice .sched{display:grid; grid-template-columns:max-content 1fr; gap:0 14px; align-items:baseline;}
+  #novice .sched > span{padding:7px 0; border-top:1px solid rgba(30,35,48,0.85);}
+  #novice .sched > span:nth-child(-n+2){border-top:none; padding-top:0;}
+  #novice .sched .st{font-family:var(--mono); font-size:17px; font-weight:600; color:var(--accent);}
+  #novice .sched .sa{font-size:13.5px;}
+  /* "?" — the why, on demand. A real <details>, so touch, keyboard and find-in-page all work. */
+  #novice details.why{border:1px solid var(--line); border-radius:6px; margin:8px 0 0; background:#0a0c10;}
+  #novice details.why summary{display:flex; align-items:center; gap:10px; min-height:48px; padding:0 12px;
+                              cursor:pointer; list-style:none; font-size:13px; color:#a7b4c9;}
+  #novice details.why summary::-webkit-details-marker{display:none;}
+  #novice details.why summary::before{content:'?'; flex:none; width:22px; height:22px; border-radius:50%;
+                                      border:1px solid var(--dim); color:var(--dim); font-size:12px;
+                                      display:flex; align-items:center; justify-content:center;}
+  #novice details.why[open] summary{color:var(--accent);}
+  #novice details.why[open] summary::before{content:'\2212'; border-color:var(--accent); color:var(--accent);}
+  #novice details.why summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+  #novice .whyb{padding:0 13px 12px;}
   .wrap{max-width:1100px; margin:0 auto; padding:0 10px;}
   canvas#sky{display:block; width:100%; aspect-ratio:16/9; background:#000; border:1px solid var(--line); border-radius:6px; touch-action:none;}
   canvas#map{display:block; width:100%; aspect-ratio:16/9; background:#070c14; border:1px solid var(--line); border-radius:6px; cursor:crosshair; touch-action:none;}
@@ -77,6 +118,23 @@
   .live{display:flex; flex-wrap:wrap; gap:6px 18px; padding:8px 2px; font-family:var(--mono); font-size:12px; color:var(--dim);}
   .live b{color:var(--ink); font-weight:400;}
   .live .acc{color:var(--accent);}
+
+  /* WHEN bar — "at what time", for everyone, above the fold. The time is the headline and
+     is deliberately the largest type on the page after the app title; the sentence under it
+     is for someone who has never heard the word "contact". */
+  .whenbar{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; margin:8px 0 2px;
+           padding:11px 13px 12px; background:#0f1319; border:1px solid #2b3346;
+           border-left:3px solid var(--accent); border-radius:6px;}
+  .whenbar .wl{font-size:10px; letter-spacing:.24em; color:var(--accent); text-transform:uppercase;}
+  /* the time owns its own line: the label and zone sit above it, the sentence below, so the
+     clock reading is never squeezed or wrapped mid-number at 375px */
+  .whenbar b{flex:1 0 100%; font-family:var(--mono); font-weight:400; font-size:clamp(23px,7.2vw,34px);
+             line-height:1.05; letter-spacing:.02em; color:#ffe1a8; margin-top:3px;}
+  .whenbar .wz{font-family:var(--mono); font-size:12px; color:var(--dim);}
+  .whenbar .ws{flex:1 0 100%; font-size:13.5px; color:var(--ink); margin-top:5px;}
+  .whenbar.none{border-left-color:var(--dim);}
+  .whenbar.none b{color:var(--dim); font-size:clamp(18px,5vw,24px);}
+  @media(max-width:430px){ .whenbar{padding:10px 11px 11px;} .whenbar .ws{font-size:13px;} }
 
   /* LIVE status bar — the one line that answers "what is happening right now, to me".
      Escalates: dim idle → amber in progress → loud red during totality. Sits above the
@@ -212,30 +270,13 @@
     .captabs button{min-height:46px; padding:14px 2px 13px; font-size:12px; letter-spacing:.08em;}
   }
   #plan{border-top-left-radius:0; padding-top:12px;}
-  /* SIMPLE/FULL: a sub-choice of the selected tab, so lighter than the tabs above it */
-  #plan .ambrow{display:flex; justify-content:space-between; align-items:center; gap:8px; margin:-2px 0 8px;}
-  #plan .ambrow .al{font-size:9.5px; letter-spacing:.2em; color:var(--dim); text-transform:uppercase;}
-  .ambmode{display:inline-flex; gap:4px;}
-  .ambmode button{padding:3px 10px; min-height:22px; font-size:9.5px; letter-spacing:.16em; background:transparent;}
   #plan .pbud{border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:4px; padding:8px 10px; margin:2px 0 10px; line-height:1.6;}
   #plan .pbud .bl{display:block; font-size:9.5px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase; margin-bottom:5px;}
   #plan .pbud .bn{color:var(--accent); font-weight:600;}
   #plan .pbud .as{color:var(--dim); font-size:10.5px;}
-  /* SIMPLE: one settings card dialled in once, then a schedule whose only actions are the
-     filter. Green rail, not amber — this block is "you are ready", not "you are on the clock". */
-  #plan .pset{border:1px solid var(--line); border-left:3px solid var(--good); border-radius:4px; padding:8px 10px; margin:2px 0 10px; line-height:1.6;}
-  #plan .pset .bl{display:block; font-size:9.5px; letter-spacing:.2em; color:var(--good); text-transform:uppercase; margin-bottom:5px;}
-  #plan .pset .sm{color:#d8ffe4; font-weight:600;}
-  #plan .pset .sw{color:var(--dim);}
-  #plan .pset .sg{display:grid; grid-template-columns:max-content 1fr; gap:0 12px; margin:6px 0 0;}
-  #plan .pset .sk{color:var(--dim); text-transform:uppercase; font-size:9.5px; letter-spacing:.12em; padding-top:3px;}
-  #plan .pset .sv{color:var(--ink);}
-  #plan .pset .sh{color:#f0c48a; margin-top:7px;}
-  /* the inputs that drive the plan, repeated at the plan itself — the framing/exposure
-     controls are several sections up and out of sight once you are reading the schedule */
-  /* these four fields are what make the plan yours, and at 9.5px they read as fine print you
-     scroll past. Boxed, larger type, real field boundaries, 44px tap targets — the row should
-     look like it wants your numbers. */
+  /* ONE camera row for the whole PRO panel: focal, sensor, crop, overlay, aperture, ISO.
+     There used to be two (a FRAMING row up top and a "drives this plan" row at the plan)
+     holding the same values in two places, which read as two different settings. */
   .planctl{margin:0 0 12px; align-items:center; gap:9px; padding:11px 12px 12px;
            background:#12161f; border:1px solid #2b3346; border-radius:8px;}
   .planctl .cl{flex:1 0 100%; font-size:11px; letter-spacing:.22em; color:#f0c48a;
@@ -245,6 +286,7 @@
                                   background:#080b11; border-color:#3c4762; border-radius:6px;}
   .planctl input:focus, .planctl select:focus{outline:none; border-color:var(--accent);}
   .planctl input{width:98px;}
+  .planctl button{min-height:44px; font-size:12.5px;}
   .planctl .pf{display:flex; align-items:center; gap:8px;}
   .planctl .u{font:300 13px var(--mono); color:var(--dim);}
   @media(max-width:520px){
@@ -296,6 +338,16 @@
       <span>drag to orbit &middot; wheel / pinch to zoom</span>
     </div>
     <div class="note">illustrative scale &mdash; sun and moon sit along their <b>true directions</b> for this moment, the earth carries its true rotation, and the shadow lands at its true position; distances and sizes are compressed for clarity (at true scale the moon would be sub-pixel).</div>
+  </div>
+
+  <!-- THE ANSWER TO "WHAT TIME?" — the one thing every visitor asks first, above the fold on
+       a phone, in both modes and on all three tabs. The LIVE bar below answers "how long
+       until"; this answers "at what time", so the pair complements rather than repeats. -->
+  <div class="whenbar" id="whenBar" hidden>
+    <span class="wl" id="whenLbl">MAXIMUM</span>
+    <span class="wz" id="whenTz"></span>
+    <b id="whenBig">—</b>
+    <span class="ws" id="whenSub"></span>
   </div>
 
   <div class="live">
@@ -367,35 +419,47 @@
          "what you'll see" heading -->
     <div id="novice"><div id="noviceBody"></div></div>
 
+    <!-- ONE camera row for the whole panel. Framing, exposure and the shot plan all read
+         from these six controls; there used to be a second copy of four of them down at the
+         plan, which read as a different set of settings that disagreed with this one. -->
     <div class="photosec" style="border-top:none; padding-top:0; margin-top:0">
-      <h3>Framing</h3>
-      <div class="row">
-        <label>focal</label><input type="number" id="focal" value="600" step="10" min="8" max="4000"> <span class="mono" style="color:var(--dim)">mm</span>
-        <select id="sensor">
+      <h3>Your camera</h3>
+      <div class="row planctl" id="camCtl">
+        <span class="cl">drives the framing, the exposures and the plan</span>
+        <!-- each label stays welded to its control, so a 375px wrap never orphans "SENSOR" -->
+        <span class="pf"><label for="focal">focal</label><input type="number" id="focal" value="600" step="10" min="8" max="4000"><span class="u">mm</span></span>
+        <span class="pf"><label for="sensor">sensor</label><select id="sensor">
           <option value="36,24">Full frame 36×24</option>
           <option value="23.6,15.7">APS-C 23.6×15.7</option>
           <option value="17.3,13">MFT 17.3×13</option>
           <option value="custom">Custom…</option>
-        </select>
-        <button id="crop" title="apply 1.5× APS-C crop mode">1.5× crop: OFF</button>
-        <button id="frameShow" class="on">Frame overlay: ON</button>
+        </select></span>
+        <span class="pf"><label for="fnum">f/</label>
+          <select id="fnum"><option>2.8</option><option>4</option><option>5.6</option><option selected>8</option><option>11</option><option>16</option></select></span>
+        <span class="pf"><label for="iso">ISO</label>
+          <select id="iso"><option>100</option><option selected>200</option><option>400</option><option>800</option><option>1600</option><option>3200</option></select></span>
+        <span class="pf">
+          <button id="crop" title="apply 1.5× APS-C crop mode">1.5× crop: OFF</button>
+          <button id="frameShow" class="on">Frame overlay: ON</button>
+        </span>
       </div>
       <div class="row" id="customSensor" hidden>
         <label>sensor w</label><input type="number" id="sw" value="36" step="0.1">
         <label>h</label><input type="number" id="sh" value="24" step="0.1"> <span class="mono" style="color:var(--dim)">mm</span>
       </div>
+    </div>
+
+    <div class="photosec">
+      <h3>Framing</h3>
       <div class="kv" id="frameKv"></div>
       <div class="note" id="driftNote"></div>
     </div>
 
     <div class="photosec">
       <h3>Exposure — Espenak t = f² / (ISO × 2^Q)</h3>
-      <div class="row">
-        <label>aperture</label>
-        <select id="fnum"><option>2.8</option><option>4</option><option>5.6</option><option selected>8</option><option>11</option><option>16</option></select>
-        <label>ISO</label>
-        <select id="iso"><option>100</option><option selected>200</option><option>400</option><option>800</option><option>1600</option><option>3200</option></select>
-      </div>
+      <!-- the table is right, and to anyone who hasn't met it before, meaningless. Three
+           sentences of plain English are the difference between a reference and a wall. -->
+      <div class="note" style="margin-top:0">These are <b>starting shutter speeds</b> for each stage of the eclipse at the aperture and ISO you set above — set the shutter, shoot, then judge the result. <b>Q</b> is just a brightness number for the subject: each step of Q is one stop, and a bigger Q means a brighter subject and a faster shutter. The corona spans many stops at once, so no single value catches it all.</div>
       <table class="exp" id="expTable"></table>
       <div class="note">Corona spans a huge dynamic range — bracket wide (±3 stops or more around each value) and merge later. These are starting points, not answers.</div>
       <div class="note" id="extNote"></div>
@@ -403,20 +467,9 @@
 
     <div class="photosec">
       <h3>Shot plan</h3>
-      <!-- two tiers: the capture mode is WHAT you're shooting, so it gets tabs above the card
-           (same idiom as SKY/PATH); SIMPLE/FULL is HOW MUCH within that mode, so it is a
-           lighter segmented pair inside the card. PRO/NOVICE (vocabulary) stays on the
-           panel heading — three controls, three distinct registers. -->
-      <!-- the plan is computed from focal/sensor/aperture/ISO, which live two sections above
-           and off-screen by the time you are reading the schedule — so they are mirrored here -->
-      <div class="row planctl" id="planCtl">
-        <span class="cl">drives this plan</span>
-        <!-- each label stays welded to its control, so a 375px wrap never orphans "SENSOR" -->
-        <span class="pf"><label for="pfocal">focal</label><input type="number" id="pfocal" value="600" step="10" min="8" max="4000"><span class="u">mm</span></span>
-        <span class="pf"><label for="psensor">sensor</label><select id="psensor"></select></span>
-        <span class="pf"><label for="pfnum">f/</label><select id="pfnum"></select></span>
-        <span class="pf"><label for="piso">ISO</label><select id="piso"></select></span>
-      </div>
+      <!-- the capture mode is WHAT you're shooting, so it gets tabs (same idiom as SKY/PATH).
+           HOW MUCH detail is no longer a separate axis: that is PRO vs NOVICE, decided once
+           on the panel heading — two controls, two distinct registers. -->
       <div class="tabs captabs" id="capMode">
         <button data-cap="stills">PHOTO</button><button data-cap="timelapse">TIMELAPSE</button><button data-cap="video">VIDEO</button>
       </div>
@@ -476,7 +529,7 @@ const state = {
   extended: false,   // scrubber: false = C1→C4 only, true = ±3h around it
   tab: 'sky',        // which view fills the main area: 'sky' | 'path'
   cap: 'stills',     // shot plan is generated for ONE capture mode: stills|timelapse|video
-  amb: 'simple',     // ambition, not vocabulary: 'simple' = only what the budget affords
+  lens: 'tele',      // NOVICE's visual focal picker (see LENSES) — PRO types a number instead
 };
 const MAP_ASPECT = 16/9;
 const FOVS = [60, 20, 5, 1.5];
@@ -2838,7 +2891,51 @@ function updateReadout(){
   // the IANA zone as well as the abbreviation: with coordinates resolving to a nearest-city
   // zone, you want to see WHICH zone the times are in before you book anything
   $('tzName').textContent = tzAbbr + (state.tz && state.tz !== tzAbbr ? ' · ' + state.tz : '');
+  updateWhen();
   syncScrub();
+}
+/* "WHAT TIME?" — the first and often only question anyone asks. It is not a photographer
+   question and not a mode question, so it sits under the canvas, above everything else, in
+   both modes and on all three tabs. Totality gets the window (start–end), because that is
+   the bit that matters; everywhere else gets maximum. The LIVE bar underneath counts DOWN
+   to these moments — deliberately the other half of the sentence, not a repeat of it. */
+function updateWhen(){
+  const bar = $('whenBar');
+  if(!ecl){ bar.hidden = true; return; }
+  const place = pickedName || `${state.obs.lat.toFixed(2)}, ${state.obs.lon.toFixed(2)}`;
+  const c = Object.fromEntries(contacts.map(x=>[x.key,x]));
+  const tz = tzAbbr || '';
+  bar.hidden = false;
+  bar.className = 'whenbar';
+  if(ecl.kind === 'none'){
+    $('whenLbl').textContent = 'NOT HERE';
+    $('whenBig').textContent = 'not visible';
+    $('whenTz').textContent = '';
+    $('whenSub').textContent = `${place} sees nothing of this eclipse — tap the red band on the PATH map, or jump to this location's next one below.`;
+    bar.classList.add('none');
+    return;
+  }
+  const mid = ecl.kind === 'annular' ? 'annularity' : 'totality';
+  const hasTot = !!(c.c2 && c.c3 && ecl.total_begin && ecl.total_end);
+  const obsc = (ecl.kind === 'partial' ? Math.min(99.9, ecl.obscuration*100) : ecl.obscuration*100);
+  const mxMs = c.mx ? c.mx.ms : ecl.peak.time.date.getTime();
+  const belowNow = (c.mx ? c.mx.alt : ecl.peak.altitude) < 0;
+  if(hasTot){
+    const s = Math.round((c.c3.ms - c.c2.ms)/1000);
+    const durTxt = (s >= 60 ? `${Math.floor(s/60)}m ${s%60}s` : `${s}s`);
+    $('whenLbl').textContent = mid.toUpperCase();
+    $('whenBig').textContent = `${fmtLocal(c.c2.ms)} – ${fmtLocal(c.c3.ms)}`;
+    $('whenTz').textContent = tz;
+    $('whenSub').textContent = `${place} — ${durTxt} of ${mid}, local time` +
+      (belowNow ? ', but below the horizon here' : '. Glasses come off only between those two times.');
+    bar.classList.add('tot');
+  }else{
+    $('whenLbl').textContent = 'MAXIMUM';
+    $('whenBig').textContent = fmtLocal(mxMs);
+    $('whenTz').textContent = tz;
+    $('whenSub').textContent = `${place} — maximum ${obsc.toFixed(0)}% covered, local time` +
+      (belowNow ? ', but below the horizon here' : '. No totality here, so eye protection stays on throughout.');
+  }
 }
 function azName(az){ return CARDS[Math.round(az/22.5)%16]; }
 
@@ -2905,7 +3002,8 @@ function updatePhoto(){
   updatePlan();
   updateFilter();
   updateLowSun();
-  if(typeof syncPlanCtlValues === 'function') syncPlanCtlValues();
+  // NOVICE reads the same inputs (set for it by the lens picker), so it re-renders here too
+  if(document.body.classList.contains('novice')) updateNovice();
 }
 const EXP_ROWS = [
   ['Partial phase (ND5 solar filter)', 11],
@@ -2981,39 +3079,18 @@ function horizonCross(tAbove, tBelow){
   }
   return Math.round((a + b2)/2);
 }
-let planText = '';                       // plain text for Copy plan — rendering is separate
-function updatePlan(){
-  if(!ecl) return;
-  const name = pickedName || state.obs.lat.toFixed(2)+', '+state.obs.lon.toFixed(2);
-  const dt = new Date(ecl.peak.time.date).toISOString().slice(0,10);
-  const tz = tzShort(state.t);
+/* ---------- shared plan arithmetic ----------
+   PRO's full schedule and NOVICE's set-once card have to agree on every number, so the
+   derivations they share (gear, drift, interval, video exposure) are computed once here
+   and consumed by both rather than written twice. */
+function planNumbers(){
   const c = Object.fromEntries(contacts.map(x=>[x.key,x]));
   // Below-horizon contacts get no camera instructions — telling someone to start a
   // sequence on a sun that has already set is worse than useless. Times stay listed.
   const above = contacts.filter(x => x.alt >= 0);
   const allBelow = contacts.length > 0 && above.length === 0;
-  const leads = [];
-  if(ecl.kind === 'none'){
-    leads.push({ bad:true, t:`${eclNotice ? eclNotice.charAt(0).toUpperCase()+eclNotice.slice(1) : "This eclipse isn't visible from here"} — nothing to photograph from this location.` });
-  }else if(allBelow){
-    leads.push({ bad:true, t:'NOT OBSERVABLE HERE — the sun is below your horizon for the whole eclipse. The times below are for reference only; there is nothing to photograph from this location.' });
-  }else if(above.length < contacts.length){
-    let fa = 0, la = contacts.length-1;
-    while(fa < contacts.length && contacts[fa].alt < 0) fa++;
-    while(la >= 0 && contacts[la].alt < 0) la--;
-    if(la < contacts.length-1){
-      const setMs = horizonCross(contacts[la].ms, contacts[la+1].ms);
-      leads.push({ bad:true, t: (c.mx && c.mx.alt < 0)
-        ? `The sun sets before maximum here — the eclipse finishes below your horizon. Nothing to shoot after ${fmtLocal(setMs)}.`
-        : `The sun sets during the eclipse here — the later contacts happen below your horizon. Nothing to shoot after ${fmtLocal(setMs)}.` });
-    }
-    if(fa > 0){
-      const riseMs = horizonCross(contacts[fa].ms, contacts[fa-1].ms);
-      leads.push({ bad:true, t:`The eclipse is already underway when the sun rises here — nothing to shoot before ${fmtLocal(riseMs)}.` });
-    }
-  }
   const up = x => x && x.alt >= 0;                  // is this contact above the horizon?
-  const cap = state.cap, amb = state.amb;
+  const shootable = ecl.kind !== 'none' && !allBelow;   // nowhere to point a camera → no settings card
   // --- the user's actual camera settings, so the printed plan stands alone in the field ---
   const { hFov, f: focal } = fovNow();
   const { sw, sh } = sensorNow();
@@ -3028,37 +3105,9 @@ function updatePlan(){
   const driftMin = (hFov/2)/0.25;                   // sun moves 0.25°/min
   const gearLine = `${focal}mm · ${sensorTxt} · f/${fnum} · ISO ${iso}` +
     (stops > 0 ? ` · exposures include +${stops.toFixed(1)} stop${stops>=1.5?'s':''} for extinction at ${pkAlt.toFixed(1)}°` : '');
-
-  // --- time budget: what can actually be done inside totality, honestly costed ---
-  // A "discrete action" is the whole loop — reach, change one thing, recompose for drift,
-  // confirm — not just the mechanical movement. SIMPLE costs it at an unpractised 20s and
-  // reserves half of totality for the eyes; FULL assumes drilled hands at 15s.
-  const ACTION_S = amb === 'simple' ? 20 : 15;
-  const EYES_FRAC = amb === 'simple' ? 0.5 : 0.4;
   const totalSec = (c.c2 && c.c3) ? Math.round((c.c3.ms - c.c2.ms)/1000) : 0;
   const isCentral = totalSec > 0 && up(c.c2) && up(c.c3);
   const midWord = ecl.kind === 'annular' ? 'annularity' : 'totality';
-  let budget = null;
-  if(isCentral){
-    const eyesSec = Math.max(10, Math.round(totalSec*EYES_FRAC)); // reserved for looking, not shooting
-    const nActions = Math.max(1, Math.floor((totalSec - eyesSec)/ACTION_S));
-    const band = totalSec < 40 ? 'one' : totalSec < 120 ? 'few' : 'full';
-    const advice = band === 'one'
-      ? `At ${totalSec}s you get ONE thing. Pre-set it, fire it, and watch the rest with your eyes — there is no time for a second decision.`
-      : band === 'few'
-        ? `That is a ${nActions}-action plan, not a sequence. Pick your ${nActions}, rehearse them, and let everything else go.`
-        : `Enough for the fuller sequence below, provided every setting is dialled in beforehand and you never hunt for a control.`;
-    budget = {
-      secs: totalSec, n: nActions, eyes: eyesSec, band,
-      lines: [
-        `You have ${totalSec} seconds of ${midWord}. That is roughly ${nActions} discrete camera action${nActions>1?'s':''} if everything goes right.`,
-        advice,
-        `Pre-set before C2: filter off, camera already on the bracket settings, intervalometer or burst pre-programmed. No dial-turning once it is dark.`,
-        `Spend at least ${eyesSec}s of it looking at the sky, not through the viewfinder.`
-      ],
-      assume: `assumes ~${ACTION_S}s per action for ${amb === 'simple' ? 'an unpractised operator' : 'drilled hands'} (reach 5–8s, one setting 3–5s, recompose ~5s for drift, plus a beat to confirm) and ${eyesSec}s reserved for your eyes.`
-    };
-  }
 
   // --- timelapse / video arithmetic, all from the user's own settings ---
   const winSec = (c.c1 && c.c4) ? Math.round((c.c4.ms - c.c1.ms)/1000) : 0;
@@ -3071,11 +3120,7 @@ function updatePlan(){
   const ND5_STOPS = 16.6;                          // ND5 ≈ 100,000× ≈ 16.6 stops
   const needsTracker = driftMin < 30;
   const vFps = 25;
-  // longest shutter a video frame allows, and which corona exposures still fit
-  const maxVidT = 1/vFps;
-  let slowestQ = null;
-  for(const [, q] of EXP_ROWS) if(fnum*fnum/(iso*Math.pow(2,q))*Math.pow(2,stops) <= maxVidT)
-    slowestQ = slowestQ === null ? q : Math.min(slowestQ, q);
+  const maxVidT = 1/vFps;                          // longest shutter a video frame allows
 
   /* VIDEO exposure works the other way round from stills: the frame rate fixes the shutter
      (180° convention, 1/(2×fps) — 1/50 at 25fps), and aperture and ISO have to meet it.
@@ -3106,9 +3151,75 @@ function updatePlan(){
   })();
   const hrsMin = m => m >= 60 ? `${Math.floor(m/60)}h${String(Math.round(m%60)).padStart(2,'0')}` : `${Math.round(m)} min`;
 
+  return { c, above, allBelow, up, shootable, hFov, focal, sw, sh, fnum, iso, pkAlt, stops,
+           shutter, sensorTxt, driftMin, gearLine, totalSec, isCentral, midWord,
+           winSec, FPS, ivl, nFrames, clipSec, ND5_STOPS, needsTracker,
+           vFps, maxVidT, vShut, vidExp, hrsMin };
+}
+
+let planText = '';                       // plain text for Copy plan — rendering is separate
+// PRO's plan: every contact, every bracket, the honest time budget, nothing withheld.
+function updatePlan(){
+  if(!ecl) return;
+  const name = pickedName || state.obs.lat.toFixed(2)+', '+state.obs.lon.toFixed(2);
+  const dt = new Date(ecl.peak.time.date).toISOString().slice(0,10);
+  const tz = tzShort(state.t);
+  const P = planNumbers();
+  const { c, above, allBelow, up, focal, fnum, iso, stops, shutter, driftMin, gearLine,
+          totalSec, isCentral, midWord, winSec, FPS, ivl, nFrames, clipSec, ND5_STOPS,
+          needsTracker, vFps, maxVidT, vShut, vidExp, hrsMin } = P;
+  const cap = state.cap;
+  const leads = [];
+  if(ecl.kind === 'none'){
+    leads.push({ bad:true, t:`${eclNotice ? eclNotice.charAt(0).toUpperCase()+eclNotice.slice(1) : "This eclipse isn't visible from here"} — nothing to photograph from this location.` });
+  }else if(allBelow){
+    leads.push({ bad:true, t:'NOT OBSERVABLE HERE — the sun is below your horizon for the whole eclipse. The times below are for reference only; there is nothing to photograph from this location.' });
+  }else if(above.length < contacts.length){
+    let fa = 0, la = contacts.length-1;
+    while(fa < contacts.length && contacts[fa].alt < 0) fa++;
+    while(la >= 0 && contacts[la].alt < 0) la--;
+    if(la < contacts.length-1){
+      const setMs = horizonCross(contacts[la].ms, contacts[la+1].ms);
+      leads.push({ bad:true, t: (c.mx && c.mx.alt < 0)
+        ? `The sun sets before maximum here — the eclipse finishes below your horizon. Nothing to shoot after ${fmtLocal(setMs)}.`
+        : `The sun sets during the eclipse here — the later contacts happen below your horizon. Nothing to shoot after ${fmtLocal(setMs)}.` });
+    }
+    if(fa > 0){
+      const riseMs = horizonCross(contacts[fa].ms, contacts[fa-1].ms);
+      leads.push({ bad:true, t:`The eclipse is already underway when the sun rises here — nothing to shoot before ${fmtLocal(riseMs)}.` });
+    }
+  }
+  // --- time budget: what can actually be done inside totality, honestly costed ---
+  // A "discrete action" is the whole loop — reach, change one thing, recompose for drift,
+  // confirm — not just the mechanical movement. PRO assumes drilled hands at 15s and
+  // reserves 40% of totality for the eyes.
+  const ACTION_S = 15;
+  const EYES_FRAC = 0.4;
+  let budget = null;
+  if(isCentral){
+    const eyesSec = Math.max(10, Math.round(totalSec*EYES_FRAC)); // reserved for looking, not shooting
+    const nActions = Math.max(1, Math.floor((totalSec - eyesSec)/ACTION_S));
+    const band = totalSec < 40 ? 'one' : totalSec < 120 ? 'few' : 'full';
+    const advice = band === 'one'
+      ? `At ${totalSec}s you get ONE thing. Pre-set it, fire it, and watch the rest with your eyes — there is no time for a second decision.`
+      : band === 'few'
+        ? `That is a ${nActions}-action plan, not a sequence. Pick your ${nActions}, rehearse them, and let everything else go.`
+        : `Enough for the fuller sequence below, provided every setting is dialled in beforehand and you never hunt for a control.`;
+    budget = {
+      secs: totalSec, n: nActions, eyes: eyesSec, band,
+      lines: [
+        `You have ${totalSec} seconds of ${midWord}. That is roughly ${nActions} discrete camera action${nActions>1?'s':''} if everything goes right.`,
+        advice,
+        `Pre-set before C2: filter off, camera already on the bracket settings, intervalometer or burst pre-programmed. No dial-turning once it is dark.`,
+        `Spend at least ${eyesSec}s of it looking at the sky, not through the viewfinder.`
+      ],
+      assume: `assumes ~${ACTION_S}s per action for drilled hands (reach 5–8s, one setting 3–5s, recompose ~5s for drift, plus a beat to confirm) and ${eyesSec}s reserved for your eyes.`
+    };
+  }
+
   let rows = [];
-  // prio: rank inside totality — 1 is the shot to keep, higher numbers get the FULL "cut first"
-  // tag when the time budget can't pay for them. SIMPLE has no ranking: it is one action.
+  // prio: rank inside totality — 1 is the shot to keep, higher numbers get the "cut first"
+  // tag when the time budget can't pay for them.
   const row = (ms, alt, label, txt, prio) => rows.push({ ms, alt, label, txt, prio, below: alt < 0 });
   const belowTxt = { c1:'first contact — the sun is below your horizon.',
                      c2:`${midWord} begins — below your horizon.`,
@@ -3116,101 +3227,7 @@ function updatePlan(){
                      c3:`${midWord} ends — below your horizon.`,
                      c4:'last contact — below your horizon.' };
 
-  // ============================= SIMPLE =============================
-  // SIMPLE is not a shortened FULL. It is a different promise: ONE semi-auto mode, dialled in
-  // before anything starts and never touched again, so the entire schedule reduces to the
-  // filter coming off and going back on. Everything that would make you turn a dial in the
-  // dark — bracket ladders, corona-radius tables, recentring cadence — is deliberately absent.
-  // ...and nowhere to point a camera means no settings card either: "not visible here" must
-  // not be followed by a page of things to dial in.
-  let setup = null;
-  const shootable = ecl.kind !== 'none' && !allBelow;   // no sun to point at → no settings card
-  if(amb === 'simple'){
-    const hasTot = !!(c.c2 && c.c3 && up(c.c2));
-    const isoCeil = clamp(iso*8, 800, 6400);
-    if(cap === 'video'){
-      // the one mode where auto is actively wrong: AE hunts through C2/C3, the seconds you
-      // cannot reshoot. So SIMPLE video is still "set once and leave it" — just set manually.
-      setup = {
-        mode: 'Manual (M), one exposure for totality',
-        why: `Video auto-exposure hunts through C2 and C3 — the exact seconds you cannot reshoot — so this is the one mode that must be manual. Set it once for the corona and never touch it.`,
-        pairs: [
-          ['mode', `M · ${vFps}fps`],
-          ['shutter', `${vShut} — fixed by the frame rate, not a choice`],
-          ['exposure', `${vidExp.set} — locked`],
-          ['focus', 'manual, on the filtered sun beforehand. Then tape the ring.'],
-          ['white balance', 'manual daylight (~5500K) — auto drifts as the light dies'],
-          ['IS / VR', 'OFF on a tripod'],
-          ['ambition', hasTot ? `skip the partial phase — you are here for ${midWord}` : 'short takes, not one long one']
-        ],
-        honest: hasTot
-          ? `${vidExp.why} One fixed exposure can't hold the whole corona — you are recording the moment, not the detail, which is the right trade for a first eclipse.`
-          : `The trade: locked exposure isn't optimal for every phase, but it is consistent, and it needs nothing from you.`
-      };
-    }else{
-      setup = {
-        mode: 'Aperture priority (A / Av) — set now, left alone all event',
-        why: `Filtered sun to bare corona is about ${ND5_STOPS} stops; aperture priority rides that on its own, so the only thing you ever touch is the filter.`,
-        pairs: [
-          ['mode dial', 'A / Av'],
-          ['aperture', `f/${fnum}`],
-          ['ISO', `Auto, ceiling ${isoCeil}${stops > 0 ? ' (the sun is low — it needs the room)' : ''}`],
-          ['exp. comp', '0'],
-          ['metering', 'spot, on the sun'],
-          [cap === 'timelapse' ? 'interval' : 'drive',
-            cap === 'timelapse' ? `${ivl}s, running C1 → C4` : 'continuous / burst'],
-          ['focus', 'manual, on the filtered sun beforehand. Then tape it.'],
-          ['also', 'IS / VR off · tripod · RAW']
-        ],
-        honest: hasTot
-          ? `The trade: in ${midWord} the meter sees a near-black frame and overexposes the corona a stop or two — bright and soft, not fine. That is the price of not fiddling, and for a first eclipse it is the right price. Optional single tweak: −1 to −2 EV while the filter is off.`
-          : `The trade: aperture priority through a solar filter isn't surgical, but it is consistent — and it asks nothing of you.`
-      };
-    }
-    if(!shootable) setup = null;
-    // the schedule: times, and the filter. Nothing else changes hands.
-    if(cap === 'stills'){
-      if(c.c1) row(c.c1.ms, c.c1.alt, 'C1', up(c.c1)
-        ? `filter ON. Shoot whenever you like — a frame every few minutes is plenty. Change nothing.` : belowTxt.c1);
-      if(c.c2){
-        if(up(c.c2)) row(c.c2.ms-20000, altAt(c.c2.ms-20000), 'C2 −20s', `filter OFF. The only thing you change all day.`);
-        row(c.c2.ms, c.c2.alt, 'C2', up(c.c2)
-          ? `${midWord} begins. One burst — then hands down, look up.` : belowTxt.c2);
-      }
-      if(c.mx) row(c.mx.ms, c.mx.alt, 'MAX', !up(c.mx) ? belowTxt.mx
-        : hasTot ? `nothing to do. Look up.`
-                 : `maximum. Filter stays ON, camera unchanged — carry on as you were.`);
-      if(c.c3) row(c.c3.ms, c.c3.alt, 'C3', up(c.c3)
-        ? `filter back ON immediately — before anything else, before you look. Then carry on as before.` : belowTxt.c3);
-      if(c.c4) row(c.c4.ms, c.c4.alt, 'C4', up(c.c4) ? 'last contact. Done.' : belowTxt.c4);
-    }else if(cap === 'timelapse'){
-      if(c.c1) row(c.c1.ms, c.c1.alt, 'C1', up(c.c1)
-        ? `filter ON. Start the intervalometer at ${ivl}s, then leave it alone.` : belowTxt.c1);
-      if(c.c2){
-        if(up(c.c2)) row(c.c2.ms-20000, altAt(c.c2.ms-20000), 'C2 −20s', `filter OFF. Leave the interval running — the camera re-meters itself.`);
-        row(c.c2.ms, c.c2.alt, 'C2', up(c.c2) ? `${midWord} begins. It is shooting itself. Look up.` : belowTxt.c2);
-      }
-      if(c.mx) row(c.mx.ms, c.mx.alt, 'MAX', !up(c.mx) ? belowTxt.mx
-        : hasTot ? `the interval is doing the work. Look up.` : `deepest point. Filter stays ON, interval unchanged.`);
-      if(c.c3) row(c.c3.ms, c.c3.alt, 'C3', up(c.c3)
-        ? `filter back ON immediately — the interval keeps running underneath you.` : belowTxt.c3);
-      if(c.c4) row(c.c4.ms, c.c4.alt, 'C4', up(c.c4)
-        ? `stop the sequence. ~${nFrames} frames ≈ ${clipSec.toFixed(0)}s at ${FPS}fps.` : belowTxt.c4);
-    }else{
-      if(c.c1) row(c.c1.ms, c.c1.alt, 'C1', up(c.c1)
-        ? (hasTot ? `nothing to do. Filter on the lens, camera set and waiting.`
-                  : `filter ON, exposure locked. Record short takes — a continuous hour is unwatchable.`) : belowTxt.c1);
-      if(c.c2){
-        if(up(c.c2)) row(c.c2.ms-20000, altAt(c.c2.ms-20000), 'C2 −20s', `filter OFF, press record. Do not touch anything again until C3.`);
-        row(c.c2.ms, c.c2.alt, 'C2', up(c.c2) ? `${midWord} begins. It is recording itself. Look up.` : belowTxt.c2);
-      }
-      if(c.mx) row(c.mx.ms, c.mx.alt, 'MAX', !up(c.mx) ? belowTxt.mx
-        : hasTot ? `still rolling, still untouched. Look up.` : `deepest point. Filter stays ON, exposure locked.`);
-      if(c.c3) row(c.c3.ms, c.c3.alt, 'C3', up(c.c3)
-        ? `filter back ON immediately, then stop recording. That order.` : belowTxt.c3);
-      if(c.c4) row(c.c4.ms, c.c4.alt, 'C4', up(c.c4) ? 'last contact. Done.' : belowTxt.c4);
-    }
-  }else if(cap === 'stills'){
+  if(cap === 'stills'){
     if(c.c1) row(c.c1.ms, c.c1.alt, 'C1', up(c.c1)
       ? `first contact. Solar filter ON. Start interval sequence — partial phase ${shutter(11)} at f/${fnum} ISO ${iso}. Recentre every ~${driftMin.toFixed(1)} min at ${focal}mm.`
       : belowTxt.c1);
@@ -3272,31 +3289,15 @@ function updatePlan(){
       : belowTxt.c3, 3);
     if(c.c4) row(c.c4.ms, c.c4.alt, 'C4', up(c.c4) ? 'last contact. Sequence ends.' : belowTxt.c4);
   }
-  // AMBITION. FULL keeps the whole sequence and MARKS what the budget cannot pay for, so an
-  // experienced operator can decide what to drop. (SIMPLE builds its own rows above and needs
-  // no trimming — it is one action by construction.) Neither invents steps that don't exist here.
-  if(amb === 'full' && budget){
+  // The plan keeps the whole sequence and MARKS what the budget cannot pay for, so an
+  // experienced operator can decide what to drop — it never invents steps that don't exist here.
+  if(budget){
     for(const r of rows) if(r.prio && r.prio > budget.n) r.cut = true;
   }
 
   // --- mode notes: the few things that decide whether the mode works at all ---
   const notes = [];
-  if(amb === 'simple' && !shootable){
-    // nothing to shoot: the leads above have already said so, and that is the whole note
-  }else if(amb === 'simple'){
-    // SIMPLE gets at most three, and only ones that change what you do
-    if(cap === 'timelapse'){
-      notes.push(`The filter pull is a ${ND5_STOPS}-stop step: the clip will flash at C2 and again at C3 while the camera catches up. Deflicker later, or keep it — it is what happened.`);
-      if(needsTracker) notes.push(`At ${focal}mm the sun leaves the frame in ~${driftMin.toFixed(1)} min — unattended this needs a tracker, or shoot wider.`);
-    }else if(needsTracker){
-      notes.push(cap === 'video'
-        ? `At ${focal}mm the sun leaves the frame in ~${driftMin.toFixed(1)} min — track it or shoot wider. Reframing mid-${midWord} costs you the shot.`
-        : `At ${focal}mm the sun drifts out of frame in ~${driftMin.toFixed(1)} min — nudge it back between frames, then leave it alone once the filter is off.`);
-    }
-    notes.push(isCentral
-      ? `Everything else is yours to watch — ${budget.eyes}s of the ${budget.secs} belongs to your eyes.`
-      : `Nothing here needs rationing: set it once, and watch it happen.`);
-  }else if(cap === 'timelapse'){
+  if(cap === 'timelapse'){
     if(winSec) notes.push(`C1→C4 is ${hrsMin(winSec/60)}. At a ${ivl}s interval that is ~${nFrames} frames ≈ ${clipSec.toFixed(0)}s of footage at ${FPS}fps.`);
     notes.push(`Pulling the ND5 filter adds about ${ND5_STOPS} stops (≈100,000×) in a single step. No fixed exposure spans filtered partial and unfiltered ${midWord}: either bracket through it, or accept that one half clips.`);
     notes.push(needsTracker
@@ -3317,12 +3318,10 @@ function updatePlan(){
       [shClamp.fast ? `faster than 1/8000 — stop down or drop ISO` : '',
        shClamp.slow ? `slower than 30s — open up or raise ISO` : ''].filter(Boolean).join('; ') + '.');
   }
-  if(amb === 'full'){
-    notes.push(`FULL assumes practised, pre-drilled operation — a rehearsed sequence, ideally a tracker and prior eclipse experience. If any of that is missing, SIMPLE is the honest plan.`);
-  }
+  notes.push(`PRO assumes practised, pre-drilled operation — a rehearsed sequence, ideally a tracker and prior eclipse experience. If any of that is missing, NOVICE is the honest plan.`);
 
   const capLabel = cap === 'stills' ? 'PHOTO' : cap.toUpperCase();   // the tab says PHOTO
-  const modeLine = `${capLabel} · ${amb.toUpperCase()} · ${gearLine}`;
+  const modeLine = `${capLabel} · ${gearLine}`;
 
   // plain text (clipboard) — everything the on-screen plan says, in plain text
   const L = [`ECLIPSE SHOT PLAN — ${name} — ${dt}`,
@@ -3330,22 +3329,12 @@ function updatePlan(){
              modeLine,
              '-'.repeat(46)];
   for(const ld of leads) L.push(ld.t, '');
-  // SIMPLE keeps the budget's honest arithmetic — the seconds and the action count — but drops
-  // the rehearsal coaching, which belongs to a plan that has more than one action in it. The
-  // "you get ONE thing" line survives, because at 35s that IS the plan.
-  const budLines = budget
-    ? (amb === 'simple' ? budget.lines.slice(0, budget.band === 'one' ? 2 : 1) : budget.lines)
-    : [];
+  const budLines = budget ? budget.lines : [];
   if(budget){
     L.push('TIME BUDGET');
     for(const b2 of budLines) L.push('  ' + b2);
-    if(amb === 'full') L.push('  (' + budget.assume + ')');
+    L.push('  (' + budget.assume + ')');
     L.push('');
-  }
-  if(setup){
-    L.push('SET THIS ONCE, BEFORE ANYTHING STARTS', '  ' + setup.mode, '  ' + setup.why);
-    for(const [k, v] of setup.pairs) L.push(`  ${(k + ':').padEnd(16)}${v}`);
-    L.push('  ' + setup.honest, '');
   }
   for(const r of rows)
     L.push(`${fmtLocal(r.ms)} (${fmtUTC(r.ms)}U)  ${r.alt.toFixed(1).padStart(5)}°  ${r.label} — ${r.txt}` +
@@ -3356,9 +3345,6 @@ function updatePlan(){
   // rendering
   const esc = s => String(s).replace(/[<&]/g, m => m === '<' ? '&lt;' : '&amp;');
   $('plan').innerHTML =
-    `<div class="ambrow"><span class="al">how much</span>` +
-      `<span class="ambmode" id="ambMode"><button data-amb="simple"${amb==='simple'?' class="on"':''}>SIMPLE</button>` +
-      `<button data-amb="full"${amb==='full'?' class="on"':''}>FULL</button></span></div>` +
     `<div class="ph">ECLIPSE SHOT PLAN — ${esc(name)} — ${dt}</div>` +
     `<div class="ph d">times ${tz} (UTC in parens) · sun alt shown</div>` +
     `<div class="ph d">${esc(modeLine)}</div>` +
@@ -3368,11 +3354,7 @@ function updatePlan(){
        `<div>You have <span class="bn">${budget.secs} seconds</span> of ${midWord}. That is roughly ` +
        `<span class="bn">${budget.n} discrete camera action${budget.n>1?'s':''}</span> if everything goes right.</div>` +
        budLines.slice(1).map(t=>`<div>${t}</div>`).join('') +
-       (amb === 'full' ? `<div class="as">${budget.assume}</div>` : '') + `</div>` : '') +
-    (setup ? `<div class="pset"><span class="bl">set this once, before anything starts</span>` +
-       `<div class="sm">${setup.mode}</div><div class="sw">${setup.why}</div>` +
-       `<div class="sg">` + setup.pairs.map(([k,v]) => `<span class="sk">${k}</span><span class="sv">${v}</span>`).join('') + `</div>` +
-       `<div class="sh">${setup.honest}</div></div>` : '') +
+       `<div class="as">${budget.assume}</div></div>` : '') +
     rows.map((r, i) => `<div class="prow${i%2 ? ' z' : ''}${r.below ? ' below' : ''}">` +
       `<span class="pt">${fmtLocal(r.ms)}</span>` +
       `<span class="pm"><span class="pu">(${fmtUTC(r.ms)}U)</span><span class="pa">${r.alt.toFixed(1)}°</span></span>` +
@@ -3383,84 +3365,157 @@ function updatePlan(){
       notes.map(n=>`<div>${n}</div>`).join('') + `</div>` : '');
 }
 function altAt(ms){ return computeFrame(ms).sunAlt; }
-// NOVICE mode — plain sentences, everything derived from existing state, no new math
+/* ---------- NOVICE ----------
+   NOVICE is not a shortened PRO: it is a different promise. Two choices (what you are
+   shooting, roughly what lens you own), ONE recommended setting you cannot tweak, a
+   five-line schedule, and the eye-safety block. Every number that would make you turn a
+   dial — aperture, ISO, Q, corona radii, drift, thread diameter — is decided internally
+   and never shown as an input. Explanation is available but not in the way: it lives
+   behind "?" disclosures, except the safety block, which is never collapsible. */
+const LENSES = [
+  { k:'phone',  mm:24,  t:'Phone', s:'or wide lens' },
+  { k:'normal', mm:50,  t:'Normal', s:'kit lens' },
+  { k:'zoom',   mm:200, t:'Zoom',  s:'telephoto' },
+  { k:'tele',   mm:600, t:'Big zoom', s:'or a scope' },
+];
+// icons carry the meaning; the millimetres never appear on the face of the control
+const LENS_ICO = {
+  phone:  '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10.5 5.2h3"/></svg>',
+  normal: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="8" width="9" height="8" rx="1.4"/><path d="M15 10.5 19 8v8l-4-2.5Z"/></svg>',
+  zoom:   '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="9" height="8" rx="1.4"/><rect x="12" y="9.4" width="7" height="5.2" rx="1"/><path d="M19 10.6 21.5 9v6L19 13.4Z"/></svg>',
+  tele:   '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="8.5" width="6" height="7" rx="1.2"/><rect x="7.5" y="9.6" width="7" height="4.8" rx="0.8"/><rect x="14.5" y="8.8" width="6" height="6.4" rx="1"/><path d="M20.5 10.2 22.6 9v6l-2.1-1.2Z"/></svg>',
+};
+const CAP_ICO = {
+  stills:    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.4h3.6L8 5.3h8l1.4 2.1H21a1 1 0 0 1 1 1v8.6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8.4a1 1 0 0 1 1-1Z"/><circle cx="12" cy="12.6" r="3.2"/></svg>',
+  timelapse: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l2.6 1.6M9 2.6h6"/></svg>',
+  video:     '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6.5" width="13" height="11" rx="1.6"/><path d="M15 11.2 22 8v8l-7-3.2Z"/></svg>',
+};
+const CAPS = [['stills','Photos'],['timelapse','Timelapse'],['video','Video']];
+/* The picker writes straight into the canonical PRO inputs — one source of truth for focal
+   and sensor — and silently commits to full frame, because a phone's "24mm" is already a
+   full-frame equivalent and NOVICE must not ask about sensors at all. */
+function applyLens(k, persist){
+  const L = LENSES.find(l => l.k === k) || LENSES[LENSES.length-1];
+  state.lens = L.k;
+  $('focal').value = L.mm;
+  $('sensor').value = '36,24';
+  $('customSensor').hidden = true;
+  if(state.crop){                                  // a crop factor is a number you didn't choose
+    state.crop = false;
+    $('crop').textContent = '1.5× crop: OFF';
+    $('crop').classList.remove('on');
+  }
+  if(persist) try{ localStorage.setItem('eclipse.lens', L.k); }catch(e){}
+}
 function updateNovice(){
   if(!ecl || !peakFrame) return;
+  const A_ = s => `<span class="t">${s}</span>`;          // amber: the moments that matter
+  const D_ = s => `<span class="d">${s}</span>`;          // dim: asides
+  const chunk = (label, body) => `<div class="chunk"><span class="lbl">${label}</span>${body}</div>`;
+  const why = (q, body) => `<details class="why"><summary>${q}</summary><div class="whyb">${body}</div></details>`;
+  const out = [];
+
+  // no eclipse here: one sentence and a way out. No pickers, no settings, nothing to dial.
   if(ecl.kind === 'none'){
-    $('noviceBody').innerHTML = `<div class="chunk"><span class="lbl">What you'll see</span>` +
-      `<p>Nothing, this time: ${eclNotice || "this eclipse isn't visible from this location"}. ` +
-      `Tap on or near the red band on the PATH map to move somewhere that sees it, or use the button in the readout panel to jump to this location's next eclipse.</p></div>`;
+    $('noviceBody').innerHTML = chunk('Not from here',
+      `<p>${(eclNotice ? eclNotice.charAt(0).toUpperCase()+eclNotice.slice(1) : "This eclipse isn't visible from this location")}. ` +
+      `Tap the red band on the PATH map to stand somewhere that sees it, or jump to this location's next eclipse from the panel above.</p>`);
     return;
   }
-  const total = !!ecl.total_begin && ecl.kind !== 'partial';
-  const kindWord = ecl.kind === 'annular' ? 'annular' : ecl.kind === 'total' ? 'total' : 'partial';
-  const c = Object.fromEntries(contacts.map(x=>[x.key,x]));
-  const pct = (ecl.kind === 'partial' ? Math.min(99.9, ecl.obscuration*100) : ecl.obscuration*100).toFixed(0);
+
+  const P = planNumbers();
+  const { c, up, allBelow, shootable, midWord, focal, fnum, driftMin, needsTracker,
+          ivl, vFps, vShut, vidExp, totalSec, ND5_STOPS } = P;
+  const cap = state.cap;
+  const hasTot = !!(c.c2 && c.c3 && up(c.c2));
   const alt = ecl.peak.altitude;
   const place = pickedName || 'this spot';
   const tz = tzAbbr || 'local time';
-  const dur = (total && ecl.total_begin && ecl.total_end)
+  const pct = (ecl.kind === 'partial' ? Math.min(99.9, ecl.obscuration*100) : ecl.obscuration*100).toFixed(0);
+  const dur = (hasTot && ecl.total_begin && ecl.total_end)
     ? (()=>{ const s = Math.round((ecl.total_end.time.date - ecl.total_begin.time.date)/1000);
              return Math.floor(s/60) ? Math.floor(s/60)+' minute'+(Math.floor(s/60)>1?'s':'')+' '+(s%60)+' seconds' : s+' seconds'; })()
     : null;
-  const out = [];
-  const A_ = s => `<span class="t">${s}</span>`;          // amber: moments, numbers that matter
-  const G_ = s => `<span class="g">${s}</span>`;          // green: you're clear
-  const D_ = s => `<span class="d">${s}</span>`;          // dim: asides
-  const chunk = (label, body) => `<div class="chunk"><span class="lbl">${label}</span>${body}</div>`;
-  const midWord = ecl.kind === 'annular' ? 'annularity' : 'totality';
+  const isoCeil = clamp(+$('iso').value*8, 800, 6400);
 
-  // WHAT YOU'LL SEE
-  if(total){
-    out.push(chunk('What you\'ll see',
-      `<p>From ${A_(place)} the moon takes about an hour to eat its way across the sun — slow enough that you'll keep checking and thinking nothing much is happening. Then, in the last minute, it goes fast. The light turns thin and metallic, the temperature drops, and the western sky bruises.</p>` +
-      `<p>At ${A_(fmtLocal(c.mx ? c.mx.ms : ecl.peak.time.date.getTime()))} the sun goes out. For ${A_(dur)} there is a black disc where it was, wrapped in the corona — a pale, feathered halo you'll only ever see during a ${midWord === 'annularity' ? 'total' : 'total'} eclipse. ${G_('Jupiter and the brightest stars come out.')} Then a bead of white fires along the moon's edge and it's daylight again, as though someone flipped a switch.</p>`));
-  }else{
-    out.push(chunk('What you\'ll see',
-      `<p>From ${A_(place)} this is a partial eclipse: at its deepest the moon covers ${A_(pct + '%')} of the sun. Through eclipse glasses you'll watch it shrink to a bright crescent.</p>` +
-      `<p>Don't expect darkness. Even at ${pct}% the remaining sliver of sun is blindingly bright, so the daylight only takes on an odd, flat, slightly wrong quality — like a cloud passing that isn't there. ${D_('The corona, the stars and the sudden night all belong to the path of totality; you\'d need to travel to it to see them.')}</p>`));
+  // ---- the two choices ----
+  out.push(chunk('What are you shooting',
+    `<div class="nsel" id="nCap" role="group" aria-label="what are you shooting">` +
+    CAPS.map(([k, t]) => `<button type="button" data-cap="${k}" aria-pressed="${k===cap}"${k===cap?' class="on"':''}>${CAP_ICO[k]}<span>${t}</span></button>`).join('') +
+    `</div>`));
+  out.push(chunk('What have you got',
+    `<div class="nsel" id="nLens" role="group" aria-label="what lens have you got">` +
+    LENSES.map(L => `<button type="button" data-lens="${L.k}" aria-pressed="${L.k===state.lens}"${L.k===state.lens?' class="on"':''}>${LENS_ICO[L.k]}<span>${L.t}<br><i>${L.s}</i></span></button>`).join('') +
+    `</div>` +
+    `<p class="adv">${focal <= 35
+      ? `At this end the sun is a bright dot — so shoot the scene and the light, not the disc. ${D_('(≈' + focal + 'mm)')}`
+      : focal <= 85
+        ? `You'll get the sun small inside a real scene — the honest, keepable frame. ${D_('(≈' + focal + 'mm)')}`
+        : needsTracker
+          ? `The sun gets big, but drifts out of frame in about ${Math.round(driftMin)} minutes — nudge it back between shots. ${D_('(≈' + focal + 'mm)')}`
+          : `The sun sits comfortably in frame and drifts slowly. ${D_('(≈' + focal + 'mm)')}`}</p>`));
+
+  // ---- ONE recommendation, no inputs, no range ----
+  if(shootable){
+    const big = cap === 'video'
+      ? { v:`M · ${vFps}fps · ${vShut}`, s:`${vidExp.set} — locked`,
+          l:'Manual focus on the sun beforehand, then tape the ring. Manual white balance. Tripod, stabiliser off.' }
+      : { v:`A / Av · f/${fnum}`,
+          s:`ISO auto (max ${isoCeil}) · spot metering · RAW` + (cap === 'timelapse' ? ` · every ${ivl}s` : ' · burst'),
+          l:'Manual focus on the filtered sun beforehand, then tape the ring. Tripod, stabiliser off.' };
+    out.push(chunk('Set your camera to this, once',
+      `<div class="setbig"><div class="bigv">${big.v}</div><div class="bigs">${big.s}</div>` +
+      `<div class="bigl">${big.l}</div></div>` +
+      why('Why these settings?', cap === 'video'
+        ? `<p>${vidExp.why.charAt(0).toUpperCase()+vidExp.why.slice(1)}</p>` +
+          `<p>Auto-exposure hunts wildly through the start and end of ${midWord} — the seconds you cannot reshoot — so this is the one mode that has to be manual and then left alone.</p>`
+        : `<p>Filtered sun to bare corona is a jump of about ${ND5_STOPS} stops. Aperture priority rides that on its own, so the only thing you ever touch is the filter.</p>` +
+          `<p>The trade: during ${midWord} the meter sees a nearly black frame and overexposes the corona a stop or so — bright and soft rather than fine. That is the price of not fiddling, and for a first eclipse it is the right price.</p>`)));
   }
 
-  // WHERE TO LOOK — the defining feature of this eclipse
-  if(alt < 12){
-    out.push(chunk('Where to look',
-      `<p>West, and lower than you think. At maximum the sun sits just ${A_(alt.toFixed(0) + '° above the horizon')} — roughly ${A_(alt < 7 ? 'half a fist' : 'a fist')} held at arm's length. Anything on your western skyline (a building, a ridge, a line of trees) can take the whole event away from you.</p>` +
-      `<p>${D_('Scout the spot in daylight first: stand there, look west, and check nothing is in the way. The obstruction slider above will tell you exactly how many degrees of clear sightline you need.')}</p>`));
-  }else{
-    out.push(chunk('Where to look',
-      `<p>Look west. At maximum the sun is ${A_(alt.toFixed(0) + '° up')} — comfortably clear of most obstructions, but a open western view is still worth having.</p>`));
-  }
-
-  // WHEN TO LOOK
-  if(c.c1 || c.mx){
-    const rows = [];
-    if(c.c1) rows.push(`${A_(fmtLocal(c.c1.ms))} &nbsp;first bite — glasses on, and stay on`);
-    if(total && c.c2) rows.push(`${A_(fmtLocal(c.c2.ms))} &nbsp;${G_('glasses OFF')} — look straight at it`);
-    if(c.mx) rows.push(`${A_(fmtLocal(c.mx.ms))} &nbsp;maximum${total ? ' — the middle of it' : ' — deepest point'}`);
-    if(total && c.c3) rows.push(`${A_(fmtLocal(c.c3.ms))} &nbsp;<span style="color:var(--bad)">glasses back ON</span> — immediately`);
-    if(c.c4) rows.push(`${A_(fmtLocal(c.c4.ms))} &nbsp;over${c.c4.alt < 0 ? D_(' (the sun sets before this)') : ''}`);
-    out.push(chunk(`When to look &nbsp;<span class="d">${tz}</span>`,
-      `<p class="times">${rows.join('<br>')}</p>` +
-      `<p>${D_('Be in position twenty minutes early. ' + (total ? 'Totality does not wait, and it is over in less time than it takes to make coffee.' : 'The interesting part is the hour of slow change either side of maximum.'))}</p>`));
-  }
-
-  // EYES — conditional logic unchanged
-  out.push('<div class="chunk safety"><span class="lbl">Eyes — read this one</span>' + (total
+  // ---- EYES. Never collapsed, never abbreviated. ----
+  out.push('<div class="chunk safety"><span class="lbl">Eyes — read this one</span>' + (hasTot
     ? `<p>Eclipse glasses on, or a proper solar filter over any camera, phone lens, binoculars or telescope, for the <b>entire</b> partial phase either side.</p>` +
       `<p>The one exception is ${dur} long: during ${midWord} itself, once the sun's disc is <b>completely</b> covered, you can and should look with bare eyes. That's the whole point. The instant the first bright sliver returns — <b>glasses back on</b>, no lingering.</p>`
     : `<p>${place[0].toUpperCase()+place.slice(1)} does <b>not</b> get totality. The sun is never fully covered here, so there is <b>no</b> safe moment to look without protection — not at maximum, not for a second, no matter how dim the day feels.</p>` +
       `<p>Eclipse glasses or a proper solar filter for the <b>entire</b> event, start to finish.</p>`) + '</div>');
 
-  // YOUR PHONE
-  out.push(chunk('Your phone',
-    `<p>Watch it first. Photograph it second. A phone cannot record what your eyes are about to do, and ${total ? 'totality is ' + dur + ' long' : 'the view through the glasses is the good bit'}.</p>` +
-    `<p>If you do shoot: ${total ? 'no filter is needed during totality itself, but you need one before and after' : 'keep a solar filter over the lens the whole time'}. Flash off. Tap the sun on screen, then drag the brightness slider well down or it blows out to a white blob. Use the 2× or 3× lens rather than pinch zoom. ${alt < 7 ? 'And with the sun this low, the honest advice is to go wide: a frame with landscape, sky and that strange light will beat a soft, wobbly close-up every time — there is too much atmosphere in the way at this altitude for sharp detail.' : 'A wide frame with some landscape in it usually outlives the close-up.'}</p>` +
-    `<p>${D_('Want real settings, exposure brackets and a timed shot plan? Switch this panel to PRO.')}</p>`));
+  // ---- the schedule: times, and the filter. Nothing else changes hands. ----
+  const R = [];
+  const act = { stills:'fire one burst, then hands down and look up',
+                timelapse:'it shoots itself. Look up',
+                video:'it records itself. Look up' }[cap];
+  if(allBelow){
+    R.push([fmtLocal((c.mx || c.c1).ms), 'the sun is below your horizon the whole time — nothing to shoot here']);
+  }else{
+    if(c.c1) R.push([fmtLocal(c.c1.ms), up(c.c1) ? 'filter + glasses ON — start shooting' : 'starts below your horizon']);
+    if(hasTot){
+      R.push([fmtLocal(c.c2.ms - 20000), 'filter OFF — the only thing you change all day']);
+      R.push([fmtLocal(c.c2.ms), `${midWord} — ${act}`]);
+      R.push([fmtLocal(c.c3.ms), 'filter back ON — immediately, before you look']);
+    }else if(c.mx){
+      R.push([fmtLocal(c.mx.ms), up(c.mx) ? `deepest point, ${pct}% covered — filter stays ON` : 'maximum is below your horizon']);
+    }
+    if(c.c4) R.push([fmtLocal(c.c4.ms), up(c.c4) ? 'over' : 'the sun sets before this']);
+  }
+  out.push(chunk(`Your plan &nbsp;<span class="d">${tz}</span>`,
+    `<div class="sched">` + R.map(([t, a]) => `<span class="st">${t}</span><span class="sa">${a}</span>`).join('') + `</div>` +
+    (hasTot ? `<p class="adv">${A_(totalSec + ' seconds')} of ${midWord}. Most of that belongs to your eyes.</p>` : '') +
+    (alt < 12 && !allBelow ? `<p class="adv">Sun only ${A_(alt.toFixed(0) + '° up')} in the west at maximum — you need a clear western skyline.</p>` : '')));
 
-  // FILTERS
-  out.push(chunk('One word on filters',
+  // ---- the why, on demand ----
+  out.push(why('What will it actually look like?', hasTot
+    ? `<p>From ${place} the moon takes about an hour to eat its way across the sun — slow enough that you'll keep checking and thinking nothing much is happening. Then, in the last minute, it goes fast: the light turns thin and metallic, the temperature drops, and the western sky bruises.</p>` +
+      `<p>Then the sun goes out. For ${dur} there is a black disc where it was, wrapped in the corona, and the brightest stars and planets come out. Then a bead of white fires along the moon's edge and it is daylight again, as though someone flipped a switch.</p>`
+    : `<p>From ${place} this is a partial eclipse: at its deepest the moon covers ${pct}% of the sun, and through eclipse glasses you'll watch it shrink to a bright crescent.</p>` +
+      `<p>Don't expect darkness. Even at ${pct}% the remaining sliver is blindingly bright, so the daylight only takes on an odd, flat, slightly wrong quality. The corona, the stars and the sudden night all belong to the path of totality.</p>`));
+  out.push(why('What counts as a solar filter?',
     `<p>"Eclipse glasses" means a specific certified product ${D_('(ISO 12312-2 / ND5, about 100,000× darker than a photographic filter)')}. Sunglasses — even stacked — welding glass below shade 14, exposed film and photographic ND filters are <b>not</b> substitutes and will not protect you.</p>` +
-    `<p>And never look through binoculars, a telescope or a camera viewfinder pointed at the sun unless a proper solar filter is fitted over the <b>front</b> of it. Optics concentrate what they collect.</p>`));
+    `<p>Never look through binoculars, a telescope or a camera viewfinder pointed at the sun unless a proper solar filter is fitted over the <b>front</b> of it. Optics concentrate what they collect.</p>`));
+  out.push(why('Shooting it on a phone?',
+    `<p>Watch it first, photograph it second. Tap the sun on screen, then drag the brightness slider well down or it blows out to a white blob. Flash off. Use the 2× or 3× lens rather than pinch zoom.</p>` +
+    `<p>A phone still needs a filter over the lens whenever the sun isn't ${hasTot ? 'fully covered' : 'covered — which here is always'}.</p>`));
+  out.push(`<p class="adv">${D_('Want exposure brackets, the Espenak table and a timed contact-by-contact plan? Switch this panel to PRO.')}</p>`);
 
   $('noviceBody').innerHTML = out.join('');
 }
@@ -3471,8 +3526,16 @@ function setMode(mode){
   $('mNovice').classList.toggle('on', mode === 'novice');
   $('mPro').classList.toggle('on', mode === 'pro');
   try{ localStorage.setItem('eclipse.mode', mode); }catch(e){}
-  if(mode === 'novice') $('photo').open = true;   // novice lives inside the panel — keep it visible
-  if(mode === 'novice') updateNovice(); else updatePhoto();
+  if(mode === 'novice'){
+    $('photo').open = true;                       // novice lives inside the panel — keep it visible
+    // NOVICE owns no numbers, so whatever PRO was set to is snapped onto the nearest rung of
+    // the picker: the visible advice and the hidden inputs can then never disagree.
+    const f = +$('focal').value || 600;
+    const near = LENSES.reduce((a, b) =>
+      Math.abs(Math.log(b.mm/f)) < Math.abs(Math.log(a.mm/f)) ? b : a);
+    applyLens(near.k, false);
+  }
+  updatePhoto();
 }
 
 function updateFilter(){
@@ -3593,9 +3656,12 @@ function eclipseStatus(tn, f){
   if(tn < c1.ms){
     const dt = c1.ms - tn;
     if(dt > 30*864e5) return null;                       // months away: say nothing
-    const sub = c2
-      ? kindLc + ' begins ' + fmtLocal(c2.ms) + ' local, lasting ' + durClock(c3.ms - c2.ms)
-      : 'partial only here — up to ' + maxPct.toFixed(0) + '% covered at ' + fmtLocal(mx.ms) + ' local';
+    // the WHEN bar above already gives the clock times, so this line deliberately does not
+    // repeat them: the countdown answers "how long until", the bar answers "at what time"
+    const altTxt = ecl.peak.altitude >= 0
+      ? 'sun ' + ecl.peak.altitude.toFixed(0) + '° above the horizon at maximum'
+      : 'the sun is below your horizon at maximum';
+    const sub = c2 ? altTxt : 'partial only here — ' + altTxt;
     return out(dt < 3600e3 ? 1 : 0, 'FIRST CONTACT IN ' + durLong(dt), sub);
   }
   // --- totality / annularity, the moment that matters ---
@@ -4046,43 +4112,24 @@ const photoChanged = ()=>{
   $(id).addEventListener('change', photoChanged);
   $(id).addEventListener('input', photoChanged);
 });
-// mirrored plan controls: same values, bound to the canonical inputs above. They sit next to
-// the plan because that is where you are looking when you decide 600mm was optimistic.
-$('psensor').innerHTML = $('sensor').innerHTML;
-$('pfnum').innerHTML = $('fnum').innerHTML;
-$('piso').innerHTML = $('iso').innerHTML;
-[['pfocal','focal'],['psensor','sensor'],['pfnum','fnum'],['piso','iso']].forEach(([m, src])=>{
-  const h = ()=>{ $(src).value = $(m).value; photoChanged(); };
-  $(m).addEventListener('change', h);
-  $(m).addEventListener('input', h);
-});
-// never write to the control the user is currently typing in — that eats the caret
-function syncPlanCtlValues(){
-  for(const [m, src] of [['pfocal','focal'],['psensor','sensor'],['pfnum','fnum'],['piso','iso']]){
-    const el = $(m);
-    if(!el || el === document.activeElement || !el.isConnected) continue;
-    if(m !== 'pfocal' && !el.options.length) continue;
-    if(el.value !== $(src).value) el.value = $(src).value;
-  }
-}
-syncPlanCtlValues();
-// capture mode + ambition: both regenerate the plan, both persist
+// capture mode: one axis (WHAT you're shooting), shared by both modes, persisted
 function syncPlanCtl(){
   document.querySelectorAll('#capMode button').forEach(b => b.classList.toggle('on', b.dataset.cap === state.cap));
 }
-document.querySelectorAll('#capMode button').forEach(b => b.addEventListener('click', ()=>{
-  state.cap = b.dataset.cap;
-  try{ localStorage.setItem('eclipse.cap', state.cap); }catch(e){}
-  syncPlanCtl(); updatePlan();
-}));
-// SIMPLE/FULL is rendered inside the plan card, which updatePlan replaces wholesale —
-// so it is delegated from the container rather than bound to the buttons
-$('plan').addEventListener('click', e=>{
-  const b = e.target.closest('[data-amb]');
-  if(!b) return;
-  state.amb = b.dataset.amb;
-  try{ localStorage.setItem('eclipse.amb', state.amb); }catch(e2){}
-  updatePlan();
+function setCap(k){
+  state.cap = k;
+  try{ localStorage.setItem('eclipse.cap', k); }catch(e){}
+  syncPlanCtl();
+  if(document.body.classList.contains('novice')) updateNovice(); else updatePlan();
+}
+document.querySelectorAll('#capMode button').forEach(b => b.addEventListener('click', ()=> setCap(b.dataset.cap)));
+// NOVICE's two pickers are re-rendered wholesale on every update, so they are delegated
+// from the container rather than bound to buttons that will not exist a moment later
+$('noviceBody').addEventListener('click', e=>{
+  const cb = e.target.closest('[data-cap]');
+  if(cb){ setCap(cb.dataset.cap); return; }
+  const lb = e.target.closest('[data-lens]');
+  if(lb){ applyLens(lb.dataset.lens, true); updatePhoto(); }
 });
 $('crop').addEventListener('click', ()=>{
   state.crop = !state.crop;
@@ -4227,16 +4274,21 @@ document.addEventListener('visibilitychange', ()=>{
 // mode: remembered choice, PRO by default
 let savedMode = 'pro';
 try{ savedMode = localStorage.getItem('eclipse.mode') || 'pro'; }catch(e){}
-setMode((savedModeOverride || savedMode) === 'novice' ? 'novice' : 'pro');
+const bootMode = (savedModeOverride || savedMode) === 'novice' ? 'novice' : 'pro';
 
-// shot plan: remembered capture mode (PHOTO) and ambition (SIMPLE) — both default honest
+// shot plan: remembered capture mode (PHOTO), and NOVICE's remembered lens. The lens is only
+// applied when we are booting into NOVICE — in PRO the focal field is the user's own number
+// and must not be overwritten by a choice made in the other mode.
 try{
   const sc = localStorage.getItem('eclipse.cap');
   if(sc === 'stills' || sc === 'timelapse' || sc === 'video') state.cap = sc;
-  const sa = localStorage.getItem('eclipse.amb');
-  if(sa === 'simple' || sa === 'full') state.amb = sa;
+  const sl = localStorage.getItem('eclipse.lens');
+  if(sl && LENSES.some(l => l.k === sl)) state.lens = sl;
+  localStorage.removeItem('eclipse.amb');   // SIMPLE/FULL is gone — don't leave the key behind
 }catch(e){}
+if(bootMode === 'novice') applyLens(state.lens, false);
 syncPlanCtl();
+setMode(bootMode);
 
 recomputeEclipse();
 try{ if(localStorage.getItem('eclipse.map3d') === '1') setMapMode(true); }catch(e){}
