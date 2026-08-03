@@ -2659,22 +2659,30 @@ function drawCosmos(){
   }
   c.drawImage(COS.stars, 0, 0);
 
-  /* --- 2. the sun: a stylised glow along its true direction --- */
+  /* --- 2. the sun: a stylised glow along its true direction.
+     Compressed to COS_DS but along the real vector, so its depth along the camera axis is
+     well defined and it joins the painter's sort below — orbit the sun to the near side and
+     it occludes the earth. The glow is composited with 'lighter' so that when it does come
+     forward it brightens the earth like flare instead of smearing a brown sheet over it
+     (against the near-black starfield 'lighter' looks the same as source-over). */
   const Ps = proj(vMul(sHat, COS_DS));
-  const gr = 2.6*Spx;
-  const gg = c.createRadialGradient(Ps.x, Ps.y, 0, Ps.x, Ps.y, gr);
-  gg.addColorStop(0, 'rgba(255,250,235,0.98)');
-  gg.addColorStop(0.10, 'rgba(255,230,170,0.75)');
-  gg.addColorStop(0.35, 'rgba(255,190,110,0.22)');
-  gg.addColorStop(1, 'rgba(255,170,90,0)');
-  c.fillStyle = gg; c.beginPath(); c.arc(Ps.x, Ps.y, gr, 0, 7); c.fill();
-  c.fillStyle = '#fff7e8'; c.beginPath(); c.arc(Ps.x, Ps.y, 0.45*Spx, 0, 7); c.fill();
+  const zSun = COS_DS*vDot(sHat, eye);
+  const drawSun = ()=>{
+    const gr = 2.6*Spx;
+    const gg = c.createRadialGradient(Ps.x, Ps.y, 0, Ps.x, Ps.y, gr);
+    gg.addColorStop(0, 'rgba(255,250,235,0.98)');
+    gg.addColorStop(0.10, 'rgba(255,230,170,0.75)');
+    gg.addColorStop(0.35, 'rgba(255,190,110,0.22)');
+    gg.addColorStop(1, 'rgba(255,170,90,0)');
+    c.save(); c.globalCompositeOperation = 'lighter';
+    c.fillStyle = gg; c.beginPath(); c.arc(Ps.x, Ps.y, gr, 0, 7); c.fill();
+    c.restore();
+    c.fillStyle = '#fff7e8'; c.beginPath(); c.arc(Ps.x, Ps.y, 0.45*Spx, 0, 7); c.fill();
+  };
 
-  /* --- 3. earth / cones / moon, painter-sorted --- */
+  /* --- 3. sun / earth / cones / moon, painter-sorted by true camera depth --- */
   const E0 = proj([0,0,0]);
-  const moonInFront = vDot(Pm, eye) > 0;
   const drawEarth = ()=> cosEarth(c, w, h, base, E0, Spx, proj, rt, upv, eye, gast, sHat, S, M, U);
-  const drawCones = ()=> cosCones(c, base, proj, Pm, T, U);
   const drawMoon = ()=>{
     const q = proj(Pm), r = COS_RM*Spx;
     const lx = vDot(sHat, rt), ly = vDot(sHat, upv);         // lit from the true sun side
@@ -2686,8 +2694,15 @@ function drawCosmos(){
     c.fillStyle = 'rgba(190,200,215,0.55)';
     c.fillText('moon', q.x + r + base*6, q.y + base*3);
   };
-  if(moonInFront){ drawEarth(); drawCones(); drawMoon(); }
-  else { drawCones(); drawMoon(); drawEarth(); }
+  // one depth key per element, measured along the camera axis (+ = toward the viewer); the
+  // earth sits at 0 because it is the sphere everything else is sorted against. Ties keep
+  // insertion order (Array#sort is stable), which keeps penumbra under umbra.
+  const items = [ { z: 0, draw: drawEarth },
+                  { z: vDot(Pm, eye), draw: drawMoon },
+                  { z: zSun, draw: drawSun } ];
+  for(const it of cosCones(c, base, proj, Pm, T, eye)) items.push(it);
+  items.sort((a,b)=>a.z - b.z);
+  for(const it of items) it.draw();
 
   /* --- 4. captions --- */
   const pad = Math.round(w*0.012) + 8;
@@ -2817,8 +2832,12 @@ function cosEarth(c, w, h, base, E0, Spx, proj, rt, upv, eye, gast, sHat, S, M, 
   c.beginPath(); c.arc(E0.x, E0.y, Spx, 0, 7); c.stroke();
 }
 
-// umbra + penumbra cones from the moon toward the aim point, as hulled silhouettes
-function cosCones(c, base, proj, Pm, T, U){
+// umbra + penumbra cones from the moon toward the aim point, as hulled silhouettes.
+// Returns depth-sortable { z, draw } items rather than painting: a cone runs from the moon
+// down onto the surface, so it can straddle the earth's limb — one half in front of the
+// sphere, one half behind it. We find that crossing along the axis and emit the two frusta
+// separately, each with its own depth key, so the earth can be drawn between them.
+function cosCones(c, base, proj, Pm, T, eye){
   const ax = vNorm(vSub(T, Pm));
   let b1 = vCross(ax, [0,0,1]); b1 = vLen(b1) < 1e-6 ? [1,0,0] : vNorm(b1);
   const b2 = vCross(ax, b1);
@@ -2831,20 +2850,48 @@ function cosCones(c, base, proj, Pm, T, U){
     return pts;
   };
   const qm = proj(Pm), qt = proj(T);
+  const at = t => vAdd(Pm, vMul(vSub(T, Pm), t));
+  // does the earth sphere cover this point? inside the disc AND behind the near surface
+  const hidden = p => { const dz = vDot(p, eye), r2 = Math.max(0, vDot(p, p) - dz*dz);
+                        return r2 < 1 && dz < Math.sqrt(1 - r2); };
+  const h0 = hidden(Pm), h1 = hidden(T);
+  let segs = [[0, 1, h0]];
+  if(h0 !== h1){                                             // bisect for the limb crossing
+    let lo = 0, hi = 1;
+    for(let i = 0; i < 24; i++){ const m = (lo + hi)/2; if(hidden(at(m)) === h0) lo = m; else hi = m; }
+    const tc = (lo + hi)/2;
+    segs = [[0, tc, h0], [tc, 1, h1]];
+  }
+  const path = (pts) => { c.beginPath(); c.moveTo(pts[0].x, pts[0].y);
+    for(let i = 1; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y); c.closePath(); };
+  const items = [];
   const cone = (rMoon, rEnd, fill0, fill1, stroke) => {
-    const hullPts = cosHull(ring(Pm, rMoon).concat(ring(T, rEnd)));
-    if(hullPts.length < 3) return;
-    const lg = c.createLinearGradient(qm.x, qm.y, qt.x, qt.y);
-    lg.addColorStop(0, fill0); lg.addColorStop(1, fill1);
-    c.fillStyle = lg;
-    c.beginPath(); c.moveTo(hullPts[0].x, hullPts[0].y);
-    for(let i = 1; i < hullPts.length; i++) c.lineTo(hullPts[i].x, hullPts[i].y);
-    c.closePath(); c.fill();
-    c.strokeStyle = stroke; c.lineWidth = base*0.8; c.stroke();
+    const full = cosHull(ring(Pm, rMoon).concat(ring(T, rEnd)));   // outline of the whole cone
+    if(full.length < 3) return;
+    for(const [t0, t1, hid] of segs){
+      const c0 = at(t0), c1 = at(t1);
+      const r0 = rMoon + (rEnd - rMoon)*t0, r1 = rMoon + (rEnd - rMoon)*t1;
+      const hullPts = cosHull(ring(c0, r0).concat(ring(c1, r1)));
+      if(hullPts.length < 3) continue;
+      const dz = vDot(vMul(vAdd(c0, c1), 0.5), eye);
+      // keep a hidden piece strictly behind the earth's key (0) and a visible piece ahead of it
+      items.push({ z: hid ? Math.min(dz, -1e-3) : Math.max(dz, 1e-3), draw: ()=>{
+        const lg = c.createLinearGradient(qm.x, qm.y, qt.x, qt.y);  // gradient spans the full cone
+        lg.addColorStop(0, fill0); lg.addColorStop(1, fill1);
+        c.fillStyle = lg; c.strokeStyle = stroke; c.lineWidth = base*0.8;
+        if(segs.length === 1){ path(hullPts); c.fill(); c.stroke(); return; }  // unsplit: as before
+        // split: stroke the whole cone's outline through the piece's own clip, so the cut
+        // itself is never stroked and no bar appears across the shadow at the limb
+        c.save(); path(hullPts); c.clip(); c.fill();
+        path(full); c.stroke();
+        c.restore();
+      } });
+    }
   };
   // penumbra first (wide, light), umbra on top (narrow, dark, apex at/near the surface)
   cone(COS_RM, 0.55, 'rgba(150,160,190,0.13)', 'rgba(150,160,190,0.04)', 'rgba(150,160,190,0.16)');
   cone(COS_RM*0.98, 0.055, 'rgba(28,20,32,0.42)', 'rgba(6,5,10,0.72)', 'rgba(255,190,140,0.30)');
+  return items;
 }
 
 /* --- cosmos interaction: drag to orbit, wheel/pinch to zoom --- */
@@ -4320,10 +4367,11 @@ document.addEventListener('visibilitychange', ()=>{
   if(state.live){ state.t = nowMs(); syncScrub(); }
 });
 
-// mode: remembered choice, PRO by default
-let savedMode = 'pro';
-try{ savedMode = localStorage.getItem('eclipse.mode') || 'pro'; }catch(e){}
-const bootMode = (savedModeOverride || savedMode) === 'novice' ? 'novice' : 'pro';
+// mode: remembered choice, NOVICE by default — most first-time visitors want
+// the plain answer, and PRO is one click away for the ones who don't.
+let savedMode = 'novice';
+try{ savedMode = localStorage.getItem('eclipse.mode') || 'novice'; }catch(e){}
+const bootMode = (savedModeOverride || savedMode) === 'pro' ? 'pro' : 'novice';
 
 // shot plan: remembered capture mode (PHOTO), and NOVICE's remembered lens. The lens is only
 // applied when we are booting into NOVICE — in PRO the focal field is the user's own number
