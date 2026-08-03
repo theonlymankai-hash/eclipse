@@ -372,7 +372,7 @@
       <button data-snap="c1">C1</button><button data-snap="c2">C2</button><button data-snap="mx">MAX</button><button data-snap="c3">C3</button><button data-snap="c4">C4</button>
     </span>
     <button id="ext" title="expand scrubber range to 3h either side of the eclipse">±3h</button>
-    <button id="zoom" title="field of view">FOV 60°</button>
+    <button id="zoom" title="field of view">FOV 8°</button>
   </div>
 
   <div class="grid">
@@ -522,7 +522,14 @@ const state = {
                           // forward just because one tapped location missed the eclipse
   tz: 'Europe/Madrid',
   obstDeg: 0,
-  fov: 60,
+  // Landing FOV. 60° is the naked-eye-ish framing but renders the 0.53° sun as a speck
+  // (1/114 of the frame) — a first-time visitor sees an empty sky. 8° makes the disc
+  // ~1/16 of the frame width (≈71px desktop, ≈23px at 375px) so the moon's bite is
+  // legible on arrival. The horizon can't be in frame at any legible FOV — the eclipse
+  // sits ~6° up at Zaragoza and holding the horizon needs FOV ≳22° — so the altitude
+  // ruler and the "▼ horizon N° below view" line (both active below 45°) carry the
+  // low-sun story instead. User zoom always wins; nothing here persists across reloads.
+  fov: 8,
   playing: false, speed: 60,
   live: false,       // sim clock follows wall-clock time (see LIVE mode below)
   showFrame: true, crop: false,
@@ -532,7 +539,7 @@ const state = {
   lens: 'tele',      // NOVICE's visual focal picker (see LENSES) — PRO types a number instead
 };
 const MAP_ASPECT = 16/9;
-const FOVS = [60, 20, 5, 1.5];
+const FOVS = [60, 20, 8, 5, 1.5];   // 8 = the landing framing, so the cycle can return to it
 const SPEEDS = [1, 60, 600];
 
 const PRESETS = [
