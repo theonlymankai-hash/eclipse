@@ -378,12 +378,12 @@
      nothing here can interfere afterwards. Policy: initCover() at the end of the script. */
   #cover{position:fixed; inset:0; z-index:1000; background:rgba(11,13,17,0.85); display:flex;
          align-items:center; justify-content:center; text-align:center; cursor:pointer;
-         opacity:1; transition:opacity 1.8s ease;}
+         opacity:1; transition:opacity 3.6s ease;}
   /* eclipse-day glance: the live sky at full presence, only a whisper of scrim for the text */
   #cover.glance{background:rgba(11,13,17,0.35);}
   #cover.out{opacity:0; pointer-events:none;}
   #cover.fast{transition-duration:.55s;}
-  #cover .cvi{padding:24px 20px; max-width:680px; transition:transform 1.8s ease;}
+  #cover .cvi{padding:24px 20px; max-width:680px; transition:transform 3.6s ease;}
   #cover.fast .cvi{transition-duration:.55s;}
   #cover.out .cvi{transform:translateY(-26px);}
   #cover .cvKick{font-size:11px; letter-spacing:.3em; color:var(--dim); text-transform:uppercase;}
@@ -4870,10 +4870,9 @@ let coverUp = false;   // read by draw(): suppress the canvas' instrument overla
 
   if(state.live || inWindow(nowMs())){
     // eclipse under way — paint() already armed the 1.2s auto-leave
-  }else if(seen){
-    autoLeave = setTimeout(()=> leave(true), 1000);    // return visitor: a one-second glance
   }else{
-    $('cvEnter').focus({ preventScroll:true });        // full cover: Enter/Space work at once
+    // the cover holds until the visitor enters — first visit or fiftieth, it can be read
+    $('cvEnter').focus({ preventScroll:true });        // Enter/Space work at once
   }
 })();
 
