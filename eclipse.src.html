@@ -182,10 +182,30 @@
   @keyframes totPulse{50%{background:#25100f;}}
   @media (prefers-reduced-motion:reduce){ .livebar.l3{animation:none;} }
   #shadowNote{color:var(--dim); font-size:12px; font-family:var(--mono); margin-top:4px;}
-  /* LIVE toggle — a real indicator light, not another grey button */
-  #live{display:inline-flex; align-items:center; gap:6px;}
-  #live i{width:7px; height:7px; border-radius:50%; background:var(--dim); flex:none;}
-  #live.on{border-color:#e0524a; color:#ff9080;}
+  /* Playback controls — LIVE / PLAY / speed are THE primary controls on eclipse day,
+     but at 34px grey-button size they read as less important than the content around
+     them (especially on a phone, where they sat low and small). Same bordered-box
+     treatment as .captabs/.viewtabs: 48px+ tap targets, 2px borders, raised bottom
+     edge — unmistakably pressable. Grouped in .playctl so on narrow screens they get
+     their own full-width row above the scrubber. */
+  .playctl{display:flex; align-items:center; gap:6px; flex:none;}
+  .playctl button{min-height:48px; min-width:66px; padding:14px 15px 13px;
+                  border:2px solid #333d54; border-bottom-width:3px; border-radius:7px;
+                  background:#0f131b; color:#c6cede;
+                  font-size:13.5px; font-weight:500; letter-spacing:.14em; line-height:1;
+                  transition:color .13s ease, background .13s ease, border-color .13s ease;}
+  .playctl button:hover{color:var(--accent); background:#161b26; border-color:#414c66;
+                        border-bottom-color:rgba(232,179,74,0.55);}
+  .playctl button.on{color:var(--accent); background:#141822;
+                     border-color:#4a4335; border-bottom-color:var(--accent);}
+  @media (prefers-reduced-motion:reduce){ .playctl button{transition:none;} }
+  /* LIVE toggle — a real indicator light, not another grey button. OFF must still look
+     clickable (it's the hero control): warmer border + brighter ink than PLAY/speed. */
+  #live{display:inline-flex; align-items:center; justify-content:center; gap:7px;
+        min-width:88px; color:#ecdfc9; border-color:#4c4557; border-bottom-color:#5a4a4a;}
+  #live i{width:9px; height:9px; border-radius:50%; background:#a89684; flex:none;}
+  #live:hover{color:#ffb3a6; border-color:#8a5a52; border-bottom-color:#e0524a; background:#161016;}
+  #live.on{border-color:#e0524a; border-bottom-color:#ff5a4a; color:#ff9080; background:#1a0f0e;}
   #live.on i{background:#ff5a4a; animation:liveDot 1.6s ease-in-out infinite;}
   @keyframes liveDot{0%,100%{opacity:1;} 50%{opacity:.2;}}
   @media (prefers-reduced-motion:reduce){ #live.on i{animation:none;} }
@@ -200,6 +220,18 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:26px; height:26px; margin-top:-11px; border-radius:50%; background:var(--accent); border:4px solid var(--bg);}
   input[type=range]::-moz-range-track{height:4px; background:var(--line); border-radius:2px;}
   input[type=range]::-moz-range-thumb{width:20px; height:20px; border-radius:50%; background:var(--accent); border:none;}
+  /* phone: playback controls get their own full-width row (stretched thirds) ABOVE the
+     scrubber; scrubber gets its own row with a bigger thumb; snaps/±3h/FOV wrap below.
+     (must sit after the base range rules — same specificity, source order decides) */
+  @media(max-width:430px){
+    .playctl{flex:1 0 100%;}
+    .playctl button{flex:1 1 0; min-width:0; min-height:52px; padding:15px 4px 14px; font-size:14px;}
+    #live{min-width:0;}
+    .scrubwrap{flex:1 1 100%;}
+    input[type=range]{height:44px;}
+    input[type=range]::-webkit-slider-thumb{width:30px; height:30px; margin-top:-13px;}
+    input[type=range]::-moz-range-thumb{width:24px; height:24px;}
+  }
   button{font:300 12px/1 system-ui,sans-serif; letter-spacing:.06em; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:9px 12px; cursor:pointer; min-height:34px;}
   button:hover{border-color:var(--accent); color:var(--accent);}
   button.on{border-color:var(--accent); color:var(--accent);}
@@ -389,9 +421,11 @@
   <div class="livebar" id="liveBar" hidden><b id="liveHead"></b><span id="liveSub"></span></div>
 
   <div class="timebar">
-    <button id="live" title="follow real time"><i></i>LIVE</button>
-    <button id="play">PLAY</button>
-    <button id="spd" title="playback speed">60×</button>
+    <div class="playctl">
+      <button id="live" title="follow real time"><i></i>LIVE</button>
+      <button id="play">PLAY</button>
+      <button id="spd" title="playback speed">60×</button>
+    </div>
     <div class="scrubwrap">
       <div id="eclBand"></div><div id="maxTick"></div>
       <input type="range" id="scrub" min="0" max="10000" value="5000">
