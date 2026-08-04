@@ -224,6 +224,8 @@
         font-family:var(--mono); font-size:12px; color:var(--dim);}
   .live b{color:var(--ink); font-weight:400;}
   .live .acc{color:var(--accent);}
+  /* phone: a footnote, not a panel — two tight lines instead of four loose ones */
+  @media(max-width:430px){ .live{gap:2px 13px; padding:6px 9px; margin-bottom:6px; font-size:11px;} }
 
   /* WHEN bar — "at what time", for everyone, above the fold. The time is the headline and
      is deliberately the largest type on the page after the app title; the sentence under it
@@ -238,9 +240,22 @@
              line-height:1.05; letter-spacing:.02em; color:#ffe1a8; margin-top:3px;}
   .whenbar .wz{font-family:var(--mono); font-size:12px; color:var(--dim);}
   .whenbar .ws{flex:1 0 100%; font-size:13.5px; color:var(--ink); margin-top:5px;}
+  .whenbar .wsS{display:none;}          /* the phone cut of the same sentence — see updateWhen() */
   .whenbar.none{border-left-color:var(--dim);}
   .whenbar.none b{color:var(--dim); font-size:clamp(18px,5vw,24px);}
-  @media(max-width:430px){ .whenbar{padding:10px 11px 11px;} .whenbar .ws{font-size:13px;} }
+  /* PHONE: the picture is the subject, and no block under it may rival the canvas for height.
+     This one was the worst offender at 120px against a 200px canvas. It comes down to ~78px
+     WITHOUT touching what it says first (padding, line-height and the short sentence do the
+     work) and without demoting the time, which stays the loudest type on the page. */
+  @media(max-width:430px){
+    .whenbar{margin:8px 0 2px; padding:8px 11px 8px; gap:0 9px;}
+    .whenbar .wl, .whenbar .wz{line-height:1.2;}   /* the label row is 1.5-leaded prose otherwise */
+    .whenbar .wl{font-size:9.5px;}
+    .whenbar b{font-size:25px; margin-top:1px;}
+    .whenbar .ws{font-size:12px; line-height:1.35; margin-top:3px;}
+    .whenbar .wsL{display:none;}
+    .whenbar .wsS{display:block;}
+  }
 
   /* LIVE status bar — the one line that answers "what is happening right now, to me".
      Escalates: dim idle → amber in progress → loud red during totality. Sits above the
@@ -259,6 +274,7 @@
   .livebar.l3 span{color:#f0c48a;}
   @keyframes totPulse{50%{background:#25100f;}}
   @media (prefers-reduced-motion:reduce){ .livebar.l3{animation:none;} }
+  @media(max-width:430px){ .livebar{padding:6px 9px; margin-bottom:6px;} }
   #shadowNote{color:var(--dim); font-size:12px; font-family:var(--mono); margin-top:4px;}
   /* Playback controls — LIVE / PLAY / speed are THE primary controls on eclipse day,
      but at 34px grey-button size they read as less important than the content around
@@ -298,14 +314,32 @@
   #spd .spdn{font-variant-numeric:tabular-nums;}
   #spd:hover .spdi{opacity:1;}
 
-  /* the timebar is now the first thing under the canvas, so it gets a body: a panel-dark
-     fill one step off the page black, a hairline border and a radius. Barely there — the
-     buttons stay the brightest objects in it — but enough that the group reads as one
-     instrument cluster rather than loose controls floating in the text. */
+  /* THE REMOTE. This is the first thing under the canvas and the first thing worth touching,
+     so it must read as a device you operate — not as one more block of page. Two moves do it:
+     a fill that is WARM where every other panel is neutral blue-grey (a few per cent of the
+     app's own amber stirred into near-black — at a glance simply "dark", only warm by
+     comparison, never brown), and a defined warm border with enough internal padding that the
+     buttons sit ON something instead of floating in text. The fill stops well short of
+     competing with the canvas: the buttons stay the brightest objects in the panel, and the
+     distinction is carried as much by the border and the padding as by the brightness. */
   .timebar{display:flex; flex-wrap:wrap; align-items:center; gap:8px;
-           margin:8px 0 8px; padding:10px 12px 11px;
-           background:#10141c; border:1px solid #232939; border-radius:8px;}
-  @media(max-width:430px){ .timebar{padding:9px 9px 10px; gap:7px;} }
+           margin:8px 0 8px; padding:11px 13px 12px;
+           background:#181310; border:1px solid #35291b; border-radius:8px;
+           box-shadow:0 1px 0 rgba(0,0,0,0.45);}
+  @media(max-width:430px){ .timebar{padding:9px 10px 10px; gap:6px;} }
+  /* the snap row folds on a phone (see #snapTog); on desktop the wrapper is not there at all
+     as far as layout is concerned, so #snaps and #ext stay flex items of the bar exactly as
+     they always were */
+  .snapgrp{display:contents;}
+  /* MOMENTS — the phone fold key. Same body as a playback button so it belongs to the remote,
+     but quiet type and neutral ink so it never reads as a fourth transport control. */
+  #snapTog{display:none; align-items:center; justify-content:center; gap:6px; white-space:nowrap;
+           min-height:48px; padding:0 10px; border:2px solid #333d54; border-bottom-width:3px;
+           border-radius:7px; background:#0f131b; color:#98a3b9;
+           font-size:10.5px; letter-spacing:.12em; line-height:1;}
+  #snapTog::before{content:'+'; flex:none; width:15px; height:15px; border:1px solid currentColor;
+                   border-radius:50%; font-size:11px; display:flex; align-items:center; justify-content:center;}
+  #snapTog[aria-expanded="true"]{color:var(--accent); border-color:#4a4335; border-bottom-color:var(--accent);}
   input[type=range]{-webkit-appearance:none; appearance:none; flex:1 1 240px; height:34px; background:transparent; cursor:pointer;}
   .scrubwrap{position:relative; flex:1 1 240px; display:flex; align-items:center;}
   .scrubwrap input[type=range]{flex:1; width:100%;}
@@ -324,15 +358,24 @@
      scrubber; scrubber gets its own row with a bigger thumb; snaps/±3h/FOV wrap below.
      (must sit after the base range rules — same specificity, source order decides) */
   @media(max-width:430px){
-    /* stacked order inside the panel: the scrubber is the timeline the whole view rides on,
-       so it sits closest to the canvas it drives; the buttons act on it and read underneath.
-       Desktop keeps the single inline row (buttons | scrubber | snaps) — there the scrubber
-       is already beside the canvas edge and stacking would only make the bar taller. */
-    #snaps{order:3;} #ext{order:4;} #zoom{order:5;}
-    .playctl{order:2; flex:1 0 100%;}
-    .playctl button{flex:1 1 0; min-width:0; min-height:52px; padding:15px 4px 14px; font-size:14px;}
+    /* TWO ROWS, and only two: [ scrubber | FOV ] over [ LIVE | PLAY | speed | MOMENTS ].
+       The scrubber is the timeline the whole view rides on, so it sits closest to the canvas
+       it drives; the transport keys act on it and read underneath. C1…C4 and ±3h are
+       navigation to a moment rather than transport, so they fold behind MOMENTS and cost no
+       height until asked for — that alone took two rows off the panel. FOV stays OUT of the
+       fold: it changes what the canvas SHOWS, so it belongs beside the scrubber you are
+       already dragging, not filed under "jump to". Desktop keeps the single inline row
+       (buttons | scrubber | snaps | ±3h | FOV), untouched. */
+    .scrubwrap{order:1; flex:1 1 190px;}
+    #zoom{order:2; flex:0 0 auto; min-height:44px; padding:0 11px;}
+    .playctl{order:3; flex:1 1 190px;}
+    .playctl button{flex:1 1 0; min-width:0; min-height:48px; padding:14px 3px 13px; font-size:13.5px;}
     #live{min-width:0;}
-    .scrubwrap{order:1; flex:1 1 100%;}
+    #snapTog{display:inline-flex; order:4; flex:0 0 auto;}
+    .snapgrp{display:flex; flex-wrap:wrap; gap:6px; order:5; flex:1 0 100%;}
+    .snapgrp.closed{display:none;}
+    #snaps{display:contents;}                       /* the five snap buttons flow with ±3h */
+    .snapgrp button{flex:1 1 auto; min-height:44px; padding:0 6px;}
     input[type=range]{height:44px;}
     input[type=range]::-webkit-slider-thumb{width:30px; height:30px; margin-top:-13px;}
     input[type=range]::-moz-range-thumb{width:30px; height:30px;}
@@ -502,10 +545,17 @@
   /* phone: comfortably bigger than a form field, nowhere near hero-scale — the canvas and
      the timebar own the screen up top, this must not push the panel into three screens */
   @media(max-width:430px){
-    .locHero{padding:10px 11px 11px;}
+    .locHero{margin-bottom:8px; padding:8px 10px 9px;}
+    .locHero .lh{margin-bottom:5px; line-height:1.2;}
+    .locHero .lhRow{gap:6px;}
     #place{flex:1 1 100%; min-height:48px; font-size:17px; padding:0 12px;}
     #place::placeholder{font-size:14.5px;}
-    #geo{flex:1 1 100%; min-height:46px;}
+    #geo{flex:1 1 100%; min-height:44px;}
+    /* the amber prompt IS the heading here — "Location + Date" above it is a second title for
+       the same panel, and on a phone that costs a line the canvas wants back */
+    #secLoc{padding:10px 11px 11px;}
+    #secLoc > h2{display:none;}
+    #secLoc .row{margin-bottom:7px;}
   }
   /* FINE TUNE fold. Desktop: the rows are open and the toggle is not there at all — the
      panel reads exactly as it always has. Phone: one quiet line in the same register as the
@@ -681,7 +731,10 @@
     <span class="wl" id="whenLbl">MAXIMUM</span>
     <span class="wz" id="whenTz"></span>
     <b id="whenBig">—</b>
-    <span class="ws" id="whenSub"></span>
+    <!-- same sentence, two lengths: the full one everywhere, a one-line cut on a phone. CSS
+         picks, so a rotation or a resize can never leave the wrong one on screen. -->
+    <span class="ws wsL" id="whenSub"></span>
+    <span class="ws wsS" id="whenSubS"></span>
   </div>
 
   <div class="live">
@@ -706,10 +759,15 @@
       <div id="eclBand"></div><div id="maxTick"></div>
       <input type="range" id="scrub" min="0" max="10000" value="5000">
     </div>
-    <span id="snaps">
-      <button data-snap="c1">C1</button><button data-snap="c2">C2</button><button data-snap="mx">MAX</button><button data-snap="c3">C3</button><button data-snap="c4">C4</button>
+    <!-- the fold key exists only on a phone (CSS); above 430px the wrapper is display:contents
+         and the snap buttons sit inline in the bar exactly as they always have -->
+    <button id="snapTog" aria-expanded="false" aria-controls="snapGrp" title="jump to a moment of the eclipse">MOMENTS</button>
+    <span class="snapgrp closed" id="snapGrp">
+      <span id="snaps">
+        <button data-snap="c1">C1</button><button data-snap="c2">C2</button><button data-snap="mx">MAX</button><button data-snap="c3">C3</button><button data-snap="c4">C4</button>
+      </span>
+      <button id="ext" title="expand scrubber range to 3h either side of the eclipse">±3h</button>
     </span>
-    <button id="ext" title="expand scrubber range to 3h either side of the eclipse">±3h</button>
     <button id="zoom" title="field of view">FOV 8°</button>
   </div>
 
@@ -1638,14 +1696,21 @@ function refractedVRadius(aApp, r){
 }
 
 // altitude at canvas centre — pure, continuous in sunAlt (also called by tests).
-// At the wide default FOV the pan is clamped so the horizon never leaves frame:
-// it rests at 75% height, slides down to 94% as the sun climbs, then pins there
-// and the sun rises toward (and past) the top edge instead. Zoomed FOVs track
-// the sun; the altitude ruler supplies the horizon reference there.
+// centreAlt = max(FLOOR, sunAlt), with FLOOR a fraction of the VERTICAL fov, so the framing is
+// identical at 4° (phone) and 8° (desktop) and at any canvas aspect. Above the floor the view
+// tracks the sun dead-centre; at and below it the camera parks and the sun descends within frame.
+// The floor IS the resting horizon: centre = FLOOR puts the horizon at (50 + 100*FLOOR)% height,
+// and because sun and horizon coincide at alt 0 the sun can never sit higher in frame than that
+// resting horizon. 0.25 (horizon at 75%) therefore dumped the setting sun onto the bottom edge
+// with two-thirds of the frame empty sky — the reported bug. 0.08 rests the horizon at 58%:
+// the sun stays inside the 50–58% comfort band for its whole time above the horizon, and once it
+// sets the horizon + afterglow sit in the upper-middle of the frame instead of jammed at the foot.
+// Slope in sunAlt is 0 or 1 everywhere, so the centre can never move faster than the sun itself —
+// that is the property that killed the two-mode camera jump around 21° altitude. Do not break it.
 function viewCentreAlt(sunAlt, pxPerDeg, h, fov){
-  const H = 0.25*h/pxPerDeg;            // horizon resting at 75% canvas height
-  const c = Math.max(H, sunAlt);
-  if(fov >= 45) return Math.min(c, 0.44*h/pxPerDeg);  // wide FOVs: horizon pinned at 94% — same function, just clamped
+  const V = h/pxPerDeg;                 // vertical field of view, deg
+  const c = Math.max(0.08*V, sunAlt);   // horizon rests at 58% canvas height, then the sun lifts the view
+  if(fov >= 45) return Math.min(c, 0.44*V);  // wide FOVs: horizon pinned at 94% — same function, just clamped
   return c;                             // narrow FOVs track the sun; the altitude ruler supplies the reference
 }
 
@@ -1655,10 +1720,11 @@ function draw(f){
   const pxPerDeg = w / state.fov;
   const centreAz = f.sunAz;
   // Continuous camera — one function of sun altitude, no mode switch:
-  //   centreAlt = max(H, sunAlt), where H is the centre-altitude that rests the horizon at 75% height.
-  // Low sun (the eclipse case): horizon sits at exactly 75%. As the sun climbs past H the view pans up
-  // smoothly, tracking the sun dead-centre while the horizon slides off the bottom; as it descends the
-  // horizon glides back in and settles at 75%. Below-horizon suns keep the horizon parked (sunAlt < H).
+  //   centreAlt = max(F, sunAlt), where F is the centre-altitude that rests the horizon at 58% height.
+  // Low sun (the eclipse case): horizon sits at exactly 58%, sun between 50% and 58% on its way down.
+  // As the sun climbs past F the view pans up smoothly, tracking it dead-centre while the horizon slides
+  // off the bottom; as it descends the horizon glides back up into frame and settles at 58%. After sunset
+  // the camera parks and the afterglow band sits just under that horizon, mid-frame, not on the foot edge.
   // max() of a constant and the sun's real altitude — frame-to-frame change can never exceed real sun motion.
   const centreAlt = viewCentreAlt(f.sunAlt, pxPerDeg, h, state.fov);
   const horizonY = h/2 + centreAlt*pxPerDeg;
@@ -3334,13 +3400,22 @@ function drawCosmos(){
   const items = [ { z: 0, draw: drawEarth },
                   { z: vDot(Pm, eye), draw: drawMoon },
                   { z: zSun, draw: drawSun } ];
-  for(const it of cosCones(c, base, proj, Pm, T, eye)) items.push(it);
+  for(const it of cosCones(c, base, proj, Pm, T, eye, !!U)) items.push(it);
   items.sort((a,b)=>a.z - b.z);
   for(const it of items) it.draw();
 
   /* --- 4. captions --- */
   const pad = Math.round(w*0.012) + 8;
-  c.font = `${Math.round(clamp(w/78, 10, 13))}px monospace`;
+  const fs = Math.round(clamp(w/78, 10, 13));
+  c.font = `${fs}px monospace`;
+  /* When the axis misses the earth there is no shadow on the ground anywhere — but the cone is
+     still drawn (it is real, and from a day-side camera it passes IN FRONT of the globe), so it
+     reads as landing mid-Atlantic. That is exactly what "C4 still looks like it is over Spain"
+     was: at C4 the umbra has left the earth entirely. Say so. */
+  if(!U){
+    c.fillStyle = 'rgba(232,179,74,0.85)';
+    c.fillText('the umbra misses the earth — no totality anywhere now', pad, h - pad - fs - 6);
+  }
   c.fillStyle = 'rgba(150,162,182,0.75)';
   c.fillText('distances compressed · directions real', pad, h - pad);
   drawClock(c, w);
@@ -3434,16 +3509,40 @@ function cosEarth(c, w, h, base, E0, Spx, proj, rt, upv, eye, gast, sHat, S, M, 
       pg.addColorStop(0, 'rgba(4,3,8,0.42)'); pg.addColorStop(0.55, 'rgba(4,3,8,0.20)'); pg.addColorStop(1, 'rgba(4,3,8,0)');
       c.fillStyle = pg; c.beginPath(); c.arc(uq.x, uq.y, pr, 0, 7); c.fill();
       const f = cosFootprint(U, S, M, gast);
+      let rMark = 0;                                           // the footprint's screen radius, px
       if(f.along > 0 && f.across > 0){
         c.beginPath();
         for(let i = 0; i <= 36; i++){
           const a2 = i/36*2*Math.PI, dA = f.along*Math.cos(a2), dX = f.across*Math.sin(a2);
           const p = ll2scr(U.lat + f.hy*dA - f.hx*dX, U.lon + (f.hx*dA + f.hy*dX)/f.cs);
           i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y);
+          rMark = Math.max(rMark, Math.hypot(p.x - uq.x, p.y - uq.y));
         }
         c.closePath();
         c.fillStyle = 'rgba(8,6,10,0.88)'; c.fill();
         c.strokeStyle = 'rgba(255,214,170,0.95)'; c.lineWidth = base*1.4; c.stroke();
+      }
+      /* The umbra is ~100 km wide on an earth a few hundred pixels across: at any framing you
+         would actually use, that true footprint is a sub-pixel smudge. With nothing to see at
+         the landing point the eye takes the CONE for the shadow — which is why the snap buttons
+         read as "assigned to the wrong part of the globe" when they are in fact exact. So the
+         mark is floored: never smaller than a legible ring at the true point. Zoom in and the
+         real footprint outgrows the floor and takes over. */
+      const rMin = base*4.5;
+      if(rMark < rMin){
+        c.strokeStyle = 'rgba(255,214,170,0.95)'; c.lineWidth = base*1.4;
+        c.beginPath(); c.arc(uq.x, uq.y, rMin, 0, 7); c.stroke();
+      }
+      // label to the LEFT: the observer pin captions to the right, and at maximum the two marks
+      // sit on top of each other (that is the whole point of the day) — opposite sides, no pile-up
+      if(w >= 640){
+        c.font = `${Math.round(clamp(w/85, 9, 13))}px monospace`;
+        c.textAlign = 'right';
+        const lx2 = uq.x - Math.max(rMark, rMin) - base*5, ly2 = uq.y + base*4;
+        c.lineWidth = base*3.5; c.strokeStyle = 'rgba(10,16,24,0.85)';
+        c.strokeText('umbra', lx2, ly2);
+        c.fillStyle = 'rgba(255,214,170,0.95)'; c.fillText('umbra', lx2, ly2);
+        c.textAlign = 'left';
       }
     }
   }
@@ -3471,7 +3570,7 @@ function cosEarth(c, w, h, base, E0, Spx, proj, rt, upv, eye, gast, sHat, S, M, 
 // down onto the surface, so it can straddle the earth's limb — one half in front of the
 // sphere, one half behind it. We find that crossing along the axis and emit the two frusta
 // separately, each with its own depth key, so the earth can be drawn between them.
-function cosCones(c, base, proj, Pm, T, eye){
+function cosCones(c, base, proj, Pm, T, eye, lands){
   const ax = vNorm(vSub(T, Pm));
   let b1 = vCross(ax, [0,0,1]); b1 = vLen(b1) < 1e-6 ? [1,0,0] : vNorm(b1);
   const b2 = vCross(ax, b1);
@@ -3522,9 +3621,15 @@ function cosCones(c, base, proj, Pm, T, eye){
       } });
     }
   };
-  // penumbra first (wide, light), umbra on top (narrow, dark, apex at/near the surface)
+  // penumbra first (wide, light), umbra on top (narrow, dark, apex at/near the surface).
+  // A cone that lands is the subject; one that misses the earth is context, so it drops to
+  // about half strength — the difference between "the shadow is on the ground there" and
+  // "the shadow is passing by out there" has to be visible without reading the caption.
   cone(COS_RM, 0.55, 'rgba(150,160,190,0.13)', 'rgba(150,160,190,0.04)', 'rgba(150,160,190,0.16)');
-  cone(COS_RM*0.98, 0.055, 'rgba(28,20,32,0.42)', 'rgba(6,5,10,0.72)', 'rgba(255,190,140,0.30)');
+  cone(COS_RM*0.98, 0.055,
+       lands ? 'rgba(28,20,32,0.42)' : 'rgba(28,20,32,0.20)',
+       lands ? 'rgba(6,5,10,0.72)'   : 'rgba(6,5,10,0.32)',
+       lands ? 'rgba(255,190,140,0.30)' : 'rgba(255,190,140,0.13)');
   return items;
 }
 
@@ -3637,11 +3742,16 @@ function updateWhen(){
   const tz = tzAbbr || '';
   bar.hidden = false;
   bar.className = 'whenbar';
+  /* One sentence, two lengths. The full one is unchanged; the phone cut says the same thing in
+     a single line, because on a 375px screen this block was 60% of the canvas height and prose
+     length is the first thing that should give — before padding, and long before the time. */
+  const sub = (long, short) => { $('whenSub').textContent = long; $('whenSubS').textContent = short; };
   if(ecl.kind === 'none'){
     $('whenLbl').textContent = 'NOT HERE';
     $('whenBig').textContent = 'not visible';
     $('whenTz').textContent = '';
-    $('whenSub').textContent = `${place} sees nothing of this eclipse — tap the red band on the PATH map, or jump to this location's next one below.`;
+    sub(`${place} sees nothing of this eclipse — tap the red band on the PATH map, or jump to this location's next one below.`,
+        `${place} misses this one — see the PATH map`);
     bar.classList.add('none');
     return;
   }
@@ -3656,15 +3766,19 @@ function updateWhen(){
     $('whenLbl').textContent = mid.toUpperCase();
     $('whenBig').textContent = `${fmtLocal(c.c2.ms)} – ${fmtLocal(c.c3.ms)}`;
     $('whenTz').textContent = tz;
-    $('whenSub').textContent = `${place} — ${durTxt} of ${mid}, local time` +
-      (belowNow ? ', but below the horizon here' : '. Glasses come off only between those two times.');
+    sub(`${place} — ${durTxt} of ${mid}, local time` +
+          (belowNow ? ', but below the horizon here' : '. Glasses come off only between those two times.'),
+        `${place} — ${durTxt} of ${mid}` +
+          (belowNow ? ', below the horizon here' : '; glasses off only then'));
     bar.classList.add('tot');
   }else{
     $('whenLbl').textContent = 'MAXIMUM';
     $('whenBig').textContent = fmtLocal(mxMs);
     $('whenTz').textContent = tz;
-    $('whenSub').textContent = `${place} — maximum ${obsc.toFixed(0)}% covered, local time` +
-      (belowNow ? ', but below the horizon here' : '. No totality here, so eye protection stays on throughout.');
+    sub(`${place} — maximum ${obsc.toFixed(0)}% covered, local time` +
+          (belowNow ? ', but below the horizon here' : '. No totality here, so eye protection stays on throughout.'),
+        `${place} — ${obsc.toFixed(0)}% at maximum` +
+          (belowNow ? ', below the horizon here' : '; eye protection throughout'));
   }
 }
 function azName(az){ return CARDS[Math.round(az/22.5)%16]; }
@@ -4522,6 +4636,13 @@ document.querySelectorAll('#snaps button').forEach(b=>{
     const c = contacts.find(x=>x.key===b.dataset.snap);
     if(c){ if(state.live) setLive(false); state.t = c.ms; state.playing=false; $('play').textContent='PLAY'; syncScrub(); }
   });
+});
+/* MOMENTS fold. Whether the fold exists at all is a CSS decision (above 430px the wrapper is
+   display:contents and the class does nothing), so this only ever has to move a class — no
+   breakpoint logic here to drift out of step with the stylesheet on a rotate. */
+$('snapTog').addEventListener('click', ()=>{
+  const open = !$('snapGrp').classList.toggle('closed');
+  $('snapTog').setAttribute('aria-expanded', open ? 'true' : 'false');
 });
 $('live').addEventListener('click', ()=> setLive(!state.live));
 $('play').addEventListener('click', ()=>{
