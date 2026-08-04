@@ -43,11 +43,22 @@
   header{display:flex; align-items:baseline; gap:12px; padding:14px 16px 10px;}
   header h1{font-size:15px; font-weight:400; letter-spacing:.35em; color:var(--accent);}
   header span{font-size:11px; color:var(--dim); letter-spacing:.08em;}
-  /* mode switch lives on the photographer-panel heading row, and only once expanded */
-  summary .modes{display:inline-flex; gap:5px; margin-left:12px; vertical-align:-2px;}
-  summary .modes button{padding:4px 10px; font-size:10px; letter-spacing:.16em;}
+  /* Mode switch — on the photographer-panel heading row, and only once expanded. PRO and
+     NOVICE used to be two loose buttons sized by their own text, so PRO came out narrower
+     than NOVICE and the pair read as an accident. They are now a segmented control: equal
+     width, equal height, sitting in their own lifted well (the timebar's backing idea at
+     toggle scale), amber for the mode you are in and legible — not dim — for the one you
+     are not. The well, not the button borders, does the containing. */
+  summary .modes{display:inline-flex; gap:3px; margin-left:14px; padding:3px;
+                 background:#0a0d13; border:1px solid #2b3346; border-radius:8px;}
+  summary .modes button{min-width:84px; min-height:34px; padding:0 12px;
+                        font-size:10.5px; letter-spacing:.18em; border-radius:5px;
+                        background:transparent; border-color:transparent; color:#9aa5ba;}
+  summary .modes button:hover{color:var(--accent); background:#161b26; border-color:transparent;}
+  summary .modes button.on{color:var(--accent); background:#191d27; border-color:#4a4335;}
   /* in NOVICE every target is thumb-sized, and the way back to PRO is a target too */
-  body.novice summary .modes button{min-height:48px; padding:0 16px; font-size:11px;}
+  /* the bigger novice type needs a wider well or NOVICE outgrows PRO by its own text again */
+  body.novice summary .modes button{min-height:48px; min-width:96px; padding:0 16px; font-size:11.5px;}
   details.photo:not([open]) summary .modes{display:none;}
   body.novice #photo .photosec{display:none;}
   body.pro #novice{display:none;}
@@ -130,6 +141,26 @@
   #viewCosmos > .note, #viewCosmos > .scaleNote{order:61;}
   .grid{order:70;}
   #photo{order:80;}
+  /* ---------- PHONE: THE TWO THINGS YOU TOUCH, TOGETHER ----------
+     The place field and the playback controls are the only two things a visitor actually
+     operates, and they sat four blocks apart (when-bar, countdown, status line, captions
+     between them). Below 760px — where the two-column grid has ALREADY collapsed to one, so
+     this changes nothing about the desktop layout — the grid goes display:contents and its
+     two sections become orderable items of .wrap: the location panel moves up to sit
+     directly under the timebar, the readout stays where the grid was. The when-bar keeps
+     the top slot: the answer belongs under the picture, not under the instruments. */
+  @media(max-width:760px){
+    /* `.wrap >` only to out-specify the .grid display rule further down the sheet */
+    .wrap > .grid{display:contents;}
+    .whenbar{order:5;}                      /* TOTALITY time — first thing under the canvas */
+    #secLoc{order:15; margin-top:8px;}      /* your location — welded to the timebar above */
+    #secRead{order:70; margin-top:8px;}      /* the full readout, where the grid used to be */
+    /* .grid is display:contents here, so opacity on it has nothing to paint (same problem as
+       the PATH/COSMOS wrappers) — its sections carry the cover fade themselves */
+    .grid > section{transition:opacity 1.5s ease;}
+    body.covered .grid > section{opacity:0; pointer-events:none; transition:none;}
+    @media(prefers-reduced-motion:reduce){ .grid > section{transition:none;} }
+  }
   canvas#sky{display:block; width:100%; aspect-ratio:16/9; background:#000; border:1px solid var(--line); border-radius:6px; touch-action:none;}
   canvas#map{display:block; width:100%; aspect-ratio:16/9; background:#070c14; border:1px solid var(--line); border-radius:6px; cursor:crosshair; touch-action:none;}
   canvas#cosmos{display:block; width:100%; aspect-ratio:16/9; background:#05080f; border:1px solid var(--line); border-radius:6px; cursor:grab; touch-action:none;}
@@ -256,6 +287,16 @@
   #live.on i{background:#ff5a4a; animation:liveDot 1.6s ease-in-out infinite;}
   @keyframes liveDot{0%,100%{opacity:1;} 50%{opacity:.2;}}
   @media (prefers-reduced-motion:reduce){ #live.on i{animation:none;} }
+  /* SPEED — "600×" is exact and means nothing to most people; one/two/three play triangles
+     is the transport idiom every remote control and every player has taught them. Both, then:
+     the chevrons carry the amber (they are the thing that changes when you press it) and the
+     figure stays in the button's own neutral ink, so it reads as a label on an indicator
+     rather than a second amber shout next to LIVE. Inline SVG — the file must work offline
+     with no glyph font — sized off the button's type so it tracks any future size change. */
+  #spd{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-width:78px;}
+  #spd .spdi{height:11px; width:auto; flex:none; fill:var(--accent); opacity:.92;}
+  #spd .spdn{font-variant-numeric:tabular-nums;}
+  #spd:hover .spdi{opacity:1;}
 
   /* the timebar is now the first thing under the canvas, so it gets a body: a panel-dark
      fill one step off the page black, a hairline border and a radius. Barely there — the
@@ -312,16 +353,22 @@
      noticed there was a panel. Bigger, warmer, with a camera mark so it announces itself —
      but a clear step below the 15px SKY/PATH tabs: this is a section header, not nav. */
   details.photo summary{cursor:pointer; margin-bottom:0; padding:5px 0 4px; list-style:none;
-                        display:flex; align-items:center; gap:9px;
-                        font-size:13.5px; font-weight:500; letter-spacing:.2em; color:var(--accent);}
+                        display:flex; align-items:center; flex-wrap:wrap; gap:9px;
+                        font-size:15px; font-weight:500; letter-spacing:.18em; color:#f3c569;}
   details.photo summary::-webkit-details-marker{display:none;}
   details.photo summary::before{content:'+'; color:var(--accent); font-size:16px; line-height:1; opacity:.8;}
   details.photo[open] summary::before{content:'\2212';}
   details.photo summary:hover{color:#ffd68a;}
   details.photo[open] summary{margin-bottom:10px;}
-  .camico{width:21px; height:16px; flex:none; fill:none; stroke:currentColor; stroke-width:1.4;
+  .camico{width:23px; height:17px; flex:none; fill:none; stroke:currentColor; stroke-width:1.4;
           stroke-linejoin:round; stroke-linecap:round; opacity:.95;}
-  @media(max-width:430px){ details.photo summary{font-size:12.5px; letter-spacing:.14em;} }
+  /* phone: the heading keeps its new weight but the toggle drops to its own line rather
+     than squeezing the words — the summary row wraps, and the pair stays thumb-sized */
+  @media(max-width:430px){
+    details.photo summary{font-size:13.5px; letter-spacing:.11em;}
+    summary .modes{margin-left:0;}
+    summary .modes button{min-height:44px; min-width:80px;}
+  }
   .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;}
   /* .row's display:flex is an author rule and beats the UA [hidden] rule, which left every
      hidden .row (share fallback, custom sensor) permanently on screen and empty */
@@ -459,6 +506,35 @@
     #place{flex:1 1 100%; min-height:48px; font-size:17px; padding:0 12px;}
     #place::placeholder{font-size:14.5px;}
     #geo{flex:1 1 100%; min-height:46px;}
+  }
+  /* FINE TUNE fold. Desktop: the rows are open and the toggle is not there at all — the
+     panel reads exactly as it always has. Phone: one quiet line in the same register as the
+     COSMOS scale caveat (11px, .2em, dim, small round mark), 48px of tap target, +/- rather
+     than the caveat's "i" because this opens controls, not prose. The [open] on the hide
+     rule is the safety net: a details that somehow ends up closed on a wide screen shows its
+     toggle rather than swallowing lat/lon/date. */
+  details.fine{margin:0;}
+  details.fine[open] > summary{display:none;}
+  details.fine > summary{list-style:none; cursor:pointer; display:flex; align-items:center;
+                         gap:8px; min-height:48px; font-size:11px; letter-spacing:.2em;
+                         color:var(--dim); text-transform:uppercase;}
+  details.fine > summary::-webkit-details-marker{display:none;}
+  details.fine > summary::before{content:'+'; flex:none; width:17px; height:17px;
+                                 border:1px solid var(--dim); border-radius:50%;
+                                 font-size:12px; line-height:1;
+                                 display:flex; align-items:center; justify-content:center;}
+  details.fine > summary .fs{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em;
+                             color:#4e576d; text-transform:none;}
+  details.fine > summary:hover{color:var(--accent);}
+  details.fine > summary:hover::before{border-color:var(--accent);}
+  details.fine > summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  details.fine[open]{margin-bottom:0;}
+  @media(max-width:760px){
+    /* closed, it is the panel's last line: a hairline floor above it keeps it from reading
+       as one more grey button under the hero */
+    details.fine{border-top:1px solid var(--line); margin-top:2px;}
+    details.fine[open] > summary{display:flex;}
+    details.fine[open] > summary::before{content:'\2212';}
   }
   /* ---------- COVER — the front door. The app's own SKY render (the eclipsed sun at MAX)
      sits BEHIND the cover as a heavily dimmed background — the cover's translucent scrim
@@ -622,7 +698,9 @@
     <div class="playctl">
       <button id="live" title="follow real time"><i></i>LIVE</button>
       <button id="play">PLAY</button>
-      <button id="spd" title="playback speed">60×</button>
+      <!-- face is repainted by paintSpeed() on load; this is the same 60× state, statically,
+           so the first paint under the cover is never a bare number -->
+      <button id="spd" title="playback speed"><svg class="spdi" viewBox="0 0 13.5 10" aria-hidden="true"><path d="M0 0 L6 5 L0 10 Z"/><path d="M7.5 0 L13.5 5 L7.5 10 Z"/></svg><span class="spdn">60×</span></button>
     </div>
     <div class="scrubwrap">
       <div id="eclBand"></div><div id="maxTick"></div>
@@ -658,17 +736,27 @@
         <label for="shareUrl">copy this link</label>
         <input type="text" id="shareUrl" readonly placeholder="copy this link" style="flex:1 1 200px; min-width:0"></div>
       <datalist id="placeList"></datalist>
-      <div class="row">
-        <label>lat</label><input type="number" id="lat" step="0.01" min="-89.9" max="89.9">
-        <label>lon</label><input type="number" id="lon" step="0.01" min="-180" max="180">
-        <input type="date" id="date">
-      </div>
-      <div class="row" style="margin-bottom:0">
-        <label>western horizon blocked to</label>
-        <input type="range" id="obst" min="0" max="15" step="0.5" value="0" style="flex:1 1 120px; max-width:220px">
-        <span class="mono" id="obstVal">0.0°</span>
-      </div>
-      <div id="obstVerdict" class="verdict"></div>
+      <!-- FINE TUNE. lat/lon, the date and the horizon slider are the panel's instruments,
+           not its call to action. On a phone the location panel now sits directly under the
+           playback controls, and four rows of instruments there would push the times a
+           screen down — so on a phone these fold to one tappable line. Desktop is unchanged:
+           the script opens it above 760px and the summary is hidden while open. The
+           obstruction verdict lives in here with its slider: it only says anything once a
+           horizon has been set. Native <details>, so keyboard and find-in-page still work. -->
+      <details class="fine" id="locFine" open>
+        <summary>Fine tune<span class="fs">lat, lon, date, horizon</span></summary>
+        <div class="row">
+          <label>lat</label><input type="number" id="lat" step="0.01" min="-89.9" max="89.9">
+          <label>lon</label><input type="number" id="lon" step="0.01" min="-180" max="180">
+          <input type="date" id="date">
+        </div>
+        <div class="row" style="margin-bottom:0">
+          <label>western horizon blocked to</label>
+          <input type="range" id="obst" min="0" max="15" step="0.5" value="0" style="flex:1 1 120px; max-width:220px">
+          <span class="mono" id="obstVal">0.0°</span>
+        </div>
+        <div id="obstVerdict" class="verdict"></div>
+      </details>
       <div id="errBox" class="err" hidden></div>
     </section>
 
@@ -795,11 +883,12 @@ const state = {
   obstDeg: 0,
   // Landing FOV. 60° is the naked-eye-ish framing but renders the 0.53° sun as a speck
   // (1/114 of the frame) — a first-time visitor sees an empty sky. 8° makes the disc
-  // ~1/16 of the frame width (≈71px desktop, ≈23px at 375px) so the moon's bite is
-  // legible on arrival. The horizon can't be in frame at any legible FOV — the eclipse
-  // sits ~6° up at Zaragoza and holding the horizon needs FOV ≳22° — so the altitude
-  // ruler and the "▼ horizon N° below view" line (both active below 45°) carry the
-  // low-sun story instead. User zoom always wins; nothing here persists across reloads.
+  // ~1/16 of the frame width, and that is a DESKTOP number: ≈71px over a 1080px canvas
+  // but only ≈23px over a phone's ≈355px one, which is why a phone lands at 4° instead
+  // (≈47px, see NARROW below). The horizon can't be in frame at any legible FOV — the
+  // eclipse sits ~6° up at Zaragoza and holding the horizon needs FOV ≳22° — so the
+  // altitude ruler and the "▼ horizon N° below view" line (both active below 45°) carry
+  // the low-sun story instead. User zoom always wins; nothing persists across reloads.
   fov: 8,
   playing: false, speed: 60,
   live: false,       // sim clock follows wall-clock time (see LIVE mode below)
@@ -810,7 +899,15 @@ const state = {
   lens: 'tele',      // NOVICE's visual focal picker (see LENSES) — PRO types a number instead
 };
 const MAP_ASPECT = 16/9;
-const FOVS = [60, 20, 8, 5, 1.5];   // 8 = the landing framing, so the cycle can return to it
+/* A phone is not a small desktop: the same 8° that gives a 71px sun on a 1080px canvas gives
+   a 23px one on a 355px canvas, and the moon's bite stops being readable. Narrow viewports
+   therefore LAND at 4° (≈47px) and swap the cycle's 5° rung for it, so the button can still
+   come back to the framing the visitor arrived on — exactly what the 8° rung does on desktop.
+   Desktop presets are untouched. Wheel, pinch, the ruler and the horizon marker are unchanged
+   and user zoom always wins. */
+const NARROW = (()=>{ try{ return matchMedia('(max-width:600px)').matches; }catch(e){ return false; } })();
+const FOVS = NARROW ? [60, 20, 8, 4, 1.5]    // 4 = the phone landing framing
+                    : [60, 20, 8, 5, 1.5];   // 8 = the desktop landing framing
 const SPEEDS = [1, 60, 600];
 
 const PRESETS = [
@@ -3802,6 +3899,7 @@ function updateNovice(){
   const { c, up, allBelow, shootable, midWord, focal, fnum, driftMin, needsTracker,
           ivl, vFps, vShut, vidExp, totalSec, ND5_STOPS } = P;
   const cap = state.cap;
+  const isPhone = state.lens === 'phone';   // decides the camera card AND the phone aside below
   const hasTot = !!(c.c2 && c.c3 && up(c.c2));
   const alt = ecl.peak.altitude;
   const place = pickedName || 'this spot';
@@ -3832,20 +3930,41 @@ function updateNovice(){
 
   // ---- ONE recommendation, no inputs, no range ----
   if(shootable){
-    const big = cap === 'video'
-      ? { v:`M · ${vFps}fps · ${vShut}`, s:`${vidExp.set} — locked`,
-          l:'Manual focus on the sun beforehand, then tape the ring. Manual white balance. Tripod, stabiliser off.' }
-      : { v:`A / Av · f/${fnum}`,
-          s:`ISO auto (max ${isoCeil}) · spot metering · RAW` + (cap === 'timelapse' ? ` · every ${ivl}s` : ' · burst'),
-          l:'Manual focus on the filtered sun beforehand, then tape the ring. Tripod, stabiliser off.' };
+    /* A phone is not a small camera. It has ONE fixed aperture, no A/Av dial, no ISO
+       ceiling to set, no focus ring to tape and no stabiliser switch — so the camera card
+       for the Phone lens is written around the two controls a phone actually gives you:
+       the tap-and-hold exposure/focus lock and the brightness slider beside it. Everything
+       that survives the translation (filter, RAW, burst, bracing, flash off) stays. */
+    const phoneL ='Solar filter over the lens for the whole partial phase. Flash off. ' +
+                   'Brace it — small tripod, wall or a bag — then stop touching the screen.';
+    const big = isPhone
+      ? (cap === 'video'
+          ? { v:`Video · ${vFps}fps`,
+              s:'Tap and hold the sun to lock focus + exposure · slide the brightness down · steady mount',
+              l:phoneL }
+          : { v:'Tap and hold the sun',
+              s:'Focus + exposure locked · brightness slider down · ' +
+                (cap === 'timelapse' ? 'time-lapse mode, then leave it alone'
+                                     : 'RAW if your camera app offers it · burst'),
+              l:phoneL })
+      : cap === 'video'
+        ? { v:`M · ${vFps}fps · ${vShut}`, s:`${vidExp.set} — locked`,
+            l:'Manual focus on the sun beforehand, then tape the ring. Manual white balance. Tripod, stabiliser off.' }
+        : { v:`A / Av · f/${fnum}`,
+            s:`ISO auto (max ${isoCeil}) · spot metering · RAW` + (cap === 'timelapse' ? ` · every ${ivl}s` : ' · burst'),
+            l:'Manual focus on the filtered sun beforehand, then tape the ring. Tripod, stabiliser off.' };
     out.push(chunk('Set your camera to this, once',
       `<div class="setbig"><div class="bigv">${big.v}</div><div class="bigs">${big.s}</div>` +
       `<div class="bigl">${big.l}</div></div>` +
-      why('Why these settings?', cap === 'video'
-        ? `<p>${vidExp.why.charAt(0).toUpperCase()+vidExp.why.slice(1)}</p>` +
-          `<p>Auto-exposure hunts wildly through the start and end of ${midWord} — the seconds you cannot reshoot — so this is the one mode that has to be manual and then left alone.</p>`
-        : `<p>Filtered sun to bare corona is a jump of about ${ND5_STOPS} stops. Aperture priority rides that on its own, so the only thing you ever touch is the filter.</p>` +
-          `<p>The trade: during ${midWord} the meter sees a nearly black frame and overexposes the corona a stop or so — bright and soft rather than fine. That is the price of not fiddling, and for a first eclipse it is the right price.</p>`)));
+      why('Why these settings?', isPhone
+        ? `<p>A phone has a single fixed aperture and no exposure dial, so there is nothing to set: the whole job is <b>locking</b> what it has guessed. Tap and hold the sun until the lock appears, then drag the brightness slider down until the disc stops being a white blob.</p>` +
+          `<p>Left on auto it re-meters every frame, and through the start and end of ${midWord} — the seconds you cannot reshoot — it hunts wildly between a black sky and a bright corona. Locked and braced, it just records.</p>` +
+          `<p>Filtered sun to bare corona is a jump of about ${ND5_STOPS} stops, and the filter does all of that work. When it comes off, tap and hold once more to re-lock on the corona.${D_(' Pinch-zoom is fake resolution — use the 2× or 3× lens if the phone has one.')}</p>`
+        : cap === 'video'
+          ? `<p>${vidExp.why.charAt(0).toUpperCase()+vidExp.why.slice(1)}</p>` +
+            `<p>Auto-exposure hunts wildly through the start and end of ${midWord} — the seconds you cannot reshoot — so this is the one mode that has to be manual and then left alone.</p>`
+          : `<p>Filtered sun to bare corona is a jump of about ${ND5_STOPS} stops. Aperture priority rides that on its own, so the only thing you ever touch is the filter.</p>` +
+            `<p>The trade: during ${midWord} the meter sees a nearly black frame and overexposes the corona a stop or so — bright and soft rather than fine. That is the price of not fiddling, and for a first eclipse it is the right price.</p>`)));
   }
 
   // ---- EYES. Never collapsed, never abbreviated. ----
@@ -3887,9 +4006,14 @@ function updateNovice(){
   out.push(why('What counts as a solar filter?',
     `<p>"Eclipse glasses" means a specific certified product ${D_('(ISO 12312-2 / ND5, about 100,000× darker than a photographic filter)')}. Sunglasses — even stacked — welding glass below shade 14, exposed film and photographic ND filters are <b>not</b> substitutes and will not protect you.</p>` +
     `<p>Never look through binoculars, a telescope or a camera viewfinder pointed at the sun unless a proper solar filter is fitted over the <b>front</b> of it. Optics concentrate what they collect.</p>`));
-  out.push(why('Shooting it on a phone?',
-    `<p>Watch it first, photograph it second. Tap the sun on screen, then drag the brightness slider well down or it blows out to a white blob. Flash off. Use the 2× or 3× lens rather than pinch zoom.</p>` +
-    `<p>A phone still needs a filter over the lens whenever the sun isn't ${hasTot ? 'fully covered' : 'covered — which here is always'}.</p>`));
+  // with the Phone lens picked, the card above has already given the tap-and-lock routine —
+  // this becomes the honest expectation-setter instead of repeating it
+  out.push(why(isPhone ? 'Will a phone actually get it?' : 'Shooting it on a phone?', isPhone
+    ? `<p>Honestly: at phone-wide the sun is a few pixels across. The frame that works is the <b>scene</b> — the horizon, the strange light, the faces — not the disc. Use the 2× or 3× lens if there is one; pinch zoom is only a crop.</p>` +
+      `<p>Watch it first, photograph it second: the phone can be locked, braced and left recording while you look up.</p>` +
+      `<p>A phone still needs a filter over the lens whenever the sun isn't ${hasTot ? 'fully covered' : 'covered — which here is always'}.</p>`
+    : `<p>Watch it first, photograph it second. Tap the sun on screen, then drag the brightness slider well down or it blows out to a white blob. Flash off. Use the 2× or 3× lens rather than pinch zoom.</p>` +
+      `<p>A phone still needs a filter over the lens whenever the sun isn't ${hasTot ? 'fully covered' : 'covered — which here is always'}.</p>`));
   out.push(`<p class="adv">${D_('Want exposure brackets, the Espenak table and a timed contact-by-contact plan? Switch this panel to PRO.')}</p>`);
 
   $('noviceBody').innerHTML = out.join('');
@@ -4148,9 +4272,24 @@ $('play').addEventListener('click', ()=>{
   state.playing = !state.playing;
   $('play').textContent = state.playing ? 'PAUSE' : 'PLAY';
 });
+/* speed face: n play triangles + the figure. n is the rung, not the maths — 1×/60×/600× is
+   already three rungs, so one/two/three chevrons map straight onto them. */
+const spdChevrons = n => {
+  let p = '';
+  for(let i = 0; i < n; i++) p += `<path d="M${(i*7.5).toFixed(1)} 0 L${(i*7.5+6).toFixed(1)} 5 L${(i*7.5).toFixed(1)} 10 Z"/>`;
+  return `<svg class="spdi" viewBox="0 0 ${(n*7.5-1.5).toFixed(1)} 10" aria-hidden="true">${p}</svg>`;
+};
+function paintSpeed(){
+  const n = SPEEDS.indexOf(state.speed) + 1 || 1;
+  $('spd').innerHTML = spdChevrons(n) + `<span class="spdn">${state.speed}×</span>`;
+  $('spd').setAttribute('aria-label', state.speed === 1
+    ? 'playback speed: real time — press to change'
+    : `playback speed: ${state.speed} times real time — press to change`);
+}
+paintSpeed();
 $('spd').addEventListener('click', ()=>{
   state.speed = SPEEDS[(SPEEDS.indexOf(state.speed)+1) % SPEEDS.length];
-  $('spd').textContent = state.speed + '×';
+  paintSpeed();
 });
 function setFov(v){
   state.fov = clamp(v, 1, 90);
@@ -4161,6 +4300,8 @@ $('zoom').addEventListener('click', ()=>{
   const next = FOVS.find(fv => fv < state.fov - 0.01);
   setFov(next !== undefined ? next : FOVS[0]);
 });
+// the phone landing framing (see NARROW) — also what syncs the button face to it
+if(NARROW) setFov(4);
 // mouse wheel: smooth exponential zoom over the canvas
 cv.addEventListener('wheel', e=>{
   e.preventDefault();
@@ -4542,6 +4683,21 @@ function setTab(tab){
 (function(){
   const d = $('cosScale');
   try{ if(d && matchMedia('(max-width:430px)').matches) d.open = false; }catch(e){}
+})();
+// LOCATION fine-tuning rows: ship open (desktop / no-JS state), folded on a phone, where the
+// panel now sits between the playback controls and the times. Unlike the caveat above this
+// one DOES track the viewport: below 760px the summary is the only way back to the rows, and
+// a phone rotated into a wide tablet layout would otherwise hide both the toggle and them.
+(function(){
+  const d = $('locFine');
+  if(!d) return;
+  try{
+    const mq = matchMedia('(max-width:760px)');
+    const sync = e => { if(e.matches) d.open = false; else d.open = true; };
+    sync(mq);
+    if(mq.addEventListener) mq.addEventListener('change', sync);
+    else if(mq.addListener) mq.addListener(sync);
+  }catch(e){}
 })();
 $('tabSky').addEventListener('click', ()=> setTab('sky'));
 $('tabPath').addEventListener('click', ()=> setTab('path'));
