@@ -141,19 +141,22 @@
   #viewCosmos > .note, #viewCosmos > .scaleNote{order:61;}
   .grid{order:70;}
   #photo{order:80;}
-  /* ---------- PHONE: THE TWO THINGS YOU TOUCH, TOGETHER ----------
+  /* ---------- PHONE: READ AT THE TOP, OPERATE AT THE BOTTOM ----------
      The place field and the playback controls are the only two things a visitor actually
-     operates, and they sat four blocks apart (when-bar, countdown, status line, captions
-     between them). Below 760px — where the two-column grid has ALREADY collapsed to one, so
-     this changes nothing about the desktop layout — the grid goes display:contents and its
-     two sections become orderable items of .wrap: the location panel moves up to sit
-     directly under the timebar, the readout stays where the grid was. The when-bar keeps
-     the top slot: the answer belongs under the picture, not under the instruments. */
+     operates, and they used to sit four blocks apart (when-bar, countdown, status line,
+     captions between them). Below 760px — where the two-column grid has ALREADY collapsed to
+     one, so this changes nothing about the desktop layout — the grid goes display:contents
+     and its two sections become orderable items of .wrap.
+     They are now neighbours in the order the hand wants them: WHEN and WHERE read as one
+     pair straight under the picture (both are information — the answer and the input it is
+     computed from), and the remote sits BELOW them, at the bottom of the screen where a
+     thumb already rests on the scrubber. Reading material up, instrument under the hand. */
   @media(max-width:760px){
     /* `.wrap >` only to out-specify the .grid display rule further down the sheet */
     .wrap > .grid{display:contents;}
-    .whenbar{order:5;}                      /* TOTALITY time — first thing under the canvas */
-    #secLoc{order:15; margin-top:8px;}      /* your location — welded to the timebar above */
+    .whenbar{order:5;}                      /* TOTALITY time — first thing under the picture */
+    #secLoc{order:8; margin-top:6px;}       /* WHERE — read with the WHEN above it */
+    /* .timebar keeps its base order:10 — which now lands it under the location panel */
     #secRead{order:70; margin-top:8px;}      /* the full readout, where the grid used to be */
     /* .grid is display:contents here, so opacity on it has nothing to paint (same problem as
        the PATH/COSMOS wrappers) — its sections carry the cover fade themselves */
@@ -229,10 +232,33 @@
 
   /* WHEN bar — "at what time", for everyone, above the fold. The time is the headline and
      is deliberately the largest type on the page after the app title; the sentence under it
-     is for someone who has never heard the word "contact". */
-  .whenbar{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; margin:8px 0 2px;
+     is for someone who has never heard the word "contact".
+     TWO CLOCKS, ONE BLOCK. The window on the left is a static answer you read once; the
+     clock on the right is a moving instrument you track while dragging the scrubber, so it
+     is sized as a peer of the answer rather than hidden in a corner. They are never
+     confusable: the answer is amber under an amber label, the instrument is white under a
+     dim NOW/SHOWING. On a wide screen the clock takes the block's empty right-hand column
+     (absolute, so the answer's own three lines are laid out exactly as they always were,
+     with padding-right reserving the column); at 760px and below it folds up into the label
+     row, where it costs one row of height instead of a whole line. */
+  .whenbar{position:relative;
+           display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; margin:8px 0 2px;
            padding:11px 13px 12px; background:#0f1319; border:1px solid #2b3346;
            border-left:3px solid var(--accent); border-radius:6px;}
+  .whenbar .wnow{margin-left:auto; display:flex; align-items:baseline; gap:0 7px;}
+  .whenbar .wnl{font-size:9.5px; letter-spacing:.2em; color:var(--dim); text-transform:uppercase;
+                white-space:nowrap;}
+  .whenbar .wnz{margin-left:6px;}
+  .whenbar .wnt{font-family:var(--mono); font-size:20px; line-height:1.05; color:#e4ebf8;
+                letter-spacing:.02em; white-space:nowrap;}
+  /* wide screens: the empty right-hand side the answer never used */
+  @media(min-width:761px){
+    .whenbar{padding-right:215px;}
+    .whenbar .wnow{position:absolute; right:15px; top:50%; transform:translateY(-50%);
+                   margin:0; flex-direction:column; align-items:flex-end; gap:2px;}
+    .whenbar .wnl{font-size:10px; letter-spacing:.24em;}
+    .whenbar .wnt{font-size:clamp(30px,2.7vw,38px);}
+  }
   .whenbar .wl{font-size:10px; letter-spacing:.24em; color:var(--accent); text-transform:uppercase;}
   /* the time owns its own line: the label and zone sit above it, the sentence below, so the
      clock reading is never squeezed or wrapped mid-number at 375px */
@@ -246,15 +272,22 @@
   /* PHONE: the picture is the subject, and no block under it may rival the canvas for height.
      This one was the worst offender at 120px against a 200px canvas. It comes down to ~78px
      WITHOUT touching what it says first (padding, line-height and the short sentence do the
-     work) and without demoting the time, which stays the loudest type on the page. */
+     work) and without demoting the time, which stays the loudest type on the page.
+     The live clock is paid for out of the SAME budget: it rides in the label row's empty
+     right half (a row that already exists, so it costs only the difference between a 9.5px
+     label and a 17px clock), and the window gives back the 3px by stepping 25px → 22px.
+     Net height is unchanged — still ~79px — and the two clocks are now one glance apart. */
   @media(max-width:430px){
-    .whenbar{margin:8px 0 2px; padding:8px 11px 8px; gap:0 9px;}
+    .whenbar{margin:8px 0 2px; padding:8px 11px 7px; gap:0 9px;}
     .whenbar .wl, .whenbar .wz{line-height:1.2;}   /* the label row is 1.5-leaded prose otherwise */
     .whenbar .wl{font-size:9.5px;}
-    .whenbar b{font-size:25px; margin-top:1px;}
-    .whenbar .ws{font-size:12px; line-height:1.35; margin-top:3px;}
+    .whenbar b{font-size:22px; margin-top:1px;}
+    .whenbar .ws{font-size:12px; line-height:1.35; margin-top:2px;}
     .whenbar .wsL{display:none;}
     .whenbar .wsS{display:block;}
+    .whenbar .wnl{line-height:1.2;}
+    .whenbar .wnz{display:none;}   /* the zone is already in this row, two words to the left */
+    .whenbar .wnt{font-size:17px;}
   }
 
   /* LIVE status bar — the one line that answers "what is happening right now, to me".
@@ -309,10 +342,25 @@
      figure stays in the button's own neutral ink, so it reads as a label on an indicator
      rather than a second amber shout next to LIVE. Inline SVG — the file must work offline
      with no glyph font — sized off the button's type so it tracks any future size change. */
-  #spd{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-width:78px;}
-  #spd .spdi{height:11px; width:auto; flex:none; fill:var(--accent); opacity:.92;}
-  #spd .spdn{font-variant-numeric:tabular-nums;}
+  /* A GEOMETRICALLY STABLE ROW. Every face in the remote changes with state — play/pause,
+     one to three chevrons, 1× to 600×, FOV 1.0° to 90° — and each of those changed the
+     button's width, which on a phone re-wrapped the whole bar mid-press. So every such face is
+     given a slot sized to its WIDEST state and the content is centred inside it: the chevron
+     block is one fixed 23px slot (the 3-chevron width, others centre in it), the figure a
+     fixed tabular-nums slot wide enough for "600×", the FOV figure the same trick below.
+     Nothing the user presses can now move anything else. */
+  #spd{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-width:104px;}
+  #spd .spdi{height:11px; width:23px; flex:none; fill:var(--accent); opacity:.92;}
+  #spd .spdn{font-variant-numeric:tabular-nums; min-width:40px; text-align:left;}
   #spd:hover .spdi{opacity:1;}
+  /* play / pause — one box, two glyphs (see the button's note) */
+  #play{display:inline-flex; align-items:center; justify-content:center;}
+  #play .pgi{height:15px; width:13px; flex:none; fill:currentColor;}
+  /* FOV cycles 60° → 20° → 8° → 5° → 1.5°: four glyphs down to two. The figure gets its own
+     fixed slot rather than the button a min-width, so the box is constant at every screen
+     size (a min-width big enough for "1.5°" pushed FOV onto its own row at 320px). */
+  #zoom .fovn{display:inline-block; min-width:25px; text-align:left; letter-spacing:.02em;
+              font-variant-numeric:tabular-nums;}
 
   /* THE REMOTE. This is the first thing under the canvas and the first thing worth touching,
      so it must read as a device you operate — not as one more block of page. Two moves do it:
@@ -326,7 +374,10 @@
            margin:8px 0 8px; padding:11px 13px 12px;
            background:#181310; border:1px solid #35291b; border-radius:8px;
            box-shadow:0 1px 0 rgba(0,0,0,0.45);}
-  @media(max-width:430px){ .timebar{padding:9px 10px 10px; gap:6px;} }
+  /* the remote now sits at the BOTTOM of the phone layout (see the order block), so every
+     millimetre above it is a millimetre of the transport row inside the fold — hence the
+     tighter top margin here as well as the tighter padding. */
+  @media(max-width:430px){ .timebar{padding:9px 10px 10px; gap:6px; margin-top:4px;} }
   /* the snap row folds on a phone (see #snapTog); on desktop the wrapper is not there at all
      as far as layout is concerned, so #snaps and #ext stay flex items of the bar exactly as
      they always were */
@@ -371,6 +422,15 @@
     .playctl{order:3; flex:1 1 190px;}
     .playctl button{flex:1 1 0; min-width:0; min-height:48px; padding:14px 3px 13px; font-size:13.5px;}
     #live{min-width:0;}
+    /* the three transport keys are equal thirds of their own row here, so the desktop
+       widest-state widths would only push MOMENTS onto a fourth row on a 320px screen. The
+       faces are already fixed-width INSIDE the button (chevron slot + tabular figure), which
+       is what actually keeps the row from re-wrapping on a press. */
+    /* the fixed slots stay (they are what stops a press re-wrapping the row) but they are
+       tightened to the millimetre here: on a 320px screen the desktop-width slots pushed
+       MOMENTS onto a fourth row all by themselves. */
+    #spd{min-width:0; gap:6px;}
+    #spd .spdn{min-width:36px; letter-spacing:.06em;}
     #snapTog{display:inline-flex; order:4; flex:0 0 auto;}
     .snapgrp{display:flex; flex-wrap:wrap; gap:6px; order:5; flex:1 0 100%;}
     .snapgrp.closed{display:none;}
@@ -545,7 +605,7 @@
   /* phone: comfortably bigger than a form field, nowhere near hero-scale — the canvas and
      the timebar own the screen up top, this must not push the panel into three screens */
   @media(max-width:430px){
-    .locHero{margin-bottom:8px; padding:8px 10px 9px;}
+    .locHero{margin-bottom:6px; padding:8px 10px 9px;}
     .locHero .lh{margin-bottom:5px; line-height:1.2;}
     .locHero .lhRow{gap:6px;}
     #place{flex:1 1 100%; min-height:48px; font-size:17px; padding:0 12px;}
@@ -730,6 +790,17 @@
   <div class="whenbar" id="whenBar" hidden>
     <span class="wl" id="whenLbl">MAXIMUM</span>
     <span class="wz" id="whenTz"></span>
+    <!-- THE CLOCK THAT MOVES. The same number used to appear three times on one screen —
+         canvas corner stamp, status line "local", and nowhere near the control you drag —
+         while the biggest type on the page was a static answer. This is the number the
+         visitor is actually manipulating, so it sits IN the answer block, at the size of the
+         answer: right-hand column on a wide screen, top-right of the label row on a phone.
+         The status line's duplicate is gone (see .live); the canvas stamp stays, because a
+         screenshot of the picture has to carry its own timestamp. -->
+    <span class="wnow" id="whenNow">
+      <span class="wnl"><span id="whenNowL">NOW</span><span class="wnz" id="whenNowZ"></span></span>
+      <span class="wnt" id="whenNowT">—</span>
+    </span>
     <b id="whenBig">—</b>
     <!-- same sentence, two lengths: the full one everywhere, a one-line cut on a phone. CSS
          picks, so a rotation or a resize can never leave the wrong one on screen. -->
@@ -739,7 +810,11 @@
 
   <div class="live">
     <span>UTC <b id="tUtc">—</b></span>
-    <span>local <b id="tLoc">—</b> <span id="tzName"></span></span>
+    <!-- "local HH:MM:SS" used to sit here: the third copy of a number that is already the
+         canvas stamp and now the when-bar's live clock. Dropped — this line keeps only what
+         nothing else says: the UTC reading, which zone the local times are in, where the sun
+         is, and how much of it is covered. -->
+    <span>zone <b id="tzName"></b></span>
     <span>sun <b id="liveAlt">—</b> alt / <b id="liveAz">—</b> az</span>
     <span>obscuration <b class="acc" id="liveObsc">—</b></span>
     <span id="livePhase" class="acc"></span>
@@ -750,7 +825,12 @@
   <div class="timebar">
     <div class="playctl">
       <button id="live" title="follow real time"><i></i>LIVE</button>
-      <button id="play">PLAY</button>
+      <!-- transport glyph, not a word: "PLAY" → "PAUSE" is a wider label, and on a phone that
+           one extra character re-flowed the whole remote (MOMENTS dropped to its own row) the
+           moment you pressed it. A control may never move the controls. Same fixed viewBox in
+           both states, so the box cannot change; the word lives in aria-label/title. Repainted
+           by setPlayFace() — this is the paused state, statically, for the first paint. -->
+      <button id="play" aria-label="play" title="play"><svg class="pgi" viewBox="0 0 10 12" aria-hidden="true"><path d="M0.4 0 L10 6 L0.4 12 Z"/></svg></button>
       <!-- face is repainted by paintSpeed() on load; this is the same 60× state, statically,
            so the first paint under the cover is never a bare number -->
       <button id="spd" title="playback speed"><svg class="spdi" viewBox="0 0 13.5 10" aria-hidden="true"><path d="M0 0 L6 5 L0 10 Z"/><path d="M7.5 0 L13.5 5 L7.5 10 Z"/></svg><span class="spdn">60×</span></button>
@@ -768,7 +848,7 @@
       </span>
       <button id="ext" title="expand scrubber range to 3h either side of the eclipse">±3h</button>
     </span>
-    <button id="zoom" title="field of view">FOV 8°</button>
+    <button id="zoom" title="field of view">FOV <span class="fovn">8°</span></button>
   </div>
 
   <div class="grid">
@@ -3469,6 +3549,7 @@ function updateReadout(){
   // zone, you want to see WHICH zone the times are in before you book anything
   $('tzName').textContent = tzAbbr + (state.tz && state.tz !== tzAbbr ? ' · ' + state.tz : '');
   updateWhen();
+  paintNowClock();     // the bar may have just been un-hidden — don't wait a frame to fill it
   syncScrub();
 }
 /* "WHAT TIME?" — the first and often only question anyone asks. It is not a photographer
@@ -3522,6 +3603,23 @@ function updateWhen(){
         `${place} — ${obsc.toFixed(0)}% at maximum` +
           (belowNow ? ', below the horizon here' : '; eye protection throughout'));
   }
+}
+/* The clock that MOVES, in the when-bar next to the answer. Repainted every frame rather
+   than on the 150ms DOM tick, because the canvas draws its own stamp from the same state.t
+   every frame: on a slower tick the two readings sit 35px apart on a phone showing different
+   seconds, which looks like a bug. Guarded on the formatted string, so it is one cached
+   Intl format and a compare per frame, and a DOM write only when the second actually turns. */
+let _nowClk = '';
+function paintNowClock(){
+  if($('whenBar').hidden){ _nowClk = ''; return; }
+  const t = fmtLocal(state.t);
+  if(t !== _nowClk){ _nowClk = t; $('whenNowT').textContent = t; }
+  // LIVE is the wall clock; scrubbed or playing it is a moment you chose. Saying which
+  // stops the reading being mistaken for "the time now" when it is 3h from anything.
+  const lbl = state.live ? 'NOW' : 'SHOWING';
+  if($('whenNowL').textContent !== lbl) $('whenNowL').textContent = lbl;
+  const z = tzAbbr || '';
+  if($('whenNowZ').textContent !== z) $('whenNowZ').textContent = z;
 }
 function azName(az){ return CARDS[Math.round(az/22.5)%16]; }
 
@@ -4338,7 +4436,7 @@ function setLive(on){
   state.live = !!on;
   $('live').classList.toggle('on', state.live);
   if(state.live){
-    state.playing = false; $('play').textContent = 'PLAY';
+    state.playing = false; setPlayFace();
     const tn = nowMs();
     // the handle has to have a track it can actually sit on — widen if now falls outside
     if(span && (tn < span.t0 || tn > span.t1) && eclWin){
@@ -4358,7 +4456,7 @@ function syncScrub(){
 }
 $('scrub').addEventListener('input', e=>{
   if(!span) return;
-  state.playing = false; $('play').textContent='PLAY';
+  state.playing = false; setPlayFace();
   if(state.live) setLive(false);         // touching the handle is taking manual control
   state.t = span.t0 + (span.t1-span.t0) * (+e.target.value/10000);
 });
@@ -4376,7 +4474,7 @@ $('ext').addEventListener('click', ()=>{
 document.querySelectorAll('#snaps button').forEach(b=>{
   b.addEventListener('click', ()=>{
     const c = contacts.find(x=>x.key===b.dataset.snap);
-    if(c){ if(state.live) setLive(false); state.t = c.ms; state.playing=false; $('play').textContent='PLAY'; syncScrub(); }
+    if(c){ if(state.live) setLive(false); state.t = c.ms; state.playing=false; setPlayFace(); syncScrub(); }
   });
 });
 /* MOMENTS fold. Whether the fold exists at all is a CSS decision (above 430px the wrapper is
@@ -4391,8 +4489,20 @@ $('play').addEventListener('click', ()=>{
   if(state.live) setLive(false);
   if(span && state.t >= span.t1) state.t = span.t0;
   state.playing = !state.playing;
-  $('play').textContent = state.playing ? 'PAUSE' : 'PLAY';
+  setPlayFace();
 });
+/* play/pause face: the same 10×12 viewBox either way, so the button's box is identical in
+   both states and pressing it cannot re-flow the row. The word is carried by aria-label and
+   title, which is where a screen reader and a hover tooltip look for it anyway. */
+const PLAY_GLYPH = '<svg class="pgi" viewBox="0 0 10 12" aria-hidden="true"><path d="M0.4 0 L10 6 L0.4 12 Z"/></svg>';
+const PAUSE_GLYPH = '<svg class="pgi" viewBox="0 0 10 12" aria-hidden="true"><rect x="0.4" y="0" width="3.4" height="12" rx="0.7"/><rect x="6.2" y="0" width="3.4" height="12" rx="0.7"/></svg>';
+function setPlayFace(){
+  const p = $('play'), on = state.playing;
+  p.innerHTML = on ? PAUSE_GLYPH : PLAY_GLYPH;
+  p.setAttribute('aria-label', on ? 'pause' : 'play');
+  p.title = on ? 'pause' : 'play';
+  p.classList.toggle('on', on);
+}
 /* speed face: n play triangles + the figure. n is the rung, not the maths — 1×/60×/600× is
    already three rungs, so one/two/three chevrons map straight onto them. */
 const spdChevrons = n => {
@@ -4414,7 +4524,8 @@ $('spd').addEventListener('click', ()=>{
 });
 function setFov(v){
   state.fov = clamp(v, 1, 90);
-  $('zoom').textContent = 'FOV ' + (state.fov < 3 ? state.fov.toFixed(1) : Math.round(state.fov)) + '°';
+  // figure in its own fixed slot — see #zoom .fovn: the face must not resize the row
+  $('zoom').innerHTML = 'FOV <span class="fovn">' + (state.fov < 3 ? state.fov.toFixed(1) : Math.round(state.fov)) + '°</span>';
 }
 // button still cycles the presets: next one narrower than current, wrapping to 60
 $('zoom').addEventListener('click', ()=>{
@@ -4900,19 +5011,19 @@ function loop(now){
     state.t += dt * 1000 * state.speed;
     if(state.t >= span.t1){
       if(!state.extended){ applyRange(true); }   // hit C4 while in eclipse range — grow the track, keep playing
-      else { state.t = span.t1; state.playing = false; $('play').textContent = 'PLAY'; }
+      else { state.t = span.t1; state.playing = false; setPlayFace(); }
     }
     syncScrub();
   }
   const f = computeFrame(state.t);
   refreshStatus(now, f);
+  paintNowClock();     // every frame, not on the 150ms DOM tick — see the note there
   if(state.tab === 'sky') draw(f); else if(state.tab === 'cosmos') drawCosmos(); else drawMap();
   if(now - lastDom > 150){
     lastDom = now;
     updateLiveBar();
     updateShadowNote();
     $('tUtc').textContent = fmtUTC(state.t);
-    $('tLoc').textContent = fmtLocal(state.t);
     $('liveAlt').textContent = f.sunAlt.toFixed(2)+'°';
     $('liveAz').textContent = f.sunAz.toFixed(1)+'°';
     $('liveObsc').textContent = (f.obsc*100).toFixed(1)+'%';
