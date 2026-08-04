@@ -368,9 +368,81 @@
   .err{color:var(--bad); font-family:var(--mono); font-size:12px; padding:8px 0;}
   html{color-scheme:dark;} /* native datalist dropdown renders dark */
   #place{flex:1 1 150px; min-width:0;}
+  /* ---------- COVER — the front door. The app's own SKY render (the eclipsed sun at MAX)
+     sits BEHIND the cover as a heavily dimmed background — the cover's translucent scrim
+     does the dimming, so on entry the text dissolves and the scrim lifts in one move: the
+     corona the visitor was looking at brightens in place and turns out to be the live
+     simulation. The countdown is the hero; UMBRA + definition the secondary block.
+     While body.covered, the app's UI chrome is hidden (opacity, not display — the canvas
+     must never move) and fades back in on entry. The cover node is REMOVED on entry, so
+     nothing here can interfere afterwards. Policy: initCover() at the end of the script. */
+  #cover{position:fixed; inset:0; z-index:1000; background:rgba(11,13,17,0.85); display:flex;
+         align-items:center; justify-content:center; text-align:center; cursor:pointer;
+         opacity:1; transition:opacity 1.8s ease;}
+  /* eclipse-day glance: the live sky at full presence, only a whisper of scrim for the text */
+  #cover.glance{background:rgba(11,13,17,0.35);}
+  #cover.out{opacity:0; pointer-events:none;}
+  #cover.fast{transition-duration:.55s;}
+  #cover .cvi{padding:24px 20px; max-width:680px; transition:transform 1.8s ease;}
+  #cover.fast .cvi{transition-duration:.55s;}
+  #cover.out .cvi{transform:translateY(-26px);}
+  #cover .cvKick{font-size:11px; letter-spacing:.3em; color:var(--dim); text-transform:uppercase;}
+  #cover .cvCount{margin-top:42px; font-family:var(--mono);}
+  #cover .cvDays{font-size:clamp(44px,12vw,72px); font-weight:200; color:var(--ink);
+                 line-height:1.1; font-variant-numeric:tabular-nums;}
+  /* eclipse-day glance: the live phase line replaces the days figure */
+  #cover .cvDays.phase{font-size:clamp(20px,5.5vw,30px); letter-spacing:.1em; color:var(--accent);}
+  #cover .cvClock{font-size:clamp(20px,5.5vw,28px); color:var(--accent); margin-top:8px;
+                  font-variant-numeric:tabular-nums;}
+  /* under 24h the ticking clock IS the headline */
+  #cover.nodays .cvClock{font-size:clamp(36px,10vw,58px); margin-top:0; color:var(--ink);}
+  #cover .cvCap{margin-top:14px; font-size:12px; color:var(--dim); letter-spacing:.08em;}
+  #cover .cvTeach{margin-top:46px;}
+  /* trailing letter-space skews centring — the left margin puts the glyphs back on axis */
+  #cover .cvWord{font-size:clamp(24px,6.5vw,36px); font-weight:200; letter-spacing:.5em;
+                 margin-left:.5em; color:var(--accent);}
+  #cover .cvDef{margin:10px auto 0; max-width:62ch; font-size:13px; line-height:1.6; color:var(--dim);}
+  #cover .cvEnter{margin-top:44px; background:none; border:none; color:var(--dim); cursor:pointer;
+                  font-size:12px; letter-spacing:.34em; text-transform:uppercase; padding:12px 26px;
+                  animation:cvpulse 3.2s ease-in-out infinite;}
+  #cover .cvEnter:hover, #cover .cvEnter:focus-visible{color:var(--accent); animation:none;}
+  /* quiet ring — programmatic focus on load must not draw a loud amber capsule */
+  #cover .cvEnter:focus-visible{outline:1px solid rgba(232,179,74,.35); outline-offset:4px; border-radius:4px;}
+  @keyframes cvpulse{0%,100%{opacity:.6}50%{opacity:1}}
+  /* while covered: chrome invisible but in place — removing .covered fades it back in
+     around the untouched canvas. Opacity only; the layout must not shift a pixel. */
+  header, .wrap > *:not(#viewSky){transition:opacity 1.5s ease;}
+  canvas#sky{transition:border-color 1.5s ease;}
+  /* transition:none here: hiding at boot is instant (no ghost of the UI through the
+     cover); the fade-in happens on class REMOVAL, driven by the base rules above */
+  body.covered header, body.covered .wrap > *:not(#viewSky){opacity:0; pointer-events:none; transition:none;}
+  body.covered canvas#sky{border-color:transparent; transition:none;}
+  @media(prefers-reduced-motion:reduce){
+    #cover, #cover .cvi, header, .wrap > *:not(#viewSky), canvas#sky{transition:none;}
+    #cover .cvEnter{animation:none;}
+  }
 </style>
 </head>
 <body>
+<!-- COVER — visible by default so it is the first paint; the script removes it at once
+     for the skip cases (share links / any deep-link params, past eclipse). The countdown
+     is the hero; behind the scrim glows the app's own totality render. One taught word —
+     the app's name stays ECLIPSE everywhere else; UMBRA lives here. -->
+<div id="cover">
+  <div class="cvi">
+    <div class="cvKick" id="cvKick">SOLAR ECLIPSE · 12 AUGUST 2026</div>
+    <div class="cvCount">
+      <div class="cvDays" id="cvDays"></div>
+      <div class="cvClock" id="cvClock"></div>
+      <div class="cvCap" id="cvCap"></div>
+    </div>
+    <div class="cvTeach">
+      <div class="cvWord">UMBRA</div>
+      <div class="cvDef">the dark core of the moon's shadow — stand inside it and the sun goes out</div>
+    </div>
+    <button class="cvEnter" id="cvEnter" type="button">&#9662; enter</button>
+  </div>
+</div>
 <header><h1>ECLIPSE</h1><span>previsualisation — ground view</span></header>
 <div class="wrap">
 
@@ -1451,8 +1523,10 @@ function draw(f){
     ctx.textAlign = 'left';
   }
 
-  // altitude ruler — zoomed FOVs lose the horizon, so give an unambiguous reference on the left edge
-  if(state.fov < 45){
+  // altitude ruler — zoomed FOVs lose the horizon, so give an unambiguous reference on the
+  // left edge. Suppressed while the cover scrim is up: behind the cover the render is a
+  // mark, not an instrument (coverUp is only set for the dimmed cover, never on eclipse day).
+  if(state.fov < 45 && !coverUp){
     const step = state.fov >= 12 ? 5 : state.fov >= 3 ? 1 : 0.5;
     const altTop = centreAlt + (h/2)/pxPerDeg;
     const altBot = centreAlt - (h/2)/pxPerDeg;
@@ -1493,8 +1567,9 @@ function draw(f){
     ctx.fillText(`${$('focal').value}mm`, sx-fw/2+5, sy-fh/2-6);
   }
 
-  // corner info overlay (top-right, clear of the altitude ruler) — canvas self-describes for screenshots
-  {
+  // corner info overlay (top-right, clear of the altitude ruler) — canvas self-describes
+  // for screenshots. Also suppressed under the dimmed cover (see the ruler note above).
+  if(!coverUp){
     const pad = Math.round(w*0.012) + 8;
     const fs1 = Math.round(clamp(w/40, 14, 24));   // time — the prominent line
     const fs2 = Math.round(clamp(w/72, 10, 14));   // place / coords
@@ -4691,6 +4766,117 @@ if(initialTab !== 'sky') setTab(initialTab);
   const inGlobal = (state.tab === 'path' || state.tab === 'cosmos') && g && tn >= g.t0 && tn <= g.t1;
   if(inLocal || inGlobal) setLive(true);
 })();
+
+/* ---------- COVER — the front door ----------
+   Countdown to first contact over the app's own dimmed totality render; on entry the text
+   dissolves, the scrim lifts and the UI chrome fades in around the untouched canvas — the
+   mark the visitor was staring at was the live simulation all along. POLICY:
+   - ANY deep-link param (?lat/?lon/?place/?date/?tab/?now…) SKIPS it entirely — someone
+     was sent a specific view, don't gate it (and the verify harness rides on ?now=);
+   - a past eclipse skips it;
+   - inside the LIVE window it is a glance, not a gate: no dimming, the current phase line
+     for ~1.2s, then it lets itself out into the already-engaged LIVE view;
+   - return visitors (localStorage eclipse.cover) get a ~1s glance then a fast dissolve;
+   - ?cover=1 forces it back on, so any of these states can be tested with ?now=.
+   The countdown re-reads contacts/state every tick, so a location that resolves late
+   (gazetteer, tz warm-up) updates the numbers silently. On entry the node is REMOVED. */
+let coverUp = false;   // read by draw(): suppress the canvas' instrument overlays while dimmed
+(function initCover(){
+  const cov = $('cover');
+  if(!cov) return;
+  const q = new URLSearchParams(location.search);
+  const forced = q.get('cover') === '1';
+  const skip = !forced && [...q.keys()].length > 0;    // clean arrivals only — this is the front door
+  const past = !eclWin || nowMs() > eclWin.c4 + 3600e3;
+  if(skip || past){ cov.remove(); return; }
+  let seen = false;
+  try{
+    seen = localStorage.getItem('eclipse.cover') === '1';
+    localStorage.setItem('eclipse.cover', '1');
+  }catch(e){}
+
+  const glance = state.live || (eclWin && nowMs() >= eclWin.c1 - 3600e3);
+  document.body.classList.add('covered');              // chrome invisible, canvas untouched
+  if(glance) cov.classList.add('glance');              // eclipse day: full presence, no dim
+  else coverUp = true;                                 // dimmed mark: no instrument overlays
+
+  let gone = false, tick = 0, autoLeave = 0;
+  const key = e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); leave(false); } };
+  const roll = () => leave(false);
+  function leave(fast){
+    if(gone) return; gone = true;
+    clearInterval(tick); clearTimeout(autoLeave);
+    document.removeEventListener('keydown', key);
+    window.removeEventListener('wheel', roll);
+    window.removeEventListener('touchmove', roll);
+    coverUp = false;
+    document.body.classList.remove('covered');         // chrome fades back in (1.5s)
+    let reduce = false;
+    try{ reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+    if(reduce){ cov.remove(); return; }               // instant cut, no half-faded frames
+    if(fast) cov.classList.add('fast');
+    cov.classList.add('out');                          // scrim lifts with the text — the corona brightens in place
+    cov.addEventListener('transitionend', ()=> cov.remove(), { once:true });
+    setTimeout(()=> cov.remove(), fast ? 900 : 2400);  // safety net if transitionend is lost
+  }
+
+  const fmtCd = ms => {
+    const s = Math.max(0, Math.floor(ms/1000));
+    return pad2(Math.floor(s/3600)) + ':' + pad2(Math.floor((s%3600)/60)) + ':' + pad2(s%60);
+  };
+  const inWindow = tn => tn >= eclWin.c1 - 3600e3 && tn <= eclWin.c4 + 3600e3;
+  function paint(){
+    const tn = nowMs();
+    const dStr = new Date(state.date + 'T12:00:00Z')
+      .toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric', timeZone:'UTC' });
+    $('cvKick').textContent = 'SOLAR ECLIPSE · ' + dStr.toUpperCase();
+    const place = pickedName || state.obs.lat.toFixed(2) + ', ' + state.obs.lon.toFixed(2);
+    const c1 = contacts.find(x => x.key === 'c1');
+    if(!c1 || inWindow(tn) || tn > eclWin.c4){
+      // eclipse day (or the countdown ran out under an open cover): live phase line, then out
+      const st = eclipseStatus(tn, computeFrame(tn));
+      $('cvDays').hidden = false;
+      $('cvDays').className = 'cvDays phase';
+      $('cvDays').textContent = st ? st.head : 'ECLIPSE IN PROGRESS';
+      $('cvClock').hidden = true;
+      $('cvCap').textContent = place + ' — entering live view';
+      if(!autoLeave) autoLeave = setTimeout(()=> leave(true), 1200);
+      return;
+    }
+    const dt = c1.ms - tn;
+    const days = Math.floor(dt / 864e5);
+    $('cvClock').hidden = false;
+    if(days >= 1){
+      cov.classList.remove('nodays');
+      $('cvDays').hidden = false;
+      $('cvDays').className = 'cvDays';
+      $('cvDays').textContent = days + (days === 1 ? ' day' : ' days');
+      $('cvClock').textContent = fmtCd(dt - days*864e5);
+    }else{
+      cov.classList.add('nodays');                     // the ticking clock becomes the headline
+      $('cvDays').hidden = true;
+      $('cvClock').textContent = fmtCd(dt);
+    }
+    $('cvCap').textContent = 'until first contact — ' + place + ', ' + dStr;
+  }
+  paint();
+  tick = setInterval(()=>{ if(!gone) paint(); }, 250);
+
+  // every input path enters: click/tap anywhere, the button, Enter/Space, a scroll gesture
+  cov.addEventListener('click', ()=> leave(false));
+  document.addEventListener('keydown', key);
+  window.addEventListener('wheel', roll, { passive:true });
+  window.addEventListener('touchmove', roll, { passive:true });
+
+  if(state.live || inWindow(nowMs())){
+    // eclipse under way — paint() already armed the 1.2s auto-leave
+  }else if(seen){
+    autoLeave = setTimeout(()=> leave(true), 1000);    // return visitor: a one-second glance
+  }else{
+    $('cvEnter').focus({ preventScroll:true });        // full cover: Enter/Space work at once
+  }
+})();
+
 updateObstVerdict();
 requestAnimationFrame(loop);
 </script>
