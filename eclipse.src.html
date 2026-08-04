@@ -105,6 +105,31 @@
   #novice details.why summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
   #novice .whyb{padding:0 13px 12px;}
   .wrap{max-width:1100px; margin:0 auto; padding:0 10px;}
+  /* ---------- READING ORDER ----------
+     DOM order is authored for meaning (view, then answers, then instruments); the SCREEN
+     order is authored for a phone. On a phone the controls used to sit below the legend,
+     the caption, the when-bar, the status line AND the countdown — five blocks down, off
+     the fold, so nobody found PLAY. The canvas is now followed immediately by the timebar.
+     Done with flex `order` so every JS reference, the tab hiding and the cover logic keep
+     working on the untouched DOM. The per-tab legend + caption live INSIDE #viewPath /
+     #viewCosmos, so those two wrappers go display:contents and their children become
+     orderable items of .wrap directly — [hidden] still wins (it is !important below), so
+     tab switching is unaffected. #viewSky keeps its box: the cover's fade rule targets it. */
+  .wrap{display:flex; flex-direction:column;}
+  .wrap > *{order:50;}
+  .viewtabs{order:1;}
+  #viewSky{order:2;}
+  #viewPath:not([hidden]), #viewCosmos:not([hidden]){display:contents;}
+  #viewPath > .mapwrap, #viewCosmos > .mapwrap{order:2;}
+  .timebar{order:10;}                        /* the instruments — directly under the canvas */
+  .whenbar{order:20;}                        /* "at what time" */
+  .livebar{order:30;}                        /* "how long until" */
+  .live{order:40;}                           /* UTC / local / sun / obscuration */
+  #viewPath > .maplegend, #viewCosmos > .maplegend{order:60;}
+  #viewPath > .note, #viewPath > #shadowNote,
+  #viewCosmos > .note, #viewCosmos > .scaleNote{order:61;}
+  .grid{order:70;}
+  #photo{order:80;}
   canvas#sky{display:block; width:100%; aspect-ratio:16/9; background:#000; border:1px solid var(--line); border-radius:6px; touch-action:none;}
   canvas#map{display:block; width:100%; aspect-ratio:16/9; background:#070c14; border:1px solid var(--line); border-radius:6px; cursor:crosshair; touch-action:none;}
   canvas#cosmos{display:block; width:100%; aspect-ratio:16/9; background:#05080f; border:1px solid var(--line); border-radius:6px; cursor:grab; touch-action:none;}
@@ -143,7 +168,29 @@
   .maplegend i.pin{border-radius:50%; background:#fff; box-shadow:0 0 0 2px rgba(255,255,255,0.55);}
   .maplegend i.ln{background:linear-gradient(0deg,transparent 40%,rgba(206,218,238,0.85) 40%,rgba(206,218,238,0.85) 60%,transparent 60%);}
   .maplegend i.el{background:#0c0a0e; border:1px solid rgba(255,200,150,0.9); border-radius:50%/35%;}
-  .live{display:flex; flex-wrap:wrap; gap:6px 18px; padding:8px 2px; font-family:var(--mono); font-size:12px; color:var(--dim);}
+  /* COSMOS "is this to scale?" caveat. Open (desktop / no-JS) it is the note it always was
+     with a quiet heading; closed (phone) it is one tappable line instead of five of prose. */
+  details.scaleNote{margin-top:6px;}
+  details.scaleNote > summary{list-style:none; cursor:pointer; display:flex; align-items:center;
+                              gap:8px; min-height:34px; font-size:11px; letter-spacing:.2em;
+                              color:var(--dim); text-transform:uppercase;}
+  details.scaleNote > summary::-webkit-details-marker{display:none;}
+  details.scaleNote > summary::before{content:'i'; flex:none; width:17px; height:17px;
+                                      border:1px solid var(--dim); border-radius:50%;
+                                      font-size:10px; font-style:italic;
+                                      display:flex; align-items:center; justify-content:center;}
+  details.scaleNote[open] > summary::before{content:'\2212'; font-style:normal;}
+  details.scaleNote > summary:hover{color:var(--accent);}
+  details.scaleNote > summary:hover::before{border-color:var(--accent);}
+  details.scaleNote > summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  details.scaleNote .note{margin-top:2px;}
+  @media(max-width:430px){ details.scaleNote > summary{min-height:44px;} }
+  /* status line — between the countdown and the legends it would read as orphaned text, so
+     it takes the faintest backing on the page: a shade under the timebar panel, no border.
+     A footnote-with-a-floor, not a panel. */
+  .live{display:flex; flex-wrap:wrap; gap:6px 18px; margin:0 0 8px; padding:8px 11px;
+        background:#0d1016; border-radius:6px;
+        font-family:var(--mono); font-size:12px; color:var(--dim);}
   .live b{color:var(--ink); font-weight:400;}
   .live .acc{color:var(--accent);}
 
@@ -210,7 +257,14 @@
   @keyframes liveDot{0%,100%{opacity:1;} 50%{opacity:.2;}}
   @media (prefers-reduced-motion:reduce){ #live.on i{animation:none;} }
 
-  .timebar{display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:6px 0 12px;}
+  /* the timebar is now the first thing under the canvas, so it gets a body: a panel-dark
+     fill one step off the page black, a hairline border and a radius. Barely there — the
+     buttons stay the brightest objects in it — but enough that the group reads as one
+     instrument cluster rather than loose controls floating in the text. */
+  .timebar{display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+           margin:8px 0 8px; padding:10px 12px 11px;
+           background:#10141c; border:1px solid #232939; border-radius:8px;}
+  @media(max-width:430px){ .timebar{padding:9px 9px 10px; gap:7px;} }
   input[type=range]{-webkit-appearance:none; appearance:none; flex:1 1 240px; height:34px; background:transparent; cursor:pointer;}
   .scrubwrap{position:relative; flex:1 1 240px; display:flex; align-items:center;}
   .scrubwrap input[type=range]{flex:1; width:100%;}
@@ -219,18 +273,28 @@
   input[type=range]::-webkit-slider-runnable-track{height:4px; background:var(--line); border-radius:2px;}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:26px; height:26px; margin-top:-11px; border-radius:50%; background:var(--accent); border:4px solid var(--bg);}
   input[type=range]::-moz-range-track{height:4px; background:var(--line); border-radius:2px;}
-  input[type=range]::-moz-range-thumb{width:20px; height:20px; border-radius:50%; background:var(--accent); border:none;}
+  /* same BOX as the webkit thumb (26px, 4px of page-coloured border) so the thumb travels the
+     same inset track in both engines — placeMarkers() positions the band and the MAX tick on
+     that inset, and a 20px Firefox thumb would put them 3px out of true */
+  input[type=range]::-moz-range-thumb{box-sizing:border-box; width:26px; height:26px;
+                                      border-radius:50%; background:var(--accent);
+                                      border:4px solid var(--bg);}
   /* phone: playback controls get their own full-width row (stretched thirds) ABOVE the
      scrubber; scrubber gets its own row with a bigger thumb; snaps/±3h/FOV wrap below.
      (must sit after the base range rules — same specificity, source order decides) */
   @media(max-width:430px){
-    .playctl{flex:1 0 100%;}
+    /* stacked order inside the panel: the scrubber is the timeline the whole view rides on,
+       so it sits closest to the canvas it drives; the buttons act on it and read underneath.
+       Desktop keeps the single inline row (buttons | scrubber | snaps) — there the scrubber
+       is already beside the canvas edge and stacking would only make the bar taller. */
+    #snaps{order:3;} #ext{order:4;} #zoom{order:5;}
+    .playctl{order:2; flex:1 0 100%;}
     .playctl button{flex:1 1 0; min-width:0; min-height:52px; padding:15px 4px 14px; font-size:14px;}
     #live{min-width:0;}
-    .scrubwrap{flex:1 1 100%;}
+    .scrubwrap{order:1; flex:1 1 100%;}
     input[type=range]{height:44px;}
     input[type=range]::-webkit-slider-thumb{width:30px; height:30px; margin-top:-13px;}
-    input[type=range]::-moz-range-thumb{width:24px; height:24px;}
+    input[type=range]::-moz-range-thumb{width:30px; height:30px;}
   }
   button{font:300 12px/1 system-ui,sans-serif; letter-spacing:.06em; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:9px 12px; cursor:pointer; min-height:34px;}
   button:hover{border-color:var(--accent); color:var(--accent);}
@@ -367,7 +431,35 @@
   .mono{font-family:var(--mono);}
   .err{color:var(--bad); font-family:var(--mono); font-size:12px; padding:8px 0;}
   html{color-scheme:dark;} /* native datalist dropdown renders dark */
-  #place{flex:1 1 150px; min-width:0;}
+  /* ---------- THE LOCATION HERO ----------
+     Restraint note: amber already carries the tabs, the when-bar, the section headings and
+     the hero tiles, so this takes only TWO amber marks — the left rule and the prompt — plus
+     a warm-tinted (not amber) field border that intensifies to full accent on focus. The
+     "Use my location" button stays neutral: the pair must read as primary + shortcut, not as
+     two equal buttons, and one more amber outline here would tip the page into a wash. */
+  .locHero{margin:0 0 12px; padding:11px 13px 13px; background:#12151d;
+           border:1px solid #2b3346; border-left:3px solid var(--accent); border-radius:7px;}
+  .locHero .lh{display:block; font-size:10.5px; letter-spacing:.24em; color:var(--accent);
+               text-transform:uppercase; margin-bottom:9px;}
+  .locHero .lhRow{display:flex; flex-wrap:wrap; gap:8px; align-items:stretch;}
+  #place{flex:1 1 240px; min-width:0; min-height:58px; padding:0 14px;
+         font-size:20px; letter-spacing:.01em; background:#0a0c11;
+         border:1px solid #574a33; border-radius:7px;}
+  #place::placeholder{color:#6b7488; font-size:16.5px; letter-spacing:.02em;}
+  #place:focus{outline:none; border-color:var(--accent); background:#0d1016;}
+  #geo{flex:0 1 auto; min-height:58px; padding:0 18px; font-size:13px; letter-spacing:.1em;
+       border-radius:7px;}
+  /* the fine-tuning rows below are secondary — a little more air so the panel doesn't read
+     as one dense block under the hero */
+  #secLoc .row{margin-bottom:11px;}   /* the obstruction row keeps its inline margin-bottom:0 */
+  /* phone: comfortably bigger than a form field, nowhere near hero-scale — the canvas and
+     the timebar own the screen up top, this must not push the panel into three screens */
+  @media(max-width:430px){
+    .locHero{padding:10px 11px 11px;}
+    #place{flex:1 1 100%; min-height:48px; font-size:17px; padding:0 12px;}
+    #place::placeholder{font-size:14.5px;}
+    #geo{flex:1 1 100%; min-height:46px;}
+  }
   /* ---------- COVER — the front door. The app's own SKY render (the eclipsed sun at MAX)
      sits BEHIND the cover as a heavily dimmed background — the cover's translucent scrim
      does the dimming, so on entry the text dissolves and the scrim lifts in one move: the
@@ -378,12 +470,12 @@
      nothing here can interfere afterwards. Policy: initCover() at the end of the script. */
   #cover{position:fixed; inset:0; z-index:1000; background:rgba(11,13,17,0.85); display:flex;
          align-items:center; justify-content:center; text-align:center; cursor:pointer;
-         opacity:1; transition:opacity 1.8s ease;}
+         opacity:1; transition:opacity 1.2s ease;}
   /* eclipse-day glance: the live sky at full presence, only a whisper of scrim for the text */
   #cover.glance{background:rgba(11,13,17,0.35);}
   #cover.out{opacity:0; pointer-events:none;}
   #cover.fast{transition-duration:.55s;}
-  #cover .cvi{padding:24px 20px; max-width:680px; transition:transform 1.8s ease;}
+  #cover .cvi{padding:24px 20px; max-width:680px; transition:transform 1.2s ease;}
   #cover.fast .cvi{transition-duration:.55s;}
   #cover.out .cvi{transform:translateY(-26px);}
   #cover .cvKick{font-size:11px; letter-spacing:.3em; color:var(--dim); text-transform:uppercase;}
@@ -401,7 +493,28 @@
   /* trailing letter-space skews centring — the left margin puts the glyphs back on axis */
   #cover .cvWord{font-size:clamp(24px,6.5vw,36px); font-weight:200; letter-spacing:.5em;
                  margin-left:.5em; color:var(--accent);}
-  #cover .cvDef{margin:10px auto 0; max-width:62ch; font-size:13px; line-height:1.6; color:var(--dim);}
+  /* third level of the hierarchy — quieter than the countdown and than UMBRA itself, but it
+     has to be READABLE, and at 13px in --dim (~4:1 on the scrim, worse than that wherever the
+     corona glows through) it was not. #9aa6bb is ~7.9:1 on the scrim and still a clear step
+     below --ink; the shadow is what actually carries it over the bright corona, which is where
+     the legibility was failing rather than against flat black. */
+  /* the sense label is the whole trick — tiny, dim, small-caps, the chip a dictionary puts
+     before a sense. It must never compete with the two words under it. */
+  #cover .cvSense{margin-top:14px; font-size:9.5px; letter-spacing:.34em; text-transform:uppercase;
+                  color:#79839a; text-shadow:0 1px 10px rgba(4,6,9,0.95);}
+  /* third level of the hierarchy — quieter than the countdown and than UMBRA itself, but it
+     has to be READABLE, and at 13px in --dim (~4:1 on the scrim, worse wherever the corona
+     glows through) it was not. Two words can afford the size and still stay quiet. The heavy
+     dark shadow is what actually carries it in GLANCE mode, where the scrim is only 0.35 and
+     the live corona is right behind the text — that is where legibility was failing, not
+     against flat black. */
+  #cover .cvDef{display:inline-block; margin:7px auto 0; max-width:46ch; font-size:19px; line-height:1.5;
+                font-style:italic; letter-spacing:.015em; color:#b3bed1;
+                /* repeated shadows compound: one 20px blur barely dents a bright corona,
+                   four stacked plates put the glyphs on their own dark ground */
+                text-shadow:0 0 5px rgba(2,4,7,1), 0 0 5px rgba(2,4,7,1),
+                            0 0 13px rgba(2,4,7,0.95), 0 2px 26px rgba(2,4,7,0.95);}
+  @media(max-width:430px){ #cover .cvDef{font-size:17px;} }
   #cover .cvEnter{margin-top:44px; background:none; border:none; color:var(--dim); cursor:pointer;
                   font-size:12px; letter-spacing:.34em; text-transform:uppercase; padding:12px 26px;
                   animation:cvpulse 3.2s ease-in-out infinite;}
@@ -411,11 +524,15 @@
   @keyframes cvpulse{0%,100%{opacity:.6}50%{opacity:1}}
   /* while covered: chrome invisible but in place — removing .covered fades it back in
      around the untouched canvas. Opacity only; the layout must not shift a pixel. */
-  header, .wrap > *:not(#viewSky){transition:opacity 1.5s ease;}
+  header, .wrap > *:not(#viewSky),
+  #viewPath > *, #viewCosmos > *{transition:opacity 1.5s ease;}
   canvas#sky{transition:border-color 1.5s ease;}
   /* transition:none here: hiding at boot is instant (no ghost of the UI through the
      cover); the fade-in happens on class REMOVAL, driven by the base rules above */
-  body.covered header, body.covered .wrap > *:not(#viewSky){opacity:0; pointer-events:none; transition:none;}
+  /* the PATH/COSMOS wrappers are display:contents (see READING ORDER) so opacity on them
+     has nothing to paint on — their children carry the cover fade instead */
+  body.covered header, body.covered .wrap > *:not(#viewSky),
+  body.covered #viewPath > *, body.covered #viewCosmos > *{opacity:0; pointer-events:none; transition:none;}
   body.covered canvas#sky{border-color:transparent; transition:none;}
   @media(prefers-reduced-motion:reduce){
     #cover, #cover .cvi, header, .wrap > *:not(#viewSky), canvas#sky{transition:none;}
@@ -438,7 +555,10 @@
     </div>
     <div class="cvTeach">
       <div class="cvWord">UMBRA</div>
-      <div class="cvDef">the dark core of the moon's shadow — stand inside it and the sun goes out</div>
+      <!-- a real dictionary entry, not a tagline: the sense label is what does that work, so
+           it stays tiny and dim and the two-word definition carries -->
+      <div class="cvSense">literary</div>
+      <div class="cvDef">&ldquo;shadow or darkness.&rdquo;</div>
     </div>
     <button class="cvEnter" id="cvEnter" type="button">&#9662; enter</button>
   </div>
@@ -469,7 +589,13 @@
       <span><i class="sw pin"></i>you</span>
       <span>drag to orbit &middot; wheel / pinch to zoom</span>
     </div>
-    <div class="note">illustrative scale &mdash; sun and moon sit along their <b>true directions</b> for this moment, the earth carries its true rotation, and the shadow lands at its true position; distances and sizes are compressed for clarity (at true scale the moon would be sub-pixel).</div>
+    <!-- the caveat matters (people ask "is this to scale?"), but as five lines of grey prose
+         on a phone it is a wall. Shipped OPEN — that is the no-JS / desktop state, identical
+         to before — and closed at load on a narrow screen, where it becomes one tappable line. -->
+    <details class="scaleNote" id="cosScale" open>
+      <summary>illustrative scale</summary>
+      <div class="note">Sun and moon sit along their <b>true directions</b> for this moment, the earth carries its true rotation, and the shadow lands at its true position; distances and sizes are compressed for clarity (at true scale the moon would be sub-pixel).</div>
+    </details>
   </div>
 
   <!-- THE ANSWER TO "WHAT TIME?" — the one thing every visitor asks first, above the fold on
@@ -512,9 +638,20 @@
   <div class="grid">
     <section id="secLoc">
       <h2>Location + Date</h2>
+      <!-- WHERE YOU STAND. Every number on this page — the times, the duration, whether you
+           get totality at all — is derived from this one field, and as a 34px form input in
+           a row of grey buttons it read like the least important thing in the panel. It is
+           the page's primary call to action, so it gets a prompt, a hero-sized field and the
+           app's "this matters" mark (the when-bar's amber left rule). Copy link moves to its
+           own line below: it is a thing you do after, not the first thing you meet. -->
+      <div class="locHero">
+        <label class="lh" for="place">Where will you be?</label>
+        <div class="lhRow">
+          <input type="text" id="place" list="placeList" placeholder="type a city…" autocomplete="off">
+          <button id="geo">Use my location</button>
+        </div>
+      </div>
       <div class="row">
-        <input type="text" id="place" list="placeList" placeholder="type a city…" autocomplete="off">
-        <button id="geo">Use my location</button>
         <button id="share" title="copy a link to this exact view">Copy link</button>
       </div>
       <div class="row" id="shareRow" hidden style="margin-bottom:8px">
@@ -915,6 +1052,30 @@ let peakFrame = null;    // frame data at peak
 // Keeps the handle at its current time; clamps it into the window when collapsing.
 const RANGES = ['eclipse', 'ext', 'global'];
 const RANGE_LABEL = { eclipse:'C1–C4', ext:'±3h', global:'GLOBAL' };
+// MARKERS vs THE THUMB. A range input's thumb does NOT travel the full width of its track:
+// its centre runs from half a thumb in on the left to half a thumb in on the right. The band
+// and the MAX tick used to be painted at a plain percentage of .scrubwrap, so they drifted
+// right of the time they claimed by up to half a thumb — 13px on desktop, 15px on a phone.
+// In GLOBAL range (265 min over ~335px on a phone) that is minutes of lie: park the handle on
+// the MAX tick and you were ~3 min past maximum; park it on the right end of the amber band
+// and you were 6–9 min past C4, with the sun already below the horizon. Reported as "the
+// middle of the slider goes to the end of the eclipse". Markers now use the thumb's own
+// geometry, so handle position, displayed time and marker all mean the same thing.
+const THUMB = () => innerWidth <= 430 ? 30 : 26;   // must match the ::-*-range-thumb widths
+const trackPos = f => `calc(${(THUMB()/2).toFixed(2)}px + ${(f*100).toFixed(4)}% - ${(f*THUMB()).toFixed(3)}px)`;
+const trackLen = d => `calc(${(d*100).toFixed(4)}% - ${(d*THUMB()).toFixed(3)}px)`;
+function placeMarkers(){
+  if(!eclWin || !span) return;
+  const f = ms => clamp((ms - span.t0)/(span.t1 - span.t0), 0, 1);
+  const band = $('eclBand'), extended = state.range !== 'eclipse';
+  band.style.display = extended ? '' : 'none';   // eclipse mode: the whole track IS the window
+  if(extended){
+    const a = f(eclWin.c1), b = f(eclWin.c4);
+    band.style.left = trackPos(a);
+    band.style.width = trackLen(Math.max(0.004, b - a));
+  }
+  $('maxTick').style.left = trackPos(f(eclWin.mx));
+}
 function applyRange(mode){
   if(!eclWin) return;
   if(mode === true) mode = 'ext'; else if(mode === false) mode = 'eclipse';
@@ -924,19 +1085,13 @@ function applyRange(mode){
   if(mode === 'global') span = { t0: MAP.global.t0, t1: MAP.global.t1 };
   else span = { t0: eclWin.c1 - (mode === 'ext' ? 3*3600e3 : 0), t1: eclWin.c4 + (mode === 'ext' ? 3*3600e3 : 0) };
   state.t = clamp(state.t, span.t0, span.t1);
-  const pct = ms => (ms - span.t0)/(span.t1 - span.t0)*100;
-  const band = $('eclBand');
-  const extended = mode !== 'eclipse';
-  band.style.display = extended ? '' : 'none';   // eclipse mode: whole track IS the window
-  if(extended){
-    band.style.left = pct(eclWin.c1)+'%';
-    band.style.width = Math.max(0.4, pct(eclWin.c4) - pct(eclWin.c1))+'%';
-  }
-  $('maxTick').style.left = pct(eclWin.mx)+'%';
-  $('ext').classList.toggle('on', extended);
+  placeMarkers();
+  $('ext').classList.toggle('on', state.extended);
   $('ext').textContent = RANGE_LABEL[mode];
   syncScrub();
 }
+// the thumb is 4px wider under 430px, so the inset changes with the breakpoint
+addEventListener('resize', placeMarkers);
 
 function recomputeEclipse(){
   const err = $('errBox');
@@ -1645,10 +1800,25 @@ function computePath(){
     return false;
   };
   const mid = MAP.path.length ? MAP.path[Math.floor(MAP.path.length/2)].ms : peak;
-  let g0 = mid, g1 = mid;
-  for(let m = 5; m <= 260; m += 5){ if(anyEclipse(mid - m*60e3)) g0 = mid - m*60e3; else break; }
-  for(let m = 5; m <= 260; m += 5){ if(anyEclipse(mid + m*60e3)) g1 = mid + m*60e3; else break; }
-  MAP.global = { t0: g0 - 5*60e3, t1: g1 + 5*60e3 };
+  // Walk out in 5-minute steps to BRACKET first/last external contact, then bisect it. The
+  // old code padded the last known-eclipsed 5-minute sample by another 5 minutes, so each end
+  // of the GLOBAL track could carry up to ten minutes of dead time before anything happens
+  // anywhere on Earth. Four halvings put the contact inside ~19s; 1 minute of air after that
+  // keeps the endpoint just outside the event rather than just inside it.
+  const edge = dir => {
+    let inside = mid, outside = null;
+    for(let m = 5; m <= 300; m += 5){
+      const t = mid + dir*m*60e3;
+      if(anyEclipse(t)) inside = t; else { outside = t; break; }
+    }
+    if(outside == null) return inside + dir*60e3;       // ran to the cap — take what we have
+    for(let i = 0; i < 4; i++){
+      const half = (inside + outside)/2;
+      if(anyEclipse(half)) inside = half; else outside = half;
+    }
+    return outside + dir*60e3;
+  };
+  MAP.global = { t0: edge(-1), t1: edge(1) };
 
   MAP.view = { cLat: state.obs.lat, cLon: state.obs.lon, spanLat: half*2,
                kx: Math.max(0.12, Math.cos(state.obs.lat*D2R)) };
@@ -4367,6 +4537,12 @@ function setTab(tab){
   $('tabPath').classList.toggle('on', tab === 'path');
   $('tabCosmos').classList.toggle('on', tab === 'cosmos');
 }
+// COSMOS scale caveat: ships open (that is the desktop / no-JS state), folds to one tappable
+// line on a phone. Load-time only — resizing a browser window is not the case being served.
+(function(){
+  const d = $('cosScale');
+  try{ if(d && matchMedia('(max-width:430px)').matches) d.open = false; }catch(e){}
+})();
 $('tabSky').addEventListener('click', ()=> setTab('sky'));
 $('tabPath').addEventListener('click', ()=> setTab('path'));
 $('tabCosmos').addEventListener('click', ()=> setTab('cosmos'));
