@@ -115,7 +115,10 @@
   #novice details.why[open] summary::before{content:'\2212'; border-color:var(--accent); color:var(--accent);}
   #novice details.why summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
   #novice .whyb{padding:0 13px 12px;}
-  .wrap{max-width:1100px; margin:0 auto; padding:0 10px;}
+  /* position:relative so the location chip and its popover can be laid over the canvas area
+     without leaving the flow (see THE LOCATION CHIP below). Nothing else changes: every other
+     absolutely-positioned box in this sheet already has a positioned parent of its own. */
+  .wrap{max-width:1100px; margin:0 auto; padding:0 10px; position:relative;}
   /* ---------- READING ORDER ----------
      DOM order is authored for meaning (view, then answers, then instruments); the SCREEN
      order is authored for a phone. On a phone the controls used to sit below the legend,
@@ -169,9 +172,26 @@
     body.covered .grid > section{opacity:0; pointer-events:none; transition:none;}
     @media(prefers-reduced-motion:reduce){ .grid > section{transition:none;} }
   }
-  canvas#sky{display:block; width:100%; aspect-ratio:16/9; background:#000; border:1px solid var(--line); border-radius:6px; touch-action:none;}
-  canvas#map{display:block; width:100%; aspect-ratio:16/9; background:#070c14; border:1px solid var(--line); border-radius:6px; cursor:crosshair; touch-action:none;}
-  canvas#cosmos{display:block; width:100%; aspect-ratio:16/9; background:#05080f; border:1px solid var(--line); border-radius:6px; cursor:grab; touch-action:none;}
+  /* ---------- CANVAS ASPECT — ONE NUMBER, DECLARED HERE ----------
+     16:9 is a landscape shape. On a phone held upright it is a 200px letterbox: SKY gets
+     2.2° of vertical field at the 4° landing FOV, PATH gets a strip through which a mostly
+     north–south track can only be read a piece at a time, and COSMOS gets a slot. A portrait
+     frame can be taller than the picture it came from, so a portrait phone gets 4:3.
+     WHY 4:3 AND NOT TALLER. It is the tallest shape the three views all still fill. COSMOS is
+     the limit: sun–moon–earth is a broadly straight, broadly horizontal line, and past ~4:3
+     the fitted framing (see cosFit) stops being able to spend the extra height on a bigger
+     picture and starts leaving dead bands. 4:3 also costs the page the least: +67px at 375
+     wide, which keeps the scrubber and the transport inside the first screen at 360x640.
+     The number is a custom property rather than a literal because the JS projections need
+     the SAME number — MAP_ASPECT is read back from here (see readAspect), so the CSS box and
+     the maths cannot drift apart, and a media-query flip (a phone turned on its side)
+     moves both at once. Desktop is untouched: fine pointer, landscape, 16:9. */
+  :root{--cv-aspect:16/9;}
+  @media (max-width:430px) and (orientation:portrait){ :root{--cv-aspect:4/3;} }
+  @media (pointer:coarse) and (orientation:portrait){ :root{--cv-aspect:4/3;} }
+  canvas#sky{display:block; width:100%; aspect-ratio:var(--cv-aspect); background:#000; border:1px solid var(--line); border-radius:6px; touch-action:none;}
+  canvas#map{display:block; width:100%; aspect-ratio:var(--cv-aspect); background:#070c14; border:1px solid var(--line); border-radius:6px; cursor:crosshair; touch-action:none;}
+  canvas#cosmos{display:block; width:100%; aspect-ratio:var(--cv-aspect); background:#05080f; border:1px solid var(--line); border-radius:6px; cursor:grab; touch-action:none;}
   canvas#cosmos:active{cursor:grabbing;}
   /* view tabs — the map gets the same real estate as the sky */
   .tabs{display:flex; gap:3px;}
@@ -198,6 +218,55 @@
     .viewtabs button{min-width:110px; min-height:48px; padding:13px 10px 12px; font-size:13px; letter-spacing:.16em;}
   }
   #viewSky canvas, #viewPath canvas, #viewCosmos canvas{border-top-left-radius:0;}
+
+  /* ---------- LOCATION, ON THE PICTURE (phones) ----------
+     Every number on this page — the times, the duration, whether you get totality at all — is
+     derived from one field, and on a phone that field sat below the canvas, the scrubber and
+     the when-bar. The taller canvas made the room to put it back on the picture, and taking
+     the panel out of the stack hands the page back the ~137px it used to cost.
+     ONE CHIP FOR THREE VIEWS. The overlay is a child of .wrap laid over whichever canvas is
+     showing — NOT a child of #viewSky — so location is one tap away from PATH and COSMOS too.
+     A chip that only existed on the sky canvas was the reason this was turned down before.
+     EXPANDING DOES NOT BUILD A SECOND UI. It floats #secLoc ITSELF: same inputs, same
+     listeners, same 25k-city datalist, same fine-tune fold. Nothing is duplicated, so search,
+     "use my location", copy link, lat/lon/date/horizon and the share URL cannot drift out of
+     sync with a second copy — there isn't one.
+     Above 760px none of this exists: the overlay is display:none, body.chip is never set, and
+     the panel sits in the grid exactly as it always has. */
+  #locOverlay, #locScrim{display:none;}
+  @media(max-width:760px){
+    /* left:19px = the wrap's 10px padding + the canvas border + 8px of inset, so the chip sits
+       just inside the picture's top-left corner. `top` is written by syncChip() from the live
+       canvas rect — all three views share the slot, so one number serves all three. */
+    #locOverlay:not([hidden]){display:block; position:absolute; z-index:6; left:19px; top:8px;}
+    #locChip{display:inline-flex; align-items:center; gap:7px; max-width:min(70vw,300px);
+             min-height:44px; padding:0 13px 0 11px;
+             font-family:var(--mono); font-size:14px; letter-spacing:.02em; line-height:1;
+             color:var(--accent); background:rgba(11,14,20,0.80);
+             border:1px solid rgba(232,179,74,0.5); border-radius:22px;
+             box-shadow:0 2px 10px rgba(0,0,0,0.5);}
+    #locChipName{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+    #locChip .ci{flex:none; width:16px; height:16px; fill:none; stroke:var(--accent);
+                 stroke-width:1.5; stroke-linecap:round;}
+    #locChip .ci .f{fill:var(--accent); stroke:none;}
+    #locChip .cv{flex:none; font-size:9px; opacity:.8;}
+    #locChip:active{background:rgba(28,22,12,0.92); border-color:var(--accent);}
+    #locChip:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+    body.locOpen #locChip{background:rgba(28,22,12,0.95); border-color:var(--accent);}
+    body.locOpen #locChip .cv{transform:scaleY(-1);}
+    /* collapsed: the panel is not in the stack at all. expanded: the same panel, floated under
+       the chip, capped to the space left below it and scrollable if the fine-tune fold is open */
+    body.chip #secLoc{display:none;}
+    body.chip.locOpen #secLoc{display:block; position:absolute; z-index:8;
+                              left:10px; right:10px; top:var(--locTop,60px);
+                              max-height:var(--locMax,60vh); overflow-y:auto;
+                              margin:0; padding:11px 12px 12px;
+                              background:#10141c; border:1px solid #39435a; border-radius:10px;
+                              box-shadow:0 18px 44px rgba(0,0,0,0.62);}
+    body.chip.locOpen #secLoc:focus{outline:none;}
+    body.chip.locOpen #locScrim{display:block; position:fixed; inset:0; z-index:5;
+                                background:rgba(6,8,12,0.5);}
+  }
   .mapwrap{position:relative;}
   .mapmode{position:absolute; right:8px; bottom:8px; display:flex; gap:3px;}
   .mapmode button{min-width:42px; padding:7px 10px; font-size:11px; letter-spacing:.12em; background:rgba(10,16,24,0.8);}
@@ -296,9 +365,22 @@
     .whenbar .wl, .whenbar .wz{line-height:1.2;}   /* the label row is 1.5-leaded prose otherwise */
     .whenbar .wl{font-size:9.5px; order:1;}
     .whenbar .wz{display:none;}      /* the zone rides the compact line below instead */
-    .whenbar .wnow{order:2; margin-left:auto; align-items:baseline;}
-    .whenbar .wnl{line-height:1.2;}
-    .whenbar .wnz{display:none;}
+    /* THE LIVE CLOCK OWNS A ROW OF ITS OWN, CENTRED.
+       It used to ride the right-hand half of the label row, which put two clock boxes three
+       pixels apart on a 320px screen — one longer duration string and the moving clock printed
+       across the static totality window. A full-width row cannot collide with anything by
+       construction, at any width or any string, and centring puts the number you are actually
+       manipulating in the block's optical centre.
+       The NOW / SHOWING caption goes with it: a clock that ticks under your thumb while you
+       drag needs no caption, and it was costing width the row did not have. (Desktop keeps the
+       caption — it has a dedicated right-hand column with room to spare, and there the label
+       is the only thing distinguishing "the wall clock" from "the time you scrubbed to".)
+       The amber TOTALITY label stays: that one names a STATIC range, and without it the two
+       times in this block would be indistinguishable. It moves down to lead the compact line. */
+    .whenbar .wnow{order:0; flex:1 0 100%; margin:0 0 1px; justify-content:center;
+                   align-items:baseline;}
+    .whenbar .wnl{display:none;}
+    .whenbar .wl{order:3;}
     .whenbar .wnt{font-size:30px; letter-spacing:.01em;}
     /* the compact line: [duration] · [window, amber] · [zone + instruction], one wrapping
        row of small type instead of three blocks of large type */
@@ -527,10 +609,29 @@
     #snapLine button::after{content:''; position:absolute; top:8px; height:1px;
                             left:calc(50% + var(--lx,0px)); width:var(--adx,0px);
                             background:#39425640; background:rgba(77,86,107,0.55);}
+    /* THE AFFORDANCE, KEPT DELIBERATELY QUIET.
+       These are a MAP first and buttons second: their value is showing WHERE the contacts fall
+       along the track, and someone scrubbing is watching the handle, not this row. So the chip
+       is a hairline drawn around the label ONLY — the tap target stays the full invisible 44px
+       block below and around it — with almost no fill and dim ink. It is enough to read as
+       pressable and not enough to pull the eye off the handle. Anything with a real border or
+       a real background here competed with the transport row, which must stay the loudest
+       thing in this panel after the handle itself.
+       Drawn as ::before so it wraps the label without enclosing the tick and the leader above
+       it, and so the button's own box (and therefore the 38px minimum centre spacing that
+       keeps three converging labels tappable) is completely unchanged. */
+    /* 20/6: the label is NOT at the padding edge — a button centres its content in what is
+       left of the box, so the 10px text sits at y24–34 of the 44px block, and the chip is
+       drawn around THAT. Above it the tick and the leader keep the top 9px to themselves. */
+    #snapLine button::before{content:''; position:absolute; left:0; right:0; top:20px; bottom:6px;
+                             border:1px solid rgba(125,138,164,0.17); border-radius:5px;
+                             background:rgba(190,205,235,0.02);}
     #snapLine button.mx{color:var(--accent);}
     #snapLine button.mx i{background:var(--accent); height:10px; top:0;}
     #snapLine button.mx::after{background:rgba(232,179,74,0.5);}
-    #snapLine button:active{color:var(--accent); background:rgba(232,179,74,0.10);}
+    #snapLine button.mx::before{border-color:rgba(232,179,74,0.26);}
+    #snapLine button:active{color:var(--accent);}
+    #snapLine button:active::before{border-color:var(--accent); background:rgba(232,179,74,0.13);}
     #snapLine button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
   }
   button{font:300 12px/1 system-ui,sans-serif; letter-spacing:.06em; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:9px 12px; cursor:pointer; min-height:34px;}
@@ -873,6 +974,14 @@
   <div class="tabs viewtabs">
     <button id="tabSky" class="on">SKY</button><button id="tabPath">PATH</button><button id="tabCosmos">COSMOS</button>
   </div>
+  <!-- LOCATION CHIP — one for all three views. It sits here, as a sibling of the view
+       wrappers rather than inside #viewSky, so PATH and COSMOS get it too; syncChip() lays it
+       over whichever canvas is showing. Ships hidden: JS reveals it only on a phone, so a
+       wide screen (and a no-JS load) keeps the inline panel and never sees a chip. -->
+  <div id="locOverlay" hidden>
+    <button id="locChip" aria-expanded="false" aria-controls="secLoc" aria-label="Location — tap to change"><svg class="ci" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="4.2"/><circle cx="10" cy="10" r="1.2" class="f"/><path d="M10 1.4v3M10 15.6v3M1.4 10h3M15.6 10h3"/></svg><span id="locChipName">—</span><span class="cv" aria-hidden="true">&#9662;</span></button>
+  </div>
+  <div id="locScrim"></div>
   <div id="viewSky"><canvas id="sky"></canvas></div>
   <div id="viewPath" hidden>
     <div class="mapwrap"><canvas id="map"></canvas><div class="mapmode"><button id="m2d" class="on">2D</button><button id="m3d">3D</button></div></div>
@@ -982,7 +1091,10 @@
   </div>
 
   <div class="grid">
-    <section id="secLoc">
+    <!-- tabindex so the chip can hand focus straight to the panel when it expands: the panel
+         is far down the DOM (it belongs to the grid), and without this a phone user would tab
+         through the whole timebar to reach the field they just asked for. -->
+    <section id="secLoc" tabindex="-1">
       <h2>Location + Date</h2>
       <!-- WHERE YOU STAND. Every number on this page — the times, the duration, whether you
            get totality at all — is derived from this one field, and as a 34px form input in
@@ -1430,7 +1542,29 @@ const state = {
   cap: 'stills',     // shot plan is generated for ONE capture mode: stills|timelapse|video
   lens: 'tele',      // NOVICE's visual focal picker (see LENSES) — PRO types a number instead
 };
-const MAP_ASPECT = 16/9;
+/* ---------- CANVAS ASPECT ----------
+   The shape of the canvas is declared once, in CSS, as --cv-aspect (see the note there), and
+   read back here so the projections and the box can never disagree. It is a `let`: a phone
+   turned on its side flips the media query, and syncAspect() below re-derives everything that
+   was solved for the old shape rather than leaving a stale projection behind. */
+let MAP_ASPECT = 16/9;
+function readAspect(){
+  try{
+    const v = getComputedStyle(document.documentElement).getPropertyValue('--cv-aspect').trim();
+    const m = /^([0-9.]+)(?:\s*\/\s*([0-9.]+))?$/.exec(v);        // "4/3" or a bare ratio
+    if(m){
+      const n = parseFloat(m[1]), d = m[2] === undefined ? 1 : parseFloat(m[2]);
+      if(n > 0 && d > 0 && isFinite(n/d)) return n/d;
+    }
+  }catch(e){}
+  return 16/9;                                                    // no CSS custom props: as before
+}
+MAP_ASPECT = readAspect();
+const REF_ASPECT = 16/9;        // the shape every tuned constant below was chosen against
+// How much of the visible canvas's top-left corner the location chip is covering, in CSS px.
+// Declared up here rather than beside its own code (THE LOCATION CHIP, far below) because the
+// SKY ruler and the PATH title card read it, and those run from the first painted frame.
+let CHIP_RESERVE = { w: 0, h: 0 };
 /* A phone is not a small desktop: the same 8° that gives a 71px sun on a 1080px canvas gives
    a 23px one on a 355px canvas, and the moon's bite stops being readable. Narrow viewports
    therefore LAND at 4° (≈47px) and swap the cycle's 5° rung for it, so the button can still
@@ -1849,6 +1983,7 @@ function recomputeEclipse(){
   updatePhoto();
   updateNovice();
   updateMapNote();
+  if(typeof updateChip === 'function') updateChip();   // the chip carries the place name
   if(state.live) setLive(true);   // a new location reset the clock to MAX — LIVE wins
 }
 function updateMapNote(){
@@ -1926,7 +2061,13 @@ const cv = $('sky'), ctx = cv.getContext('2d');
 function resize(){
   const dpr = Math.min(devicePixelRatio||1, 2);
   const w = cv.clientWidth, h = cv.clientHeight;
-  if(cv.width !== Math.round(w*dpr)){ cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr); }
+  // BOTH dimensions are compared. The aspect is a media query now, so height can change while
+  // width does not (a phone whose portrait and landscape widths happen to match, or a pointer
+  // capability change) — testing width alone would leave the backing store the old shape and
+  // stretch the whole sky.
+  if(cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)){
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  }
 }
 const CARDS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 
@@ -2117,8 +2258,13 @@ function draw(f){
     const fs = Math.round(clamp(w/80, 10, 13));
     ctx.font = fs + 'px monospace';
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    // the location chip floats over this same corner on a phone. A ruler running under a
+    // solid chip reads as a broken ruler, so the rows behind it are simply not drawn — the
+    // scale is regular, so a missing tick is read as hidden, not as wrong.
+    const chipY = CHIP_RESERVE.h * (w / (cv.clientWidth || w));
     for(let a = Math.ceil(altBot/step)*step; a <= altTop + 1e-9; a += step){
       const y = horizonY - a*pxPerDeg;
+      if(y < chipY) continue;
       const zero = Math.abs(a) < 1e-6;
       ctx.strokeStyle = zero ? 'rgba(232,179,74,0.9)' : 'rgba(150,158,175,0.45)';
       ctx.lineWidth = 1;
@@ -2163,10 +2309,15 @@ function draw(f){
     const l1 = fmtLocal(f.ms) + (tzAbbr ? ' ' + tzAbbr : '');
     ctx.font = '300 ' + fs1 + 'px monospace';
     halo(l1,x,y); ctx.fillStyle = 'rgba(201,209,224,0.92)'; ctx.fillText(l1,x,y);
-    y += Math.round(fs1*1.3);
-    const l2 = pickedName || 'custom';
-    ctx.font = fs2 + 'px monospace';
-    halo(l2,x,y); ctx.fillStyle = 'rgba(232,179,74,0.85)'; ctx.fillText(l2,x,y);
+    // The place name is the chip's job wherever there is a chip, and a phone screenshot would
+    // otherwise carry it twice — top-left in amber and again here. Where there is no chip
+    // (desktop, no-JS) this is still the only thing naming the place on the picture.
+    if(!CHIP_RESERVE.h){
+      y += Math.round(fs1*1.3);
+      const l2 = pickedName || 'custom';
+      ctx.font = fs2 + 'px monospace';
+      halo(l2,x,y); ctx.fillStyle = 'rgba(232,179,74,0.85)'; ctx.fillText(l2,x,y);
+    }
     if(cv.clientWidth >= 480){   // phone width: drop the coords line, keep the sky clean
       y += Math.round(fs2*1.45);
       const l3 = state.obs.lat.toFixed(2) + ', ' + state.obs.lon.toFixed(2);
@@ -2457,26 +2608,6 @@ function computePath(){
   for(const p of MAP.path) best = Math.min(best, distKm(state.obs.lat, state.obs.lon, p.lat, p.lon));
   MAP.distKm = isFinite(best) ? best : null;
 
-  // Default framing: fit the WHOLE computed path — sunrise-terminator end to sunset-terminator
-  // end — around the observer, not just the nearest stretch of centreline. Hugging the observer
-  // (the old rule: nearest centreline + 11°, ~28° of latitude span at Zaragoza) filled the frame
-  // with Iberia: you saw the band cross Spain but not where the shadow comes from or where it
-  // dies, and the 20/40/60/80% contours were off-screen. The fit is done in the units the map
-  // actually draws in (latitude degrees; a longitude degree is worth cos(lat) of one, and the
-  // canvas is MAP_ASPECT wide), so it is exact rather than eyeballed, and it re-derives itself
-  // for any ?date= — 2027-08-02 frames its whole Atlantic→Somalia track, 2030-06-01 its long
-  // annular track. Centre stays on the observer so the pin is always dead-centre and findable.
-  const kx0 = Math.max(0.12, Math.cos(state.obs.lat*D2R));
-  let fitSpan = 0;
-  for(const p of MAP.path){
-    const dLa = Math.abs(p.lat - state.obs.lat), dLo = Math.abs(wrap180(p.lon - state.obs.lon))*kx0;
-    fitSpan = Math.max(fitSpan, dLa*2, dLo*2/MAP_ASPECT);
-  }
-  // Cap: past this the band thins to a thread and the basemap turns to soup. Phones get a
-  // tighter cap — the map canvas is the same 16:9 but a third the pixels, so the ~1° band
-  // survives ~60° of span and not 85°. Paths that fit inside the cap (2027) are shown whole.
-  const CAP = innerWidth < 700 ? 60 : 85;
-  const half = (MAP.path.length ? clamp(fitSpan*1.08, 30, CAP) : Math.min(CAP, 60)) / 2;
   // global window: step out from the peak until nothing on Earth sees any eclipse at all
   const anyEclipse = ms => {
     const t = A.MakeTime(new Date(ms));
@@ -2507,11 +2638,42 @@ function computePath(){
   };
   MAP.global = { t0: edge(-1), t1: edge(1) };
 
-  MAP.view = { cLat: state.obs.lat, cLon: state.obs.lon, spanLat: half*2,
-               kx: Math.max(0.12, Math.cos(state.obs.lat*D2R)) };
+  fitMapView();
+  MAP.stat = null; MAP.statKey = '';
+}
+// Default framing: fit the WHOLE computed path — sunrise-terminator end to sunset-terminator
+// end — around the observer, not just the nearest stretch of centreline. Hugging the observer
+// (the old rule: nearest centreline + 11°, ~28° of latitude span at Zaragoza) filled the frame
+// with Iberia: you saw the band cross Spain but not where the shadow comes from or where it
+// dies, and the 20/40/60/80% contours were off-screen. The fit is done in the units the map
+// actually draws in (latitude degrees; a longitude degree is worth cos(lat) of one, and the
+// canvas is MAP_ASPECT wide), so it is exact rather than eyeballed, and it re-derives itself
+// for any ?date= — 2027-08-02 frames its whole Atlantic→Somalia track, 2030-06-01 its long
+// annular track. Centre stays on the observer so the pin is always dead-centre and findable.
+// Split out of computePath because the fit depends on the canvas aspect: turn the phone and
+// the frame changes shape, so the same solve has to run again against the new one rather than
+// leaving a projection that was solved for the old one (see syncAspect).
+function fitMapView(){
+  const kx0 = Math.max(0.12, Math.cos(state.obs.lat*D2R));
+  let fitSpan = 0;
+  for(const p of MAP.path){
+    const dLa = Math.abs(p.lat - state.obs.lat), dLo = Math.abs(wrap180(p.lon - state.obs.lon))*kx0;
+    fitSpan = Math.max(fitSpan, dLa*2, dLo*2/MAP_ASPECT);
+  }
+  // Cap: past this the band thins to a thread and the basemap turns to soup. Phones get a
+  // tighter cap — a third the pixels of a desktop map, so the ~1° band survives ~60° of span
+  // and not 85°. Paths that fit inside the cap (2027) are shown whole.
+  // The cap is really a limit on degrees-per-pixel, so it is stated against the 16:9 reference
+  // frame and scaled by the actual one: a 4:3 phone canvas is 1.33x taller at the same width,
+  // so it carries 1.33x the latitude at exactly the same pixel scale — and since the longitude
+  // span is spanLat*aspect, the width of world on screen comes out identical either way. The
+  // taller frame buys more path, not a thinner band.
+  const K = REF_ASPECT/MAP_ASPECT;
+  const CAP = (innerWidth < 700 ? 60 : 85) * K;
+  const half = (MAP.path.length ? clamp(fitSpan*1.08, 30*K, CAP) : Math.min(CAP, 60*K)) / 2;
+  MAP.view = { cLat: state.obs.lat, cLon: state.obs.lon, spanLat: half*2, kx: kx0 };
   clampView();
   MAP.bounds = viewBounds(MAP.view);
-  MAP.stat = null; MAP.statKey = '';
 }
 // the view is centre + latitude span; longitude span follows from the canvas aspect and
 // an equirectangular standard parallel, so shapes stay honest as you zoom
@@ -3079,7 +3241,9 @@ function buildStatic(){
     c.beginPath(); c.arc(cx, cy, R, 0, 7); c.stroke();
   }
 
-  // title
+  // title — dropped below the location chip when there is one (phones), where it would
+  // otherwise be the one thing on any of the three canvases that the chip lands on top of
+  const ty = CHIP_RESERVE.h * (w / (mapCv.clientWidth || w));
   const d = new Date(ecl.peak.time.date);
   const title = ((MAP.gKind || ecl.kind) === 'annular' ? 'PATH OF ANNULARITY' : 'PATH OF TOTALITY') + ' — ' +
     d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' }).toUpperCase();
@@ -3087,21 +3251,24 @@ function buildStatic(){
   c.textAlign = 'left'; c.textBaseline = 'top';
   const tw = c.measureText(title).width;
   c.fillStyle = 'rgba(7,12,20,0.72)';
-  c.fillRect(0, 0, tw + base*22, clamp(w/58,11,17)*1.45 + clamp(w/85,9,12)*1.6 + base*14);
+  c.fillRect(0, ty, tw + base*22, clamp(w/58,11,17)*1.45 + clamp(w/85,9,12)*1.6 + base*14);
   c.lineWidth = base*4; c.strokeStyle = 'rgba(7,12,20,0.85)';
-  c.strokeText(title, base*10, base*9);
-  c.fillStyle = 'rgba(255,170,120,0.95)'; c.fillText(title, base*10, base*9);
+  c.strokeText(title, base*10, ty + base*9);
+  c.fillStyle = 'rgba(255,170,120,0.95)'; c.fillText(title, base*10, ty + base*9);
   c.font = `${Math.round(clamp(w/85, 9, 12))}px monospace`;
   c.lineWidth = base*3.5;
-  c.strokeText('contour lines = % of the sun covered at maximum', base*10, base*9 + clamp(w/58,11,17)*1.45);
+  c.strokeText('contour lines = % of the sun covered at maximum', base*10, ty + base*9 + clamp(w/58,11,17)*1.45);
   c.fillStyle = 'rgba(206,218,238,0.75)';
-  c.fillText('contour lines = % of the sun covered at maximum', base*10, base*9 + clamp(w/58,11,17)*1.45);
+  c.fillText('contour lines = % of the sun covered at maximum', base*10, ty + base*9 + clamp(w/58,11,17)*1.45);
   c.textBaseline = 'alphabetic';
   return cv;
 }
 
 function statKeyNow(){
-  const w = mapCv.width;
+  // width AND height: the canvas shape is a media query, so the same width can carry two
+  // different heights and the cached bitmap must not survive the change. The chip reserve is
+  // in here too — the title card is baked into this bitmap and it sits below the chip.
+  const w = mapCv.width + 'x' + mapCv.height + 'x' + Math.round(CHIP_RESERVE.h);
   return MAP.mode3d
     ? `3d|${w}|${MAP.globe.lat0.toFixed(3)}|${MAP.globe.lon0.toFixed(3)}|${MAP.globe.z.toFixed(4)}|${state.date}|${state.obs.lat.toFixed(3)},${state.obs.lon.toFixed(3)}`
     : `2d|${w}|${MAP.view.cLat.toFixed(4)}|${MAP.view.cLon.toFixed(4)}|${MAP.view.spanLat.toFixed(4)}|${(MAP.view.kx||0).toFixed(4)}|${state.date}`;
@@ -3110,9 +3277,11 @@ function statKeyNow(){
 function drawMap(){
   if(!MAP.view || !ecl) return;
   const dpr = Math.min(devicePixelRatio||1, 2);
-  const cw = mapCv.clientWidth, ch = Math.round(cw/MAP_ASPECT);
+  // the element's own laid-out height, with the aspect as the fallback for the frame before
+  // layout has settled — same number either way, but never a stretched one
+  const cw = mapCv.clientWidth, ch = mapCv.clientHeight || Math.round(cw/MAP_ASPECT);
   if(cw === 0) return;                        // hidden tab — nothing to size against
-  if(mapCv.width !== Math.round(cw*dpr)){
+  if(mapCv.width !== Math.round(cw*dpr) || mapCv.height !== Math.round(ch*dpr)){
     mapCv.width = Math.round(cw*dpr); mapCv.height = Math.round(ch*dpr);
     MAP.stat = null; MAP.statKey = '';
   }
@@ -3460,6 +3629,7 @@ const cosCv = $('cosmos'), cosCtx = cosCv.getContext('2d');
 const COS_DM = 5.2;      // moon distance, earth radii (real ~60.3 — compressed)
 const COS_RM = 0.30;     // moon radius, earth radii (real 0.273 — nudged up a touch)
 const COS_DS = 9;        // sun glow distance, earth radii (real ~23,500 — the most compressed)
+const COS_ACROSS = 13;   // earth radii across a 16:9 frame at zoom 1 — the reference framing
 const COS = { yaw: 0, pitch: 12, zoom: 1, dateKey: '', stars: null, starKey: '',
               ms: 0, umbra: null };   // ms + umbra exposed for the verify harness
 
@@ -3557,12 +3727,46 @@ function cosNight(c, E0, R, sc){
   c.closePath(); c.fill();
 }
 
+/* FITTING THE SCENE TO A FRAME THAT IS NOT 16:9.
+   Sun, moon and earth are strung along one line, so the scene is wide and shallow: a 16:9
+   frame at 13 Re across holds it with air to spare, and a 4:3 frame at that same scale holds
+   exactly the same picture with a dead band above and below. So on a taller frame the scale
+   and the centre are SOLVED: take the projected box of the things that must stay visible —
+   the earth, the moon, the sun's disc plus the bright shoulder of its glow, and the point the
+   cone is aimed at — centre it, and fit it to the canvas with a 6% margin.
+   The scale is clamped to [16:9 scale, 1.45x it]. The floor means a portrait frame can only
+   ever zoom IN, never out, so nothing that used to be visible can be pushed off the side. The
+   ceiling is the 4:3 case: it puts 9.0 earth radii across the frame and 6.7 down — less
+   vertical scene than 16:9 showed, so there is no dead band — while leaving the earth's limb
+   ~14% of the half-width clear of the edge and keeping the sun's glow reading as a glow
+   rather than a wall of light. Uncapped, the solve would push the earth onto the frame edge.
+   Cheap enough to re-solve every frame (four dot products and a clamp), which is what keeps
+   it honest while the shadow walks, the clock runs and the camera orbits. */
+function cosFit(w, h, rt, upv, sHat, mHat, T){
+  const base = w/COS_ACROSS;                                 // the 16:9 rule, as the floor
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  const add = (p, r) => {
+    const x = vDot(p, rt), y = vDot(p, upv);
+    x0 = Math.min(x0, x-r); x1 = Math.max(x1, x+r);
+    y0 = Math.min(y0, y-r); y1 = Math.max(y1, y+r);
+  };
+  add([0,0,0], 1.25);                                        // earth + a little air
+  add(vMul(mHat, COS_DM), 0.5);                              // moon
+  add(vMul(sHat, COS_DS), 1.15);                             // sun disc (0.45) + inner glow
+  if(T) add(T, 0.15);                                        // where the cone lands
+  const bw = Math.max(x1-x0, 0.1), bh = Math.max(y1-y0, 0.1);
+  return { s: clamp(Math.min(w/bw, h/bh)*0.94, base, base*1.45),
+           c: vAdd(vMul(rt, (x0+x1)/2), vMul(upv, (y0+y1)/2)) };
+}
+
 function drawCosmos(){
   const tPerf = performance.now();
   const dpr = Math.min(devicePixelRatio||1, 2);
-  const cw = cosCv.clientWidth, ch = Math.round(cw/MAP_ASPECT);
+  const cw = cosCv.clientWidth, ch = cosCv.clientHeight || Math.round(cw/MAP_ASPECT);
   if(cw === 0) return;                                       // hidden tab
-  if(cosCv.width !== Math.round(cw*dpr)){ cosCv.width = Math.round(cw*dpr); cosCv.height = Math.round(ch*dpr); }
+  if(cosCv.width !== Math.round(cw*dpr) || cosCv.height !== Math.round(ch*dpr)){
+    cosCv.width = Math.round(cw*dpr); cosCv.height = Math.round(ch*dpr);
+  }
   const w = cosCv.width, h = cosCv.height, c = cosCtx;
   const base = Math.max(1, w/900);
 
@@ -3588,13 +3792,9 @@ function drawCosmos(){
   const eye = [cpt*cyw, cpt*syw, spt];                       // toward the camera
   let rt = vCross([0,0,1], eye); rt = vLen(rt) < 1e-6 ? [1,0,0] : vNorm(rt);
   const upv = vCross(eye, rt);
-  const Spx = COS.zoom * w/13;                               // px per earth radius: 13 Re across at zoom 1
-  // frame centre drifts toward the moon/sun side so cones + glow fit; eases out as you zoom in
-  const off = vMul(mHat, 1.8/Math.max(1, COS.zoom));
-  const ccx = vDot(off, rt), ccy = vDot(off, upv);
-  const proj = p => ({ x: w/2 + (vDot(p, rt) - ccx)*Spx, y: h/2 - (vDot(p, upv) - ccy)*Spx, z: vDot(p, eye) });
 
-  // scene geometry — compressed distances, true directions
+  // scene geometry — compressed distances, true directions. Solved BEFORE the screen mapping
+  // now, because on a portrait frame the framing is fitted to this geometry rather than fixed.
   const Pm = vMul(mHat, COS_DM);
   const U = shadowAxisPoint(S, M, gast);                     // true ground point (or null)
   COS.umbra = U ? { lat: U.lat, lon: U.lon } : null;
@@ -3607,6 +3807,22 @@ function drawCosmos(){
     T = [(M.x + k*d[0])/R_EQ, (M.y + k*d[1])/R_EQ, (M.z + k*d[2])/R_EQ];
     const tl = vLen(T); if(tl > 3) T = vMul(T, 3/tl);        // keep the aim within frame
   }
+
+  // SCALE AND FRAME CENTRE. On a 16:9 frame both are the constants they always were: 13 earth
+  // radii across, centre drifting toward the moon/sun side so the cones and the glow fit, and
+  // easing out as you zoom in. On a frame TALLER than 16:9 those constants would draw the very
+  // same picture with two dead bands above and below it — sun, moon and earth lie on a broadly
+  // straight line, so the scene is wide and shallow — and the extra height would be wasted. So
+  // there the framing is solved instead of assumed; see cosFit.
+  // decided on the DECLARED aspect, not on w/h: the backing store is rounded to whole pixels,
+  // so a 16:9 box can measure 1.7739 and would otherwise fall down the portrait branch
+  const wide = MAP_ASPECT >= REF_ASPECT - 1e-3;
+  const fit = wide ? null : cosFit(w, h, rt, upv, sHat, mHat, T);
+  const Spx = COS.zoom * (wide ? w/COS_ACROSS : fit.s);      // px per earth radius
+  const off = vMul(wide ? mHat : fit.c, (wide ? 1.8 : 1)/Math.max(1, COS.zoom));
+  const ccx = vDot(off, rt), ccy = vDot(off, upv);
+  const proj = p => ({ x: w/2 + (vDot(p, rt) - ccx)*Spx, y: h/2 - (vDot(p, upv) - ccy)*Spx, z: vDot(p, eye) });
+  COS.spx = Spx;                                             // exposed for the verify harness
 
   /* --- 1. space + cached starfield --- */
   if(COS.starKey !== w + 'x' + h){
@@ -5371,6 +5587,9 @@ function setTab(tab){
   $('tabSky').classList.toggle('on', tab === 'sky');
   $('tabPath').classList.toggle('on', tab === 'path');
   $('tabCosmos').classList.toggle('on', tab === 'cosmos');
+  // the chip follows the view it is sitting on: the canvas it must measure has just changed,
+  // and so has the corner it must be kept clear of
+  if(typeof syncChip === 'function') requestAnimationFrame(syncChip);
 }
 // COSMOS scale caveat: ships open (that is the desktop / no-JS state), folds to one tappable
 // line on a phone. Load-time only — resizing a browser window is not the case being served.
@@ -5478,6 +5697,96 @@ let savedModeOverride = null, initialTab = 'sky';
   $('date').value = state.date;
 })();
 
+/* ---------- THE LOCATION CHIP ----------
+   Layout for the overlay described in the stylesheet. Three jobs:
+     1. decide whether the chip exists at all (phone width only) and lay it over whichever
+        canvas is showing — all three share the same slot in .wrap, so one measurement serves;
+     2. publish CHIP_RESERVE, the top-left corner of the canvas the chip is sitting on, so the
+        views can keep out of its way (the SKY altitude ruler drops the ticks behind it, the
+        PATH title card drops below it; COSMOS has nothing in that corner);
+     3. open and close the panel, which is #secLoc itself, floated.
+   Every read here is a layout read, so it runs on the events that can change the answer — tab
+   switch, resize, rotation, a new place name, open/close — and never per frame. */
+const CHIP_MQ = (()=>{ try{ return matchMedia('(max-width:760px)'); }catch(e){ return null; } })();
+function chipHost(){ return state.tab === 'path' ? mapCv : state.tab === 'cosmos' ? cosCv : cv; }
+function syncChip(){
+  const ov = $('locOverlay'), chip = $('locChip'), wrapEl = document.querySelector('.wrap');
+  const on = !!(CHIP_MQ && CHIP_MQ.matches);
+  if(!on){
+    document.body.classList.remove('chip', 'locOpen');
+    chip.setAttribute('aria-expanded', 'false');
+    ov.hidden = true; CHIP_RESERVE = { w: 0, h: 0 };
+    return;
+  }
+  document.body.classList.add('chip');
+  ov.hidden = false;
+  const host = chipHost();
+  if(!host.clientWidth){ CHIP_RESERVE = { w: 0, h: 0 }; return; }   // tab mid-switch
+  const hr = host.getBoundingClientRect(), wr = wrapEl.getBoundingClientRect();
+  ov.style.top = (hr.top - wr.top + 8) + 'px';
+  const cr = chip.getBoundingClientRect();
+  CHIP_RESERVE = { w: Math.max(0, cr.right - hr.left + 7), h: Math.max(0, cr.bottom - hr.top + 7) };
+  const rs = document.documentElement.style;
+  rs.setProperty('--locTop', (cr.bottom - wr.top + 7).toFixed(1) + 'px');
+  rs.setProperty('--locMax', Math.max(190, innerHeight - cr.bottom - 16).toFixed(0) + 'px');
+}
+// the chip says where you are; "custom" coordinates say it in numbers rather than lie
+function updateChip(){
+  const n = pickedName || (state.obs.lat.toFixed(2) + ', ' + state.obs.lon.toFixed(2));
+  const el = $('locChipName');
+  if(el.textContent !== n){
+    el.textContent = n;
+    $('locChip').setAttribute('aria-label', 'Location: ' + n + ' — tap to change');
+  }
+  syncChip();
+}
+function openLoc(){
+  if(!document.body.classList.contains('chip')) return;
+  document.body.classList.add('locOpen');
+  $('locChip').setAttribute('aria-expanded', 'true');
+  syncChip();
+  const p = $('secLoc');
+  p.scrollTop = 0;
+  try{ p.focus({ preventScroll:true }); }catch(e){ try{ p.focus(); }catch(e2){} }
+}
+function closeLoc(quiet){
+  if(!document.body.classList.contains('locOpen')) return;
+  document.body.classList.remove('locOpen');
+  $('locChip').setAttribute('aria-expanded', 'false');
+  if(!quiet){ try{ $('locChip').focus({ preventScroll:true }); }catch(e){} }
+}
+$('locChip').addEventListener('click', ()=>{
+  document.body.classList.contains('locOpen') ? closeLoc() : openLoc();
+});
+// tap outside — the scrim is the whole viewport behind the panel, so this is every "outside"
+$('locScrim').addEventListener('click', ()=> closeLoc());
+addEventListener('keydown', e=>{
+  if(e.key === 'Escape' && document.body.classList.contains('locOpen')){ e.preventDefault(); closeLoc(); }
+}, true);
+
+/* ---------- CANVAS SHAPE CHANGES ----------
+   Turn the phone and the media query behind --cv-aspect flips, so MAP_ASPECT has to move with
+   it and everything solved against the old shape has to be solved again. SKY needs nothing:
+   it is a pure function of the backing store's width and height every frame. COSMOS needs
+   nothing either — its framing is re-fitted per frame and its starfield is cached on the
+   pixel size. PATH is the one with state: the default framing is a solve, and the basemap is
+   a cached bitmap, so re-run the fit and drop the cache rather than stretch what is there.
+   Fired on resize (which covers rotation on every modern browser) and on the legacy
+   orientationchange as well, one frame late — iOS reports the old innerWidth on that event. */
+function syncAspect(){
+  const a = readAspect();
+  if(Math.abs(a - MAP_ASPECT) < 1e-4) return false;
+  MAP_ASPECT = a;
+  if(MAP.view){
+    if(MAP.path && MAP.path.length) fitMapView();      // re-solve "fit the whole path"
+    else { clampView(); MAP.bounds = viewBounds(MAP.view); }
+  }
+  MAP.stat = null; MAP.statKey = ''; MAP.pendingKey = null;
+  return true;
+}
+addEventListener('resize', ()=>{ syncAspect(); syncChip(); });
+addEventListener('orientationchange', ()=> setTimeout(()=>{ syncAspect(); syncChip(); }, 60));
+
 /* ---------- main loop ---------- */
 let lastRAF = performance.now();
 let lastDom = 0;
@@ -5542,6 +5851,7 @@ syncPlanCtl();
 setMode(bootMode);
 
 recomputeEclipse();
+updateChip();      // reveal the chip (phones only) now the place name is known
 try{ if(localStorage.getItem('eclipse.map3d') === '1') setMapMode(true); }catch(e){}
 if(initialTab !== 'sky') setTab(initialTab);
 // AUTO-ENGAGE: land inside the displayed eclipse's window (or the global event window on
