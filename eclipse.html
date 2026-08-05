@@ -138,7 +138,9 @@
   .timebar{order:10;}                        /* the instruments — directly under the canvas */
   .whenbar{order:20;}                        /* "at what time" */
   .livebar{order:30;}                        /* "how long until" */
-  .live{order:40;}                           /* UTC / local / sun / obscuration */
+  /* (order 40 was the status line — UTC / zone / sun / obscuration. It is now the readout
+     panel's own live row, so there is nothing to place between the countdown and the
+     legends.) */
   #viewPath > .maplegend, #viewCosmos > .maplegend{order:60;}
   #viewPath > .note, #viewPath > #shadowNote,
   #viewCosmos > .note, #viewCosmos > .scaleNote{order:61;}
@@ -293,16 +295,21 @@
   details.scaleNote > summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
   details.scaleNote .note{margin-top:2px;}
   @media(max-width:430px){ details.scaleNote > summary{min-height:44px;} }
-  /* status line — between the countdown and the legends it would read as orphaned text, so
-     it takes the faintest backing on the page: a shade under the timebar panel, no border.
-     A footnote-with-a-floor, not a panel. */
-  .live{display:flex; flex-wrap:wrap; gap:6px 18px; margin:0 0 8px; padding:8px 11px;
-        background:#0d1016; border-radius:6px;
-        font-family:var(--mono); font-size:12px; color:var(--dim);}
-  .live b{color:var(--ink); font-weight:400;}
-  .live .acc{color:var(--accent);}
-  /* phone: a footnote, not a panel — two tight lines instead of four loose ones */
-  @media(max-width:430px){ .live{gap:2px 13px; padding:6px 9px; margin-bottom:6px; font-size:11px;} }
+  /* THE LIVE ROW, inside the readout panel (it replaces the old .live status line — see the
+     note where that used to sit). A hairline separates it from the rows above: those are the
+     eclipse AT MAXIMUM, this is the sky at the moment being shown. Same footnote weight as
+     the line it replaces, but it costs no block, no background and no margins of its own. */
+  .nowkv{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 12px;
+         margin-top:7px; padding-top:7px; border-top:1px solid var(--line);
+         font-family:var(--mono); font-size:12.5px; color:var(--dim);}
+  .nowkv b{color:var(--ink); font-weight:400;}
+  .nowkv .acc, .nowkv b.acc{color:var(--accent);}
+  .nowkv .k{text-transform:uppercase; letter-spacing:.16em; font-size:10px;}
+  .nowkv i{font-style:normal;}
+  @media(max-width:430px){
+    .nowkv{gap:2px 9px; font-size:11px; margin-top:6px; padding-top:6px;}
+    .nowkv .lx{display:none;}
+  }
 
   /* WHEN bar — "at what time", for everyone, above the fold. The time is the headline and
      is deliberately the largest type on the page after the app title; the sentence under it
@@ -382,21 +389,27 @@
     .whenbar .wnl{display:none;}
     .whenbar .wl{order:3;}
     .whenbar .wnt{font-size:30px; letter-spacing:.01em;}
-    /* the compact line: [duration] · [window, amber] · [zone + instruction], one wrapping
-       row of small type instead of three blocks of large type */
+    /* the compact line: [label] [window, amber] · [what it amounts to] · [zone + instruction],
+       one wrapping row of small type instead of three blocks of large type.
+       THE TIME COMES FIRST, right after the label that names it — the old order put the
+       measurement in front (MAXIMUM 100% covered at maximum · 20:32:14), which read as the
+       label describing the percentage and pushed the answer to the end of the line. */
     .whenbar .ws{font-size:11.5px; line-height:1.4; margin-top:3px; color:#98a3b9;}
     .whenbar .wsL{display:none;}
     .whenbar .wsS{display:inline; flex:0 1 auto;}
-    .whenbar .wsS{order:3;}
+    .whenbar .wsS{order:5;}
     /* the tail takes its own row on purpose: two fragments fit line one at every plausible
        duration, and a separator that lands at the start of a wrapped line reads as a typo */
-    .whenbar .wsS2{order:5; flex:1 0 100%; margin-top:1px;}
+    .whenbar .wsS2{order:6; flex:1 0 100%; margin-top:1px;}
     .whenbar b{order:4; flex:0 1 auto; font-size:11.5px; line-height:1.4; margin-top:3px;
                letter-spacing:.01em;}
     /* the separator belongs to the layout, not to the sentence — the same strings ship to the
-       desktop block, where the three parts are not on one line */
-    .whenbar b::before{content:'· '; color:#5a6478;}
-    .whenbar.none b::before{content:none;}   /* nothing visible here: no duration to lead with */
+       desktop block, where the three parts are not on one line. It leads the fragment AFTER
+       the window now that the window leads the line; an empty fragment (the not-visible
+       case has none) must not leave a dot hanging. */
+    .whenbar .wsS::before{content:'· '; color:#5a6478;}
+    .whenbar .wsS2::before{content:none;}    /* it starts its own row — see above */
+    .whenbar .wsS:empty{display:none;}
     .whenbar.none b{font-size:11.5px;}
   }
 
@@ -1040,17 +1053,13 @@
     <span class="ws wsS wsS2" id="whenSubS2"></span>
   </div>
 
-  <div class="live">
-    <span>UTC <b id="tUtc">—</b></span>
-    <!-- "local HH:MM:SS" used to sit here: the third copy of a number that is already the
-         canvas stamp and now the when-bar's live clock. Dropped — this line keeps only what
-         nothing else says: the UTC reading, which zone the local times are in, where the sun
-         is, and how much of it is covered. -->
-    <span>zone <b id="tzName"></b></span>
-    <span>sun <b id="liveAlt">—</b> alt / <b id="liveAz">—</b> az</span>
-    <span>obscuration <b class="acc" id="liveObsc">—</b></span>
-    <span id="livePhase" class="acc"></span>
-  </div>
+  <!-- THE STATUS LINE IS GONE. It sat here — UTC · zone · sun alt/az · obscuration · phase —
+       directly above a panel that says PARTIAL, 99.9% and "sun at max" in three times the
+       type: the same facts twice, small copy first. What it uniquely carried was that its
+       numbers track the CLOCK YOU ARE SHOWING while the panel's are at maximum, so those
+       readings moved into the panel as its one live row (see .nowkv), where the at-max and
+       right-now columns finally sit next to each other and can be told apart. The zone name
+       went with them, as a kv row. -->
 
   <div class="livebar" id="liveBar" hidden><b id="liveHead"></b><span id="liveSub"></span></div>
 
@@ -1151,6 +1160,24 @@
       <div class="hero" id="readHero"></div>
       <div id="nextEv"></div>
       <div class="kv" id="readKv"></div>
+      <!-- THE ONE ROW IN THIS PANEL THAT MOVES. Everything above it is a property of the
+           eclipse at this place (at maximum); this is the sky at the moment the scrubber is
+           showing, which is what the old status line above the panel was actually for. It
+           carries the same NOW / SHOWING vocabulary as the when-bar's live clock, so the two
+           moving readings name themselves the same way and neither can be read as "at
+           maximum". Written by the 150ms DOM tick, not by updateReadout() — which rebuilds
+           #readKv above wholesale and would eat it. Each field is its own span so a narrow
+           screen wraps between fields and never inside a number. -->
+      <div class="nowkv">
+        <span class="k" id="nowKey">right now</span>
+        <span><b id="tUtc">—</b> UTC</span>
+        <!-- "sun" is dropped on a phone (CSS): it sits directly under a row that reads
+             "sun at max", so an alt/az pair here can be nothing else, and the word is the
+             difference between two wrapped lines and three at 360px. -->
+        <span><i class="lx">sun </i><b id="liveAlt">—</b> alt / <b id="liveAz">—</b> az</span>
+        <span><b class="acc" id="liveObsc">—</b> covered</span>
+        <span class="acc" id="livePhase"></span>
+      </div>
       <table class="contacts" id="contactRows"></table>
       <div class="note" id="belowNote"></div>
     </section>
@@ -2054,6 +2081,28 @@ function tzShort(ms){
     const p = new Intl.DateTimeFormat('en-GB',{timeZone:state.tz,timeZoneName:'short'}).formatToParts(new Date(ms));
     return (p.find(x=>x.type==='timeZoneName')||{}).value || state.tz;
   }catch(e){ return state.tz; }
+}
+/* the zone's offset from UTC at that instant, as "UTC+02:00". The readout prints it beside
+   the zone name because the page's live clocks are local: with the offset, any of them can
+   be converted, which is what the old status line's live UTC field was for. Intl's
+   longOffset gives "GMT+02:00" where supported; the fallback measures the offset by
+   formatting the same instant in the zone and comparing with the UTC reading. */
+function utcOffset(ms){
+  try{
+    const p = new Intl.DateTimeFormat('en-GB',{timeZone:state.tz,timeZoneName:'longOffset'}).formatToParts(new Date(ms));
+    const v = (p.find(x=>x.type==='timeZoneName')||{}).value || '';
+    if(/GMT[+-]\d/.test(v)) return v.replace('GMT','UTC');
+    if(v === 'GMT') return 'UTC+00:00';
+  }catch(e){}
+  try{
+    const f = new Intl.DateTimeFormat('en-GB',{timeZone:state.tz,hour12:false,
+      year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const q = Object.fromEntries(f.formatToParts(new Date(ms)).map(x=>[x.type,x.value]));
+    const asUTC = Date.UTC(+q.year, +q.month-1, +q.day, +q.hour%24, +q.minute, +q.second);
+    const mins = Math.round((asUTC - Math.floor(ms/1000)*1000)/60000);
+    const sg = mins < 0 ? '-' : '+', a = Math.abs(mins);
+    return 'UTC' + sg + String(Math.floor(a/60)).padStart(2,'0') + ':' + String(a%60).padStart(2,'0');
+  }catch(e){ return ''; }
 }
 
 /* ---------- canvas render ---------- */
@@ -4191,6 +4240,17 @@ function updateReadout(){
   const rows = [];
   if(eclNotice && !nextEv) rows.push(['heads up', eclNotice]);
   rows.push(['date', new Date(ecl.peak.time.date).toISOString().slice(0,10)]);
+  // WHICH ZONE THE TIMES ARE IN. It used to be the status line's "zone" field; with the
+  // status line gone it belongs with the date, because it qualifies every local time in this
+  // panel (and with coordinates resolving to a nearest-city zone you want to see WHICH zone
+  // before you book anything). The offset is spelled out: the contact rows carry their own
+  // UTC column, and this makes any other local reading on the page convertible too.
+  // the ABBREVIATION is not repeated here — it is already the suffix of the when-bar's
+  // times and of the canvas stamp. This row carries the two things that were only ever in
+  // the old status line: which IANA zone the times are in, and its offset from UTC.
+  const zAb = tzShort(state.t) || '';
+  const zOff = utcOffset(state.t);
+  rows.push(['zone', (state.tz || zAb) + (zOff ? ' · ' + zOff : '')]);
   if(peakFrame){
     rows.push(['sun at max', peakFrame.sunAlt.toFixed(1)+'° alt / '+peakFrame.sunAz.toFixed(1)+'° az ('+azName(peakFrame.sunAz)+')']);
   }
@@ -4205,9 +4265,6 @@ function updateReadout(){
   const nBelow = contacts.filter(c=>c.alt<0).length;
   $('belowNote').textContent = nBelow ? `${nBelow} contact${nBelow>1?'s':''} occur${nBelow>1?'':'s'} below the horizon at this location.` : '';
   tzAbbr = tzShort(state.t);
-  // the IANA zone as well as the abbreviation: with coordinates resolving to a nearest-city
-  // zone, you want to see WHICH zone the times are in before you book anything
-  $('tzName').textContent = tzAbbr + (state.tz && state.tz !== tzAbbr ? ' · ' + state.tz : '');
   updateWhen();
   paintNowClock();     // the bar may have just been un-hidden — don't wait a frame to fill it
   syncScrub();
@@ -4257,18 +4314,24 @@ function updateWhen(){
     $('whenLbl').textContent = mid.toUpperCase();
     $('whenBig').textContent = `${fmtLocal(c.c2.ms)} – ${fmtLocal(c.c3.ms)}`;
     $('whenTz').textContent = tz;
+    /* the phone fragment is the bare duration: the label above it already says TOTALITY and
+       the window sits between them, so "1m 27s of totality" spent a third of the line
+       repeating the label. Reads TOTALITY · 20:28:53 – 20:30:19 · 1m 27s. */
     sub(`${place} — ${durTxt} of ${mid}, local time` +
           (belowNow ? ', but below the horizon here' : '. Glasses come off only between those two times.'),
-        `${durTxt} of ${mid}`,
+        durTxt,
         (tz ? tz + ' · ' : '') + (belowNow ? 'below the horizon here' : 'glasses off only then'));
     bar.classList.add('tot');
   }else{
     $('whenLbl').textContent = 'MAXIMUM';
     $('whenBig').textContent = fmtLocal(mxMs);
     $('whenTz').textContent = tz;
-    sub(`${place} — maximum ${obsc.toFixed(0)}% covered, local time` +
+    /* "MAXIMUM ... % covered at maximum" said the word twice in one line, once as the label
+       and once inside the sentence it introduces. The label owns it: both cuts now read
+       MAXIMUM · 20:32:14 · 100% covered, with the time next to the label that names it. */
+    sub(`${place} — ${obsc.toFixed(0)}% of the sun covered, local time` +
           (belowNow ? ', but below the horizon here' : '. No totality here, so eye protection stays on throughout.'),
-        `${obsc.toFixed(0)}% covered at maximum`,
+        `${obsc.toFixed(0)}% covered`,
         (tz ? tz + ' · ' : '') + (belowNow ? 'below the horizon here' : 'eye protection throughout'));
   }
 }
@@ -5002,7 +5065,6 @@ function eclipseStatus(tn, f){
   const C = k => contacts.find(x => x.key === k) || null;
   const c1 = C('c1'), c2 = C('c2'), c3 = C('c3'), c4 = C('c4'), mx = C('mx');
   const pct = f ? Math.min(99.9, f.obsc*100) : 0;
-  const maxPct = Math.min(99.9, (ecl.obscuration||0)*100);
   const g = MAP.global;
   const near = ms => tn >= (eclWin.c1 - LIVE_PRE) && tn <= (eclWin.c4 + 3600e3);
   const out = (lvl, head, sub) => ({ lvl, head, sub: sub || '', near: near() });
@@ -5035,13 +5097,12 @@ function eclipseStatus(tn, f){
   if(tn < c1.ms){
     const dt = c1.ms - tn;
     if(dt > 30*864e5) return null;                       // months away: say nothing
-    // the WHEN bar above already gives the clock times, so this line deliberately does not
-    // repeat them: the countdown answers "how long until", the bar answers "at what time"
-    const altTxt = ecl.peak.altitude >= 0
-      ? 'sun ' + ecl.peak.altitude.toFixed(0) + '° above the horizon at maximum'
-      : 'the sun is below your horizon at maximum';
-    const sub = c2 ? altTxt : 'partial only here — ' + altTxt;
-    return out(dt < 3600e3 ? 1 : 0, 'FIRST CONTACT IN ' + durLong(dt), sub);
+    // NOTHING ELSE ON THIS LINE. The countdown answers "how long until", and only that: the
+    // when-bar above gives the clock times, and both facts this line used to carry —
+    // "partial only here" and the sun's altitude at maximum — are said larger and in full by
+    // the readout panel below (ECLIPSE HERE / PARTIAL, and the "sun at max ..° alt / ..° az"
+    // row). Nothing is above the countdown that repeats it, so nothing needs saying twice.
+    return out(dt < 3600e3 ? 1 : 0, 'FIRST CONTACT IN ' + durLong(dt), '');
   }
   // --- totality / annularity, the moment that matters ---
   if(c2 && c3 && tn >= c2.ms && tn < c3.ms){
@@ -5053,8 +5114,12 @@ function eclipseStatus(tn, f){
     const cover = 'eclipse in progress: ' + pct.toFixed(0) + '% covered' + bTag;
     if(c2 && tn < c2.ms) return out((c2.ms - tn) < 600e3 ? 2 : 1, gk + ' IN ' + durClock(c2.ms - tn), cover);
     if(c3 && tn >= c3.ms) return out(1, 'LAST CONTACT IN ' + durClock(c4.ms - tn), kindLc + ' is over — ' + pct.toFixed(0) + '% still covered');
-    if(!c2 && tn < mx.ms) return out((mx.ms - tn) < 600e3 ? 2 : 1, 'MAXIMUM ' + maxPct.toFixed(0) + '% IN ' + durClock(mx.ms - tn), cover + ' — partial only here');
-    return out(1, 'LAST CONTACT IN ' + durClock(c4.ms - tn), cover + (c2 ? '' : ' — partial only here'));
+    // "MAXIMUM 91% IN 12:34" and "— partial only here" were both already on screen: the
+    // when-bar one block up reads MAXIMUM · 19:13:11 · 91% covered, and the readout below
+    // leads with ECLIPSE HERE / PARTIAL. The countdown keeps the one thing that is only
+    // here — the clock running down, and how much is covered at this second.
+    if(!c2 && tn < mx.ms) return out((mx.ms - tn) < 600e3 ? 2 : 1, 'MAXIMUM IN ' + durClock(mx.ms - tn), cover);
+    return out(1, 'LAST CONTACT IN ' + durClock(c4.ms - tn), cover);
   }
   // --- after last contact ---
   const since = tn - c4.ms;
@@ -5813,6 +5878,10 @@ function loop(now){
     lastDom = now;
     updateLiveBar();
     updateShadowNote();
+    // the readout panel's live row — same NOW / SHOWING distinction as the when-bar clock,
+    // so the moving numbers never read as the panel's at-maximum ones
+    const nk = state.live ? 'right now' : 'showing';
+    if($('nowKey').textContent !== nk) $('nowKey').textContent = nk;
     $('tUtc').textContent = fmtUTC(state.t);
     $('liveAlt').textContent = f.sunAlt.toFixed(2)+'°';
     $('liveAz').textContent = f.sunAz.toFixed(1)+'°';
