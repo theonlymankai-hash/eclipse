@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECLIPSE — layout sketch v2</title>
+<style>
+  :root{
+    --bg:#0b0d11;
+    --panel:#12151b;
+    --panel-2:#161a21;
+    --line:rgba(255,255,255,0.08);
+    --amber:#e8b04b;
+    --text:#e9e9ec;
+    --dim:#8b8f98;
+    --dimmer:#5c6068;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Courier New', ui-monospace, monospace;
+    display:flex;
+    justify-content:center;
+    padding:24px 12px;
+  }
+  .phone{
+    width:390px;
+    max-width:100%;
+  }
+  .note{
+    font-family:-apple-system, sans-serif;
+    font-size:12px;
+    color:var(--dim);
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:14px;
+    line-height:1.5;
+  }
+  .note b{color:var(--amber); font-weight:600;}
+
+  h1{
+    font-size:22px;
+    letter-spacing:0.18em;
+    margin:0;
+    font-weight:400;
+  }
+  .sub{
+    font-size:12px;
+    color:var(--dim);
+    letter-spacing:0.04em;
+  }
+  .header-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+
+  .tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:10px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px 0 8px;
+    font-size:12px;
+    letter-spacing:0.14em;
+    color:var(--dim);
+    border-bottom:2px solid transparent;
+  }
+  .tab.active{color:var(--amber); border-bottom-color:var(--amber);}
+
+  /* HERO render */
+  .hero{
+    position:relative;
+    background:radial-gradient(circle at 50% 46%, #fff 0%, #efe8d8 6%, #d8cba8 14%, #6b5a3a 22%, #100e0a 33%, #050506 46%);
+    overflow:hidden;
+    border:1px solid var(--line);
+    border-radius:10px 10px 0 0;
+    aspect-ratio: 1 / 1.02;
+  }
+  .hero-corona{
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 46%, transparent 0 20%, rgba(0,0,0,0.85) 21% 22%, transparent 23%);
+  }
+  .hero-topbar{
+    position:absolute; top:10px; left:10px; right:10px;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    font-size:11px; color:#cfcfd2; text-shadow:0 1px 3px rgba(0,0,0,0.6);
+  }
+  .clock{font-size:15px; letter-spacing:0.06em;}
+
+  /* Location chip — lives ON the hero, tap to expand */
+  .loc-chip{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    background:rgba(10,10,12,0.55);
+    backdrop-filter: blur(2px);
+    border:1px solid rgba(232,176,75,0.5);
+    border-radius:7px;
+    padding:5px 9px;
+    font-size:11px;
+    color:var(--amber);
+  }
+  .loc-chip .pin{font-size:10px;}
+  .loc-chip .chev{color:var(--amber); font-size:9px; margin-left:2px; opacity:0.8;}
+
+  .fov-badge{
+    background:rgba(0,0,0,0.45);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:3px 8px;
+    font-size:10px;
+    color:var(--dim);
+  }
+
+  /* Scrubber — docked directly under hero, no gap, most important control */
+  .scrubber{
+    background:var(--panel);
+    border:1px solid rgba(232,176,75,0.35);
+    border-top:none;
+    border-radius:0 0 10px 10px;
+    padding:10px 12px 12px;
+    margin-bottom:14px;
+  }
+  .scrub-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .play-btn{
+    width:32px; height:32px; border-radius:50%;
+    background:var(--amber); color:#1a1400;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; flex-shrink:0;
+  }
+  .track{
+    flex:1;
+    height:4px;
+    background:#2a2e36;
+    border-radius:2px;
+    position:relative;
+  }
+  .track .fill{
+    position:absolute; left:0; top:0; bottom:0;
+    width:38%;
+    background:var(--amber);
+    border-radius:2px;
+  }
+  .track .knob{
+    position:absolute; left:38%; top:50%;
+    width:13px; height:13px; margin-left:-6.5px; margin-top:-6.5px;
+    border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 0 4px rgba(232,176,75,0.15);
+  }
+  .speed{
+    font-size:10px; color:var(--dim);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:3px 6px;
+    flex-shrink:0;
+  }
+  .moments{
+    display:flex;
+    justify-content:space-between;
+    margin-top:8px;
+    font-size:10px;
+    color:var(--dimmer);
+    letter-spacing:0.06em;
+  }
+  .moments span.now{color:var(--amber);}
+
+  /* Expanded location panel — only shown when chip is tapped, drawn here open for reference */
+  .loc-expanded{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:8px;
+  }
+  .loc-eyebrow{
+    font-size:10px;
+    letter-spacing:0.16em;
+    color:var(--amber);
+    margin-bottom:8px;
+  }
+  .loc-input-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .loc-input{
+    flex:1;
+    font-size:14px;
+    color:var(--text);
+    border-bottom:1px solid var(--line);
+    padding-bottom:6px;
+  }
+  .icon-btn{
+    font-size:10px; color:var(--dim);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:5px 8px;
+    flex-shrink:0;
+  }
+  .use-loc{
+    margin-top:8px;
+    font-size:10px;
+    color:var(--dim);
+    text-align:center;
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:6px 0;
+  }
+
+  /* Totality detail — demoted, collapsed */
+  .detail-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:9px 12px;
+    font-size:11px;
+    color:var(--dim);
+    border:1px solid var(--line);
+    border-radius:8px;
+    margin-bottom:8px;
+  }
+  .detail-row .chev{color:var(--dimmer); font-size:10px;}
+
+  .fine-tune{
+    text-align:center;
+    font-size:11px;
+    color:var(--dimmer);
+    padding:10px 0 4px;
+    letter-spacing:0.04em;
+  }
+
+  .labels{
+    display:flex;
+    gap:6px;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+  .labels span{
+    font-family:-apple-system, sans-serif;
+    font-size:10px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--dim);
+    padding:3px 7px;
+    border-radius:5px;
+  }
+
+  .divider-label{
+    font-family:-apple-system, sans-serif;
+    font-size:10px;
+    color:var(--dimmer);
+    text-align:center;
+    margin:14px 0 8px;
+    letter-spacing:0.08em;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="note">
+    <b>v2 — hero leads</b> — render is the first thing seen, full-bleed, nothing above it. Location lives as a small amber chip on the hero itself (tap → expands to the panel shown further down, for reference). Scrubber stays docked under the hero, same amber emphasis as the location chip, since these are your two live controls. Totality detail stays demoted.
+  </div>
+
+  <div class="header-row">
+    <h1>ECLIPSE</h1>
+  </div>
+  <div class="sub" style="margin-bottom:14px;">previsualisation — ground view</div>
+
+  <div class="tabs">
+    <div class="tab active">SKY</div>
+    <div class="tab">PATH</div>
+    <div class="tab">COSMOS</div>
+  </div>
+
+  <!-- HERO, leads, location chip lives on it -->
+  <div class="hero">
+    <div class="hero-corona"></div>
+    <div class="hero-topbar">
+      <div class="loc-chip"><span class="pin">◎</span>Zaragoza<span class="chev">▾</span></div>
+      <div class="fov-badge">FOV 4°</div>
+    </div>
+  </div>
+
+  <!-- SCRUBBER — docked, no gap, primary control -->
+  <div class="scrubber">
+    <div class="scrub-row">
+      <div class="play-btn">▶</div>
+      <div class="track"><div class="fill"></div><div class="knob"></div></div>
+      <div class="speed">60×</div>
+    </div>
+    <div class="moments">
+      <span>C1</span><span>C2</span><span class="now">MAX</span><span>C3</span><span>C4</span>
+    </div>
+  </div>
+
+  <!-- TOTALITY DETAIL — demoted, collapsible -->
+  <div class="detail-row">
+    <span>1m 27s totality · 20:28:53–20:30:19 · glasses off only then</span>
+    <span class="chev">▾</span>
+  </div>
+
+  <div class="fine-tune">+ fine tune — lat, lon, date, horizon</div>
+
+  <div class="divider-label">— shown open, for reference: what tapping the location chip reveals —</div>
+
+  <!-- LOCATION EXPANDED, shown open here just to illustrate the tap target's contents -->
+  <div class="loc-expanded">
+    <div class="loc-eyebrow">LOCATION</div>
+    <div class="loc-input-row">
+      <div class="loc-input">Zaragoza</div>
+      <div class="icon-btn">⎘</div>
+    </div>
+    <div class="use-loc">Use my location</div>
+  </div>
+
+  <div class="labels">
+    <span>hero: first, full-bleed, nothing above it</span>
+    <span>location: amber chip on hero, expands on tap</span>
+    <span>scrubber: docked to hero, same weight as location</span>
+    <span>totality detail: collapsed, tap to expand</span>
+  </div>
+
+</div>
+</body>
+</html>

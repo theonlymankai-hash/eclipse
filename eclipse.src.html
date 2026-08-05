@@ -42,7 +42,7 @@
   body{font:300 14px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif; padding:0 0 40px;}
   header{display:flex; align-items:baseline; gap:12px; padding:14px 16px 10px;}
   header h1{font-size:15px; font-weight:400; letter-spacing:.35em; color:var(--accent);}
-  header span{font-size:11px; color:var(--dim); letter-spacing:.08em;}
+  @media(max-width:430px){ header{padding:10px 16px 6px;} }
   /* Mode switch — on the photographer-panel heading row, and only once expanded. PRO and
      NOVICE used to be two loose buttons sized by their own text, so PRO came out narrower
      than NOVICE and the pair read as an accident. They are now a segmented control: equal
@@ -154,9 +154,14 @@
   @media(max-width:760px){
     /* `.wrap >` only to out-specify the .grid display rule further down the sheet */
     .wrap > .grid{display:contents;}
-    .whenbar{order:5;}                      /* TOTALITY time — first thing under the picture */
+    /* THE SCRUBBER DOCKS TO THE PICTURE. It used to sit under the when-bar AND the whole
+       location panel — three blocks down — on the theory that the thumb rests at the bottom
+       of the screen. In practice nobody found it: the one control the app is about was the
+       fourth thing below the fold. It is now welded to the bottom edge of the canvas it
+       drives, which is also where a timeline belongs. Reading follows the instrument. */
+    .timebar{order:4; margin-top:0; border-top-left-radius:0; border-top-right-radius:0;}
+    .whenbar{order:5;}                      /* TOTALITY time — under the picture and its control */
     #secLoc{order:8; margin-top:6px;}       /* WHERE — read with the WHEN above it */
-    /* .timebar keeps its base order:10 — which now lands it under the location panel */
     #secRead{order:70; margin-top:8px;}      /* the full readout, where the grid used to be */
     /* .grid is display:contents here, so opacity on it has nothing to paint (same problem as
        the PATH/COSMOS wrappers) — its sections carry the cover fade themselves */
@@ -277,17 +282,40 @@
      right half (a row that already exists, so it costs only the difference between a 9.5px
      label and a 17px clock), and the window gives back the 3px by stepping 25px → 22px.
      Net height is unchanged — still ~79px — and the two clocks are now one glance apart. */
+  /* PHONE, second pass: THE CLOCK IS THE BIG NUMBER.
+     The window (20:28:53 – 20:30:19) is a static answer you read once and then stop looking
+     at; at 22px it was the loudest thing on the screen for the rest of the session. The live
+     clock is what MOVES while you drag the handle, and it was 17px in the corner of the same
+     block. They swap: the clock takes the block's headline slot at 30px, and duration,
+     window and the safety instruction collapse into one 11.5px line — the amber window kept
+     amber inside it, so it is still findable, just no longer shouting. The place name comes
+     out of that line entirely: it is in the LOCATION field one block down, and repeating it
+     here was costing a phone screen a whole extra wrapped row. */
   @media(max-width:430px){
-    .whenbar{margin:8px 0 2px; padding:8px 11px 7px; gap:0 9px;}
+    .whenbar{margin:6px 0 2px; padding:7px 11px 8px; gap:0 8px; align-items:baseline;}
     .whenbar .wl, .whenbar .wz{line-height:1.2;}   /* the label row is 1.5-leaded prose otherwise */
-    .whenbar .wl{font-size:9.5px;}
-    .whenbar b{font-size:22px; margin-top:1px;}
-    .whenbar .ws{font-size:12px; line-height:1.35; margin-top:2px;}
-    .whenbar .wsL{display:none;}
-    .whenbar .wsS{display:block;}
+    .whenbar .wl{font-size:9.5px; order:1;}
+    .whenbar .wz{display:none;}      /* the zone rides the compact line below instead */
+    .whenbar .wnow{order:2; margin-left:auto; align-items:baseline;}
     .whenbar .wnl{line-height:1.2;}
-    .whenbar .wnz{display:none;}   /* the zone is already in this row, two words to the left */
-    .whenbar .wnt{font-size:17px;}
+    .whenbar .wnz{display:none;}
+    .whenbar .wnt{font-size:30px; letter-spacing:.01em;}
+    /* the compact line: [duration] · [window, amber] · [zone + instruction], one wrapping
+       row of small type instead of three blocks of large type */
+    .whenbar .ws{font-size:11.5px; line-height:1.4; margin-top:3px; color:#98a3b9;}
+    .whenbar .wsL{display:none;}
+    .whenbar .wsS{display:inline; flex:0 1 auto;}
+    .whenbar .wsS{order:3;}
+    /* the tail takes its own row on purpose: two fragments fit line one at every plausible
+       duration, and a separator that lands at the start of a wrapped line reads as a typo */
+    .whenbar .wsS2{order:5; flex:1 0 100%; margin-top:1px;}
+    .whenbar b{order:4; flex:0 1 auto; font-size:11.5px; line-height:1.4; margin-top:3px;
+               letter-spacing:.01em;}
+    /* the separator belongs to the layout, not to the sentence — the same strings ship to the
+       desktop block, where the three parts are not on one line */
+    .whenbar b::before{content:'· '; color:#5a6478;}
+    .whenbar.none b::before{content:none;}   /* nothing visible here: no duration to lead with */
+    .whenbar.none b{font-size:11.5px;}
   }
 
   /* LIVE status bar — the one line that answers "what is happening right now, to me".
@@ -377,7 +405,13 @@
   /* the remote now sits at the BOTTOM of the phone layout (see the order block), so every
      millimetre above it is a millimetre of the transport row inside the fold — hence the
      tighter top margin here as well as the tighter padding. */
-  @media(max-width:430px){ .timebar{padding:9px 10px 10px; gap:6px; margin-top:4px;} }
+  /* docked to the canvas (see the 760px order block): no top margin, square top corners, and
+     the canvas gives up its own bottom corners so the two read as one instrument */
+  @media(max-width:760px){
+    .timebar{margin-top:0;}
+    canvas#sky, canvas#map, canvas#cosmos{border-bottom-left-radius:0; border-bottom-right-radius:0;}
+  }
+  @media(max-width:430px){ .timebar{padding:9px 10px 10px; gap:6px;} }
   /* the snap row folds on a phone (see #snapTog); on desktop the wrapper is not there at all
      as far as layout is concerned, so #snaps and #ext stay flex items of the bar exactly as
      they always were */
@@ -397,48 +431,107 @@
   #eclBand{position:absolute; top:50%; height:4px; transform:translateY(-50%); background:rgba(232,179,74,0.30); border-radius:2px; pointer-events:none;}
   #maxTick{position:absolute; top:50%; width:2px; height:14px; transform:translate(-50%,-50%); background:var(--accent); border-radius:1px; pointer-events:none;}
   input[type=range]::-webkit-slider-runnable-track{height:4px; background:var(--line); border-radius:2px;}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:26px; height:26px; margin-top:-11px; border-radius:50%; background:var(--accent); border:4px solid var(--bg);}
+  /* box-sizing spelled out rather than inherited from `*`: the declared width has to BE the
+     thumb's box, because THUMB()/placeMarkers() paint the band and the MAX tick on the inset
+     that box creates, and a border counted outside it would put every marker 2×border out.
+     (Chromium happens to apply the universal rule here; Firefox needs it said. Measured, both
+     engines now travel width−26 on desktop and width−34 on a phone.) */
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; box-sizing:border-box;
+                                          width:26px; height:26px; margin-top:-11px;
+                                          border-radius:50%; background:var(--accent);
+                                          border:4px solid var(--bg);}
   input[type=range]::-moz-range-track{height:4px; background:var(--line); border-radius:2px;}
-  /* same BOX as the webkit thumb (26px, 4px of page-coloured border) so the thumb travels the
-     same inset track in both engines — placeMarkers() positions the band and the MAX tick on
-     that inset, and a 20px Firefox thumb would put them 3px out of true */
   input[type=range]::-moz-range-thumb{box-sizing:border-box; width:26px; height:26px;
                                       border-radius:50%; background:var(--accent);
                                       border:4px solid var(--bg);}
+  /* ---------- THE CONTACT MAP (phone) ----------
+     Five snap targets laid out ON the thumb's inset track. Off on desktop, where the snap
+     buttons keep their inline row in the bar. */
+  #snapLine{display:none;}
   /* phone: playback controls get their own full-width row (stretched thirds) ABOVE the
      scrubber; scrubber gets its own row with a bigger thumb; snaps/±3h/FOV wrap below.
      (must sit after the base range rules — same specificity, source order decides) */
   @media(max-width:430px){
-    /* TWO ROWS, and only two: [ scrubber | FOV ] over [ LIVE | PLAY | speed | MOMENTS ].
+    /* TWO ROWS, and only two: [ scrubber + contact map | FOV ] over [ LIVE | PLAY | speed | ±3h ].
        The scrubber is the timeline the whole view rides on, so it sits closest to the canvas
-       it drives; the transport keys act on it and read underneath. C1…C4 and ±3h are
-       navigation to a moment rather than transport, so they fold behind MOMENTS and cost no
-       height until asked for — that alone took two rows off the panel. FOV stays OUT of the
-       fold: it changes what the canvas SHOWS, so it belongs beside the scrubber you are
-       already dragging, not filed under "jump to". Desktop keeps the single inline row
-       (buttons | scrubber | snaps | ±3h | FOV), untouched. */
-    .scrubwrap{order:1; flex:1 1 190px;}
-    #zoom{order:2; flex:0 0 auto; min-height:44px; padding:0 11px;}
+       it drives; the transport keys act on it and read underneath. C1…C4 used to fold behind a
+       MOMENTS key — one more thing to find before you could find anything. They are now drawn
+       ON the track, where they cost 30px, need no tap to appear, and double as the map of the
+       eclipse the handle is travelling through. ±3h takes MOMENTS' old slot in the transport
+       row, so the row count and every button box are unchanged. FOV stays beside the scrubber:
+       it changes what the canvas SHOWS. Desktop keeps its single inline row, untouched. */
+    .scrubwrap{order:1; flex:1 1 190px; flex-wrap:wrap; align-items:flex-start;}
+    .scrubwrap input[type=range]{flex:1 0 100%;}
+    /* the wrapper is two rows tall now, so the markers can no longer hang off its centre —
+       they ride the centre of the 44px slider row, which is where the thumb is */
+    #eclBand, #maxTick{top:22px;}
+    #eclBand{height:8px; border-radius:4px;}
+    #maxTick{height:20px; width:2px;}
+    #zoom{order:2; flex:0 0 auto; min-height:44px; padding:0 11px; align-self:flex-start;}
     .playctl{order:3; flex:1 1 190px;}
     .playctl button{flex:1 1 0; min-width:0; min-height:48px; padding:14px 3px 13px; font-size:13.5px;}
     #live{min-width:0;}
-    /* the three transport keys are equal thirds of their own row here, so the desktop
-       widest-state widths would only push MOMENTS onto a fourth row on a 320px screen. The
-       faces are already fixed-width INSIDE the button (chevron slot + tabular figure), which
-       is what actually keeps the row from re-wrapping on a press. */
     /* the fixed slots stay (they are what stops a press re-wrapping the row) but they are
-       tightened to the millimetre here: on a 320px screen the desktop-width slots pushed
-       MOMENTS onto a fourth row all by themselves. */
+       tightened to the millimetre here: on a 320px screen the desktop-width slots pushed the
+       fourth key onto a row of its own all by themselves. */
     #spd{min-width:0; gap:6px;}
     #spd .spdn{min-width:36px; letter-spacing:.06em;}
-    #snapTog{display:inline-flex; order:4; flex:0 0 auto;}
-    .snapgrp{display:flex; flex-wrap:wrap; gap:6px; order:5; flex:1 0 100%;}
-    .snapgrp.closed{display:none;}
-    #snaps{display:contents;}                       /* the five snap buttons flow with ±3h */
-    .snapgrp button{flex:1 1 auto; min-height:44px; padding:0 6px;}
+    /* MOMENTS is gone from the phone entirely — the map under the track is the moments. The
+       group wrapper goes transparent so ±3h becomes a flex item of the bar in its place, and
+       it must stay so even when the (hidden) toggle left `.closed` behind on a rotate. */
+    #snapTog{display:none;}
+    .snapgrp, .snapgrp.closed{display:contents;}
+    #snaps{display:none;}
+    #ext{order:4; flex:0 0 auto; min-height:48px; padding:0 12px;
+         border:2px solid #333d54; border-bottom-width:3px; border-radius:7px;
+         background:#0f131b; color:#98a3b9; font-size:11.5px; letter-spacing:.1em;}
+    #ext.on{color:var(--accent); border-color:#4a4335; border-bottom-color:var(--accent);}
+    /* ---------- THE HANDLE ----------
+       The one control the whole app is about, and it was a 30px amber disc with a 4px
+       page-coloured rim on a 4px track: over the amber eclipse band it vanished outright.
+       It now gets a thicker track to sit on, a bigger core, a hard dark rim to cut it off
+       whatever is behind it, and two amber rings — so it reads as the brightest object in
+       the panel at any position on the track. box-shadow does not affect the thumb's box,
+       so the marker geometry (THUMB()) is untouched by the rings. */
     input[type=range]{height:44px;}
-    input[type=range]::-webkit-slider-thumb{width:30px; height:30px; margin-top:-13px;}
-    input[type=range]::-moz-range-thumb{width:30px; height:30px;}
+    input[type=range]::-webkit-slider-runnable-track{height:8px; background:#2c3446; border-radius:4px;}
+    input[type=range]::-moz-range-track{height:8px; background:#2c3446; border-radius:4px;}
+    input[type=range]::-webkit-slider-thumb{width:34px; height:34px; margin-top:-13px;
+                                            border:3px solid #08090d;
+                                            box-shadow:0 0 0 2px rgba(255,214,138,0.95),
+                                                       0 0 0 8px rgba(232,179,74,0.20),
+                                                       0 3px 12px rgba(0,0,0,0.85);}
+    input[type=range]::-moz-range-thumb{width:34px; height:34px; border:3px solid #08090d;
+                                        box-shadow:0 0 0 2px rgba(255,214,138,0.95),
+                                                   0 0 0 8px rgba(232,179,74,0.20),
+                                                   0 3px 12px rgba(0,0,0,0.85);}
+    input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 2px #ffe1a8,
+                                                   0 0 0 11px rgba(232,179,74,0.28),
+                                                   0 3px 12px rgba(0,0,0,0.85);}
+    /* ---------- THE CONTACT MAP ----------
+       Pulled up into the slider's own dead space (a 44px input around an 8px track), so five
+       44px tap targets cost 30px of panel. Each button is centred on its time by
+       placeSnapLine(); the hairline is the true time when the button had to be nudged to stay
+       tappable. Type is small and quiet — the handle above must stay the loudest thing here. */
+    #snapLine{display:block; position:relative; flex:1 0 100%; height:44px; margin-top:-14px;}
+    #snapLine button{position:absolute; top:0; height:44px; min-height:44px;
+                     transform:translateX(-50%); padding:14px 7px 0;
+                     background:none; border:none; border-radius:5px;
+                     font-size:10px; letter-spacing:.1em; line-height:1;
+                     color:#8791a6; white-space:nowrap;}
+    #snapLine button i{position:absolute; top:1px; left:calc(50% + var(--dx,0px));
+                       width:1px; height:8px; margin-left:-0.5px;
+                       background:#4d566b; border-radius:1px;}
+    /* the leader: label centre → true tick. When totality collapses to a point, three of
+       these converge on it, which is the truth the fanned-out labels can't tell on their own. */
+    #snapLine button::after{content:''; position:absolute; top:8px; height:1px;
+                            left:calc(50% + var(--lx,0px)); width:var(--adx,0px);
+                            background:#39425640; background:rgba(77,86,107,0.55);}
+    #snapLine button.mx{color:var(--accent);}
+    #snapLine button.mx i{background:var(--accent); height:10px; top:0;}
+    #snapLine button.mx::after{background:rgba(232,179,74,0.5);}
+    #snapLine button:active{color:var(--accent); background:rgba(232,179,74,0.10);}
+    #snapLine button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
   }
   button{font:300 12px/1 system-ui,sans-serif; letter-spacing:.06em; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:9px 12px; cursor:pointer; min-height:34px;}
   button:hover{border-color:var(--accent); color:var(--accent);}
@@ -599,23 +692,45 @@
   #place:focus{outline:none; border-color:var(--accent); background:#0d1016;}
   #geo{flex:0 1 auto; min-height:58px; padding:0 18px; font-size:13px; letter-spacing:.1em;
        border-radius:7px;}
+  /* the icon faces exist only on a phone (see the 430px block); desktop keeps the words */
+  #geo .bi, #share .bi{display:none;}
+  #share.ok{border-color:var(--accent); color:var(--accent);}
   /* the fine-tuning rows below are secondary — a little more air so the panel doesn't read
      as one dense block under the hero */
   #secLoc .row{margin-bottom:11px;}   /* the obstruction row keeps its inline margin-bottom:0 */
   /* phone: comfortably bigger than a form field, nowhere near hero-scale — the canvas and
      the timebar own the screen up top, this must not push the panel into three screens */
+  /* PHONE: ONE ROW, NOT FOUR. This panel was 254px — a prompt sentence, a full-width field,
+     a full-width "Use my location", a full-width "Copy link" and the fine-tune line, five
+     stacked full-width objects for what is really one input with two shortcuts hanging off
+     it. It becomes: the word LOCATION, then [ field | ◎ | ⧉ ], then fine tune. Nothing is
+     lost — both buttons keep 48px square targets and their names in title/aria-label. */
   @media(max-width:430px){
-    .locHero{margin-bottom:6px; padding:8px 10px 9px;}
-    .locHero .lh{margin-bottom:5px; line-height:1.2;}
-    .locHero .lhRow{gap:6px;}
-    #place{flex:1 1 100%; min-height:48px; font-size:17px; padding:0 12px;}
+    /* the locHero's own box is redundant inside #secLoc's box at this width — the amber rule
+       stays as the "this matters" mark, the padding and the border go */
+    .locHero{margin-bottom:0; padding:0 0 0 9px; background:none;
+             border:none; border-left:3px solid var(--accent); border-radius:0;}
+    .locHero .lh{margin-bottom:5px; line-height:1.2; font-size:0; letter-spacing:0;}
+    .locHero .lh::after{content:'LOCATION'; font-size:10.5px; letter-spacing:.24em;}
+    .locHero .lhRow{gap:6px; flex-wrap:nowrap;}
+    #place{flex:1 1 auto; min-width:0; min-height:48px; font-size:17px; padding:0 12px;}
     #place::placeholder{font-size:14.5px;}
-    #geo{flex:1 1 100%; min-height:44px;}
+    #geo, #share{flex:0 0 48px; width:48px; min-width:48px; min-height:48px; padding:0;
+                 display:inline-flex; align-items:center; justify-content:center;
+                 border:1px solid #3a4459; border-radius:7px; background:#0f131b;}
+    #geo .bi, #share .bi{display:block; width:21px; height:21px; fill:none;
+                         stroke:#b3bdcf; stroke-width:1.5; stroke-linecap:round;}
+    #geo .bi .f{fill:#b3bdcf; stroke:none;}
+    #geo:hover .bi, #share:hover .bi, #share.ok .bi{stroke:var(--accent);}
+    #share.ok .bi{stroke:var(--accent);}
+    #geo .bt, #share .bt{display:none;}
     /* the amber prompt IS the heading here — "Location + Date" above it is a second title for
        the same panel, and on a phone that costs a line the canvas wants back */
-    #secLoc{padding:10px 11px 11px;}
+    #secLoc{padding:9px 11px 9px;}
     #secLoc > h2{display:none;}
     #secLoc .row{margin-bottom:7px;}
+    /* the fine-tune instruments were the last sub-44px targets left on a phone */
+    #locFine input[type=number], #locFine input[type=date]{min-height:44px;}
   }
   /* FINE TUNE fold. Desktop: the rows are open and the toggle is not there at all — the
      panel reads exactly as it always has. Phone: one quiet line in the same register as the
@@ -749,7 +864,10 @@
     <button class="cvEnter" id="cvEnter" type="button">&#9662; enter</button>
   </div>
 </div>
-<header><h1>ECLIPSE</h1><span>previsualisation — ground view</span></header>
+<!-- the wordmark, and nothing else. "previsualisation — ground view" sat here for months
+     saying nothing a visitor needed: the three tabs one line below already name what the
+     thing does, and on a phone it cost a whole row above the picture. -->
+<header><h1>ECLIPSE</h1></header>
 <div class="wrap">
 
   <div class="tabs viewtabs">
@@ -803,9 +921,14 @@
     </span>
     <b id="whenBig">—</b>
     <!-- same sentence, two lengths: the full one everywhere, a one-line cut on a phone. CSS
-         picks, so a rotation or a resize can never leave the wrong one on screen. -->
+         picks, so a rotation or a resize can never leave the wrong one on screen.
+         The phone cut is in TWO pieces so the amber window (#whenBig above) can be set
+         between them by flex order — "1m 27s of totality · 20:28:53 – 20:30:19 · glasses off
+         only then" reads as one small line, and the big type in this block goes to the clock
+         that actually moves. -->
     <span class="ws wsL" id="whenSub"></span>
     <span class="ws wsS" id="whenSubS"></span>
+    <span class="ws wsS wsS2" id="whenSubS2"></span>
   </div>
 
   <div class="live">
@@ -838,6 +961,13 @@
     <div class="scrubwrap">
       <div id="eclBand"></div><div id="maxTick"></div>
       <input type="range" id="scrub" min="0" max="10000" value="5000">
+      <!-- THE CONTACT MAP (phone only — CSS). C1 · C2 · MAX · C3 · C4 laid along the thumb's
+           own inset track at their true times, so the row is both a set of snap targets and a
+           picture of where in the eclipse the handle currently is. It replaces the MOMENTS
+           fold: same five buttons, no tap to reveal them, and no row of height when the
+           eclipse isn't visible from here. Positions are written by placeSnapLine(); the
+           hairline <i> is the TRUE time, the button may be nudged sideways to stay tappable. -->
+      <div id="snapLine" role="group" aria-label="jump to a moment of the eclipse"><button data-snap="c1"><i></i>C1</button><button data-snap="c2"><i></i>C2</button><button data-snap="mx" class="mx"><i></i>MAX</button><button data-snap="c3"><i></i>C3</button><button data-snap="c4"><i></i>C4</button></div>
     </div>
     <!-- the fold key exists only on a phone (CSS); above 430px the wrapper is display:contents
          and the snap buttons sit inline in the bar exactly as they always have -->
@@ -860,15 +990,21 @@
            the page's primary call to action, so it gets a prompt, a hero-sized field and the
            app's "this matters" mark (the when-bar's amber left rule). Copy link moves to its
            own line below: it is a thing you do after, not the first thing you meet. -->
+      <!-- On a phone the prompt is the single word LOCATION (::after, so the desktop label —
+           and the input's accessible name — are untouched), and both buttons collapse to
+           icon squares beside the field: the sentence, the two full-width buttons and the
+           separate Copy-link row were three rows of chrome around one input. -->
       <div class="locHero">
         <label class="lh" for="place">Where will you be?</label>
         <div class="lhRow">
           <input type="text" id="place" list="placeList" placeholder="type a city…" autocomplete="off">
-          <button id="geo">Use my location</button>
+          <button id="geo" title="use my location" aria-label="Use my location"><svg class="bi" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="4.2"/><circle cx="10" cy="10" r="1.1" class="f"/><path d="M10 1.2v3.1M10 15.7v3.1M1.2 10h3.1M15.7 10h3.1"/></svg><span class="bt">Use my location</span></button>
         </div>
       </div>
-      <div class="row">
-        <button id="share" title="copy a link to this exact view">Copy link</button>
+      <!-- hidden on a phone by shareHome's own JS, which is also what moved the button up
+           into the field row — if the script never runs, the row and its button stay put -->
+      <div class="row" id="shareHome">
+        <button id="share" title="copy a link to this exact view" aria-label="Copy link"><svg class="bi" viewBox="0 0 20 20" aria-hidden="true"><path d="M8.4 11.6a3.4 3.4 0 0 0 5.1.4l2.6-2.6a3.4 3.4 0 0 0-4.8-4.8l-1.5 1.5"/><path d="M11.6 8.4a3.4 3.4 0 0 0-5.1-.4L3.9 10.6a3.4 3.4 0 0 0 4.8 4.8l1.5-1.5"/></svg><span class="bt">Copy link</span></button>
       </div>
       <div class="row" id="shareRow" hidden style="margin-bottom:8px">
         <label for="shareUrl">copy this link</label>
@@ -1296,7 +1432,7 @@ const RANGE_LABEL = { eclipse:'C1–C4', ext:'±3h', global:'GLOBAL' };
 // and you were 6–9 min past C4, with the sun already below the horizon. Reported as "the
 // middle of the slider goes to the end of the eclipse". Markers now use the thumb's own
 // geometry, so handle position, displayed time and marker all mean the same thing.
-const THUMB = () => innerWidth <= 430 ? 30 : 26;   // must match the ::-*-range-thumb widths
+const THUMB = () => innerWidth <= 430 ? 34 : 26;   // must match the ::-*-range-thumb widths
 const trackPos = f => `calc(${(THUMB()/2).toFixed(2)}px + ${(f*100).toFixed(4)}% - ${(f*THUMB()).toFixed(3)}px)`;
 const trackLen = d => `calc(${(d*100).toFixed(4)}% - ${(d*THUMB()).toFixed(3)}px)`;
 function placeMarkers(){
@@ -1310,6 +1446,56 @@ function placeMarkers(){
     band.style.width = trackLen(Math.max(0.004, b - a));
   }
   $('maxTick').style.left = trackPos(f(eclWin.mx));
+  placeSnapLine();
+}
+/* THE CONTACT MAP (phone). Same inset track as the markers above — a label sits under the
+   handle position it jumps to — but with one honest compromise: totality is 1m27s inside a
+   2h48m window, so C2, MAX and C3 land within a pixel of each other and three 44px targets
+   cannot share one pixel. The buttons are pushed apart to the minimum tappable spacing while
+   each keeps a hairline drawn at its TRUE position (--dx is the displacement), so the reading
+   stays truthful and the row stays operable. Nothing here moves the handle's own geometry. */
+function placeSnapLine(){
+  const line = $('snapLine');
+  if(!line || !eclWin || !span) return;
+  line.hidden = false;                 // it may have been folded away by a NONE location
+  const W = line.clientWidth;
+  if(!W) return;                       // display:none on desktop — nothing to lay out
+  const th = THUMB(), usable = Math.max(1, W - th);
+  const f = ms => clamp((ms - span.t0)/(span.t1 - span.t0), 0, 1);
+  const items = [];
+  for(const b of line.children){
+    const c = contacts.find(x => x.key === b.dataset.snap);
+    b.style.display = c ? '' : 'none';               // no C2/C3 without totality, none at all if NONE
+    if(c) items.push({ b, x: th/2 + f(c.ms) * usable, px: 0 });
+  }
+  // nothing of this eclipse is visible here: the row would be 44px of empty panel
+  if(!items.length){ line.hidden = true; return; }
+  const GAP = 38, HW = 20;                            // min centre spacing, and half a label
+  items.forEach(it => it.px = it.x);
+  for(let i = 1; i < items.length; i++)
+    if(items[i].px - items[i-1].px < GAP) items[i].px = items[i-1].px + GAP;
+  if(items.length && items[items.length-1].px > W - HW){
+    items[items.length-1].px = W - HW;
+    for(let i = items.length-2; i >= 0; i--)
+      if(items[i+1].px - items[i].px < GAP) items[i].px = items[i+1].px - GAP;
+  }
+  if(items.length && items[0].px < HW){
+    items[0].px = HW;
+    for(let i = 1; i < items.length; i++)
+      if(items[i].px - items[i-1].px < GAP) items[i].px = items[i-1].px + GAP;
+  }
+  for(const it of items){
+    const dx = it.x - it.px;
+    it.b.style.left = it.px.toFixed(1) + 'px';
+    it.b.style.setProperty('--dx', dx.toFixed(1) + 'px');
+    // the leader is drawn from the smaller of the two x's, |dx| long — done here rather than
+    // with CSS min()/max() on a custom property, which is one browser quirk too many for a
+    // file that has to render offline in whatever is installed
+    // under a few px there is nothing to lead to and the stub just reads as a stray serif
+    const led = Math.abs(dx) < 4 ? 0 : dx;
+    it.b.style.setProperty('--lx', Math.min(0, led).toFixed(1) + 'px');
+    it.b.style.setProperty('--adx', Math.abs(led).toFixed(1) + 'px');
+  }
 }
 function applyRange(mode){
   if(!eclWin) return;
@@ -3568,13 +3754,21 @@ function updateWhen(){
   /* One sentence, two lengths. The full one is unchanged; the phone cut says the same thing in
      a single line, because on a 375px screen this block was 60% of the canvas height and prose
      length is the first thing that should give — before padding, and long before the time. */
-  const sub = (long, short) => { $('whenSub').textContent = long; $('whenSubS').textContent = short; };
+  /* The phone cut is now TWO fragments that sit either side of the amber window on one line
+     (see the 430px .whenbar rules): [before] · WINDOW · [after]. The place name is dropped
+     from it — it is the LOCATION field one block down, and on a 375px screen repeating it
+     here was worth a whole wrapped row. */
+  const sub = (long, short, short2) => {
+    $('whenSub').textContent = long;
+    $('whenSubS').textContent = short;
+    $('whenSubS2').textContent = short2 || '';
+  };
   if(ecl.kind === 'none'){
     $('whenLbl').textContent = 'NOT HERE';
     $('whenBig').textContent = 'not visible';
     $('whenTz').textContent = '';
     sub(`${place} sees nothing of this eclipse — tap the red band on the PATH map, or jump to this location's next one below.`,
-        `${place} misses this one — see the PATH map`);
+        '', `${place} misses this one — see the PATH map`);
     bar.classList.add('none');
     return;
   }
@@ -3591,8 +3785,8 @@ function updateWhen(){
     $('whenTz').textContent = tz;
     sub(`${place} — ${durTxt} of ${mid}, local time` +
           (belowNow ? ', but below the horizon here' : '. Glasses come off only between those two times.'),
-        `${place} — ${durTxt} of ${mid}` +
-          (belowNow ? ', below the horizon here' : '; glasses off only then'));
+        `${durTxt} of ${mid}`,
+        (tz ? tz + ' · ' : '') + (belowNow ? 'below the horizon here' : 'glasses off only then'));
     bar.classList.add('tot');
   }else{
     $('whenLbl').textContent = 'MAXIMUM';
@@ -3600,8 +3794,8 @@ function updateWhen(){
     $('whenTz').textContent = tz;
     sub(`${place} — maximum ${obsc.toFixed(0)}% covered, local time` +
           (belowNow ? ', but below the horizon here' : '. No totality here, so eye protection stays on throughout.'),
-        `${place} — ${obsc.toFixed(0)}% at maximum` +
-          (belowNow ? ', below the horizon here' : '; eye protection throughout'));
+        `${obsc.toFixed(0)}% covered at maximum`,
+        (tz ? tz + ' · ' : '') + (belowNow ? 'below the horizon here' : 'eye protection throughout'));
   }
 }
 /* The clock that MOVES, in the when-bar next to the answer. Repainted every frame rather
@@ -4471,7 +4665,9 @@ $('ext').addEventListener('click', ()=>{
   const i = RANGES.indexOf(state.range || 'eclipse');
   applyRange(RANGES[(i+1) % RANGES.length]);
 });
-document.querySelectorAll('#snaps button').forEach(b=>{
+/* the desktop snap row and the phone contact map are the same five jumps, so they share one
+   handler — whichever set the stylesheet is showing is the one that can be pressed */
+document.querySelectorAll('#snaps button, #snapLine button').forEach(b=>{
   b.addEventListener('click', ()=>{
     const c = contacts.find(x=>x.key===b.dataset.snap);
     if(c){ if(state.live) setLive(false); state.t = c.ms; state.playing=false; setPlayFace(); syncScrub(); }
@@ -4807,7 +5003,15 @@ $('lon').addEventListener('change', customLoc);
 $('share').addEventListener('click', async ()=>{
   const url = buildShareUrl();
   const btn = $('share');
-  const done = msg => { btn.textContent = msg; setTimeout(()=> btn.textContent = 'Copy link', 1600); };
+  /* the face is an icon on a phone and a word on desktop, so the confirmation writes to the
+     label SPAN (never to the button, which would eat the icon) and also flips a class — that
+     amber flash is the only feedback there is once the word is hidden */
+  const done = msg => {
+    const l = btn.querySelector('.bt');
+    if(l) l.textContent = msg;
+    btn.classList.add('ok');
+    setTimeout(()=>{ if(l) l.textContent = 'Copy link'; btn.classList.remove('ok'); }, 1600);
+  };
   if(navigator.share && matchMedia('(pointer:coarse)').matches){
     try{ await navigator.share({ title:'ECLIPSE', url }); return; }catch(e){ /* fall through */ }
   }
@@ -4915,6 +5119,25 @@ function setTab(tab){
 (function(){
   const d = $('cosScale');
   try{ if(d && matchMedia('(max-width:430px)').matches) d.open = false; }catch(e){}
+})();
+/* COPY LINK: on a phone it rides in the field row as a 48px icon beside "use my location",
+   which is a whole row of panel saved; anywhere else it keeps its own line under the field.
+   Done here rather than in CSS because they are in different parents — and done this way
+   round on purpose: the markup ships in the DESKTOP arrangement, so if this never runs the
+   button is still exactly where it always was. */
+(function(){
+  const btn = $('share'), home = $('shareHome'), row = document.querySelector('.locHero .lhRow');
+  if(!btn || !home || !row) return;
+  try{
+    const mq = matchMedia('(max-width:430px)');
+    const sync = e => {
+      if(e.matches){ if(btn.parentElement !== row) row.appendChild(btn); home.hidden = true; }
+      else{ if(btn.parentElement !== home) home.appendChild(btn); home.hidden = false; }
+    };
+    sync(mq);
+    if(mq.addEventListener) mq.addEventListener('change', sync);
+    else if(mq.addListener) mq.addListener(sync);
+  }catch(e){}
 })();
 // LOCATION fine-tuning rows: ship open (desktop / no-JS state), folded on a phone, where the
 // panel now sits between the playback controls and the times. Unlike the caveat above this
