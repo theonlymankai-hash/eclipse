@@ -384,8 +384,10 @@
        is the only thing distinguishing "the wall clock" from "the time you scrubbed to".)
        The amber TOTALITY label stays: that one names a STATIC range, and without it the two
        times in this block would be indistinguishable. It moves down to lead the compact line. */
-    .whenbar .wnow{order:0; flex:1 0 100%; margin:0 0 1px; justify-content:center;
-                   align-items:baseline;}
+    /* The canvas stamp carries the live clock at 32px directly above the scrubber, so a second
+       copy 370px down the page was the same number twice on one screen. The when-bar goes back
+       to being purely the answer. */
+    .whenbar .wnow{display:none;}
     .whenbar .wnl{display:none;}
     .whenbar .wl{order:3;}
     .whenbar .wnt{font-size:30px; letter-spacing:.01em;}
@@ -1860,6 +1862,65 @@ function resize(){
     cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
   }
 }
+
+/* ---------- THE CANVAS TIME STAMP ----------
+   The clock printed on the picture, shared by all three views. Sizes here are chosen in CSS px
+   and converted, because every other number on these canvases is in the backing store: on a
+   dpr-2 phone the old device-px clamp bottomed out at 18 device px — nine CSS px — which is
+   why the clock was unreadable on a phone while the desktop looked fine. Phones get roughly
+   double, with a heavier halo and a plain rather than light weight to hold it over a noon sky,
+   over totality and over a night sky alike; the lines under it stay small, because the time is
+   the thing being read. Wide screens keep the original device-px clamp, to the pixel.
+   The location chip owns the canvas top-left on a phone, so the stamp measures itself against
+   it: it keeps the top line while the text clears the chip, shrinks to a floor to try, and
+   only then drops below the chip's reserve, where the full width is its own (the PATH title
+   card already does exactly that). */
+const STAMP_MQ = (()=>{ try{
+  return matchMedia('(max-width:430px) and (orientation:portrait), (pointer:coarse) and (orientation:portrait)');
+}catch(e){ return null; } })();
+function stampMetrics(c, w, cssW, l1){
+  const k = w / (cssW || w);                                  // device px per CSS px (dpr, capped at 2)
+  const phone = !!(STAMP_MQ && STAMP_MQ.matches);
+  const pad = Math.round(w*0.012) + 8;
+  const m = {
+    pad, phone, k,
+    fs1: phone ? Math.round(clamp(w/k/11, 26, 34)*k) : Math.round(clamp(w/40, 14, 24)),  // the time
+    fs2: phone ? Math.round(clamp(w/k/28, 11, 14)*k) : Math.round(clamp(w/72, 10, 14)),  // place / coords / UTC
+    y: pad,
+    weight: phone ? '400 ' : '300 ',
+    halo: phone ? Math.max(3, Math.round(3*k)) : 3,
+    chipR: phone && CHIP_RESERVE.h ? (CHIP_RESERVE.w + 8) * k : 0,   // chip's right edge + a gutter
+    below: phone && CHIP_RESERVE.h ? Math.round(CHIP_RESERVE.h * k) : 0
+  };
+  if(m.chipR){
+    const room = (w - pad) - m.chipR;
+    c.font = m.weight + m.fs1 + 'px monospace';
+    const need = c.measureText(l1).width;
+    if(need > room){
+      const fit = Math.floor(m.fs1 * room / need);            // monospace: width scales with size
+      if(fit >= Math.round(22*k)) m.fs1 = fit;                // still well up on the stamp it replaces
+      else m.y = m.below;                                     // nothing fits beside it — sit under the chip
+    }
+  }
+  return m;
+}
+// The countdown line, sized and placed. It is the longest string any of the views prints and
+// the only one that can reach across to the chip, and it grew with the time line it hangs off.
+// So: fit it to the picture's width first, then, if it would still run under the chip — or
+// under the PATH title card, the only other thing painted in that corner — take the row below.
+// Leaves the font set for the caller.
+function stampCountdown(c, M, w, y, txt, big, avoid){
+  let fs = big ? Math.round(M.fs1*1.05) : Math.round(M.fs2*1.25);
+  const face = ()=> (big ? '600 ' : '300 ') + fs + 'px monospace';
+  c.font = face();
+  const room = w - 2*M.pad;
+  let tw = c.measureText(txt).width;
+  if(tw > room){ fs = Math.max(8, Math.floor(fs*room/tw)); c.font = face(); tw = c.measureText(txt).width; }
+  const left = ()=> w - M.pad - tw;
+  if(M.chipR && y < M.below && left() < M.chipR) y = M.below;
+  if(avoid && y < avoid.y1 && left() < avoid.x1 + M.pad) y = Math.round(avoid.y1 + M.halo*2);
+  return { fs, y };
+}
 const CARDS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 
 // static background starfield — deterministic az/alt grid seed, so it pans/zooms with the view
@@ -2091,46 +2152,52 @@ function draw(f){
   // corner info overlay (top-right, clear of the altitude ruler) — canvas self-describes
   // for screenshots. Also suppressed under the dimmed cover (see the ruler note above).
   if(!coverUp){
-    const pad = Math.round(w*0.012) + 8;
-    // Sizes are chosen in CSS px and then converted, because `w` is the backing store: on a
-    // dpr-3 phone the old device-px clamp bottomed out at 24 device px — eight CSS px, which
-    // is why the clock was unreadable there while desktop looked fine.
-    const PR = w / (cv.clientWidth || w);
-    const cssW = w / PR;
-    const fs1 = Math.round(clamp(cssW/16, 18, 24) * PR);   // time — the prominent line
-    const fs2 = Math.round(clamp(cssW/30, 10, 13) * PR);   // place / coords
-    const halo = (txt,x,y)=>{ ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(10,12,16,0.55)'; ctx.strokeText(txt,x,y); };
-    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-    const x = w - pad; let y = pad;
     const l1 = fmtLocal(f.ms) + (tzAbbr ? ' ' + tzAbbr : '');
-    ctx.font = '300 ' + fs1 + 'px monospace';
-    halo(l1,x,y); ctx.fillStyle = 'rgba(201,209,224,0.92)'; ctx.fillText(l1,x,y);
+    const M = stampMetrics(ctx, w, cv.clientWidth, l1);      // sizes, and where the chip lets it sit
+    const pad = M.pad, fs1 = M.fs1, fs2 = M.fs2;
+    const haloInk = M.phone ? 'rgba(10,12,16,0.72)' : 'rgba(10,12,16,0.55)';
+    const halo = (txt,x,y)=>{ ctx.lineWidth = M.halo; ctx.strokeStyle = haloInk; ctx.strokeText(txt,x,y); };
+    // a halo thick enough to carry the phone-sized type spits mitre spikes off the ascenders of
+    // a monospace face; round joins is the whole fix. Phones only, so the wide-screen stamp
+    // stays pixel-for-pixel what it was. (Reset with the alignment at the end of the block.)
+    if(M.phone){ ctx.lineJoin = 'round'; ctx.lineCap = 'round'; }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    const x = w - pad; let y = M.y;
+    ctx.font = M.weight + fs1 + 'px monospace';
+    halo(l1,x,y); ctx.fillStyle = M.phone ? 'rgba(238,244,255,0.97)' : 'rgba(201,209,224,0.92)'; ctx.fillText(l1,x,y);
+    // the drop to the next line belongs to the line that was actually drawn — the two small
+    // lines below are both optional, and a fixed step taken off a time line that is now twice
+    // the size would print the next one straight through it
+    let lead = Math.round(fs1*1.3);
     // The place name is the chip's job wherever there is a chip, and a phone screenshot would
     // otherwise carry it twice — top-left in amber and again here. Where there is no chip
     // (desktop, no-JS) this is still the only thing naming the place on the picture.
     if(!CHIP_RESERVE.h){
-      y += Math.round(fs1*1.3);
+      y += lead; lead = Math.round(fs2*1.45);
       const l2 = pickedName || 'custom';
       ctx.font = fs2 + 'px monospace';
       halo(l2,x,y); ctx.fillStyle = 'rgba(232,179,74,0.85)'; ctx.fillText(l2,x,y);
     }
     if(cv.clientWidth >= 480){   // phone width: drop the coords line, keep the sky clean
-      y += Math.round(fs2*1.45);
+      y += lead; lead = Math.round(fs2*1.45);
+      ctx.font = fs2 + 'px monospace';
       const l3 = state.obs.lat.toFixed(2) + ', ' + state.obs.lon.toFixed(2);
       halo(l3,x,y); ctx.fillStyle = 'rgba(150,158,175,0.8)'; ctx.fillText(l3,x,y);
     }
     // the countdown, on the canvas itself — it has to survive a screenshot and be readable
     // across a field at arm's length, so during totality it is the biggest thing on screen
-    if(liveSt && liveSt.near){
+    // Only when the LIVE bar below is off screen or absent — otherwise this is the same
+    // sentence twice on one phone screen, which it was.
+    if(liveSt && liveSt.near && !M.phone){
       const big = liveSt.lvl >= 2;
-      const fs3 = big ? Math.round(fs1*1.05) : Math.round(fs2*1.25);
-      y += Math.round(fs2*2.0);
-      ctx.font = (big ? '600 ' : '300 ') + fs3 + 'px monospace';
-      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(10,12,16,0.7)'; ctx.strokeText(liveSt.head,x,y);
+      y += Math.max(lead, Math.round(fs2*2.0));
+      y = stampCountdown(ctx, M, w, y, liveSt.head, big).y;
+      ctx.lineWidth = Math.max(4, M.halo + 1); ctx.strokeStyle = 'rgba(10,12,16,0.7)'; ctx.strokeText(liveSt.head,x,y);
       ctx.fillStyle = liveSt.lvl === 3 ? 'rgba(255,217,160,0.98)' : 'rgba(232,179,74,0.92)';
       ctx.fillText(liveSt.head,x,y);
     }
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.lineJoin = 'miter'; ctx.lineCap = 'butt';
   }
 }
 function ellipse(x,y,rx,ry,fill){ ctx.fillStyle = fill; ctx.beginPath(); ctx.ellipse(x,y,Math.max(rx,0.5),Math.max(ry,0.5),0,0,7); ctx.fill(); }
@@ -2190,7 +2257,8 @@ const COAST = (()=>{
    umbra ellipse and the pin are redrawn per frame. */
 const R_EQ = 6378.137, R_PO = 6356.752, ZS = R_EQ/R_PO;
 const mapCv = $('map'), mapCtx = mapCv.getContext('2d');
-const MAP = { bounds:null, path:[], stat:null, statKey:'', distKm:null, building:false, mode3d:false };
+// titleBox: where buildStatic left the title card, so the clock overlay can step around it
+const MAP = { bounds:null, path:[], stat:null, statKey:'', distKm:null, building:false, mode3d:false, titleBox:null };
 const CONTOURS = [0.2, 0.4, 0.6, 0.8, 0.95];
 const MAP_SPAN_MIN = 0.6, MAP_SPAN_MAX = 150;
 
@@ -3047,7 +3115,12 @@ function buildStatic(){
   c.textAlign = 'left'; c.textBaseline = 'top';
   const tw = c.measureText(title).width;
   c.fillStyle = 'rgba(7,12,20,0.72)';
-  c.fillRect(0, ty, tw + base*22, clamp(w/58,11,17)*1.45 + clamp(w/85,9,12)*1.6 + base*14);
+  const tbw = tw + base*22, tbh = clamp(w/58,11,17)*1.45 + clamp(w/85,9,12)*1.6 + base*14;
+  c.fillRect(0, ty, tbw, tbh);
+  // published for the clock overlay: the countdown is right-aligned and, at phone sizes, long
+  // enough to reach back across this card. The card is baked into this bitmap, so this is the
+  // only place that knows where it ended up (same backing dimensions as mapCv — no conversion).
+  MAP.titleBox = { x1: tbw, y1: ty + tbh };
   c.lineWidth = base*4; c.strokeStyle = 'rgba(7,12,20,0.85)';
   c.strokeText(title, base*10, ty + base*9);
   c.fillStyle = 'rgba(255,170,120,0.95)'; c.fillText(title, base*10, ty + base*9);
@@ -3277,34 +3350,40 @@ function drawMap(){
   }
 
   // clock overlay — all tabs show the same moment
-  drawClock(mapCtx, w);
+  drawClock(mapCtx, w, cw, MAP.titleBox);
   MAP.drawGlobe = null;                           // never leaks outside this frame's dynamics
 }
 
 // top-right clock + live countdown — shared by the PATH map and the COSMOS view
-function drawClock(c, w){
-  const pad = Math.round(w*0.012) + 8;
-  const fs1 = Math.round(clamp(w/40, 14, 24)), fs2 = Math.round(clamp(w/72, 10, 14));
-  c.textAlign = 'right'; c.textBaseline = 'top';
-  let ty = pad;
+// cssW is the element's laid-out width — stampMetrics needs it to tell device px from CSS px.
+// avoid is anything already painted across this corner (the PATH title card), for the countdown.
+function drawClock(c, w, cssW, avoid){
   const l1 = fmtLocal(state.t) + (tzAbbr ? ' ' + tzAbbr : '');
-  c.font = '300 ' + fs1 + 'px monospace';
-  c.lineWidth = 3; c.strokeStyle = 'rgba(7,12,20,0.7)';
-  c.strokeText(l1, w - pad, ty); c.fillStyle = 'rgba(226,234,248,0.95)'; c.fillText(l1, w - pad, ty);
+  const M = stampMetrics(c, w, cssW, l1);
+  const pad = M.pad, fs1 = M.fs1, fs2 = M.fs2;
+  if(M.phone){ c.lineJoin = 'round'; c.lineCap = 'round'; }   // see the sky stamp: no mitre spikes
+  c.textAlign = 'right'; c.textBaseline = 'top';
+  let ty = M.y;
+  c.font = M.weight + fs1 + 'px monospace';
+  c.lineWidth = M.halo; c.strokeStyle = M.phone ? 'rgba(7,12,20,0.8)' : 'rgba(7,12,20,0.7)';
+  c.strokeText(l1, w - pad, ty);
+  c.fillStyle = M.phone ? 'rgba(238,244,255,0.97)' : 'rgba(226,234,248,0.95)';
+  c.fillText(l1, w - pad, ty);
   ty += Math.round(fs1*1.3);
   const l2 = fmtUTC(state.t) + ' UTC';
   c.font = fs2 + 'px monospace';
+  c.lineWidth = 3; c.strokeStyle = 'rgba(7,12,20,0.7)';
   c.strokeText(l2, w - pad, ty); c.fillStyle = 'rgba(150,162,182,0.9)'; c.fillText(l2, w - pad, ty);
   if(liveSt && liveSt.near){                      // same countdown as the sky view
     const big = liveSt.lvl >= 2;
-    const fs3 = big ? Math.round(fs1*1.05) : Math.round(fs2*1.25);
     ty += Math.round(fs2*2.0);
-    c.font = (big ? '600 ' : '300 ') + fs3 + 'px monospace';
-    c.lineWidth = 4; c.strokeStyle = 'rgba(7,12,20,0.75)'; c.strokeText(liveSt.head, w - pad, ty);
+    ty = stampCountdown(c, M, w, ty, liveSt.head, big, avoid).y;
+    c.lineWidth = Math.max(4, M.halo + 1); c.strokeStyle = 'rgba(7,12,20,0.75)'; c.strokeText(liveSt.head, w - pad, ty);
     c.fillStyle = liveSt.lvl === 3 ? 'rgba(255,217,160,0.98)' : 'rgba(232,179,74,0.92)';
     c.fillText(liveSt.head, w - pad, ty);
   }
   c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+  c.lineJoin = 'miter'; c.lineCap = 'butt';
 }
 
 /* --- map interaction: wheel zoom, drag pan/rotate, pinch, tap to set location --- */
@@ -3696,7 +3775,7 @@ function drawCosmos(){
   }
   c.fillStyle = 'rgba(150,162,182,0.75)';
   c.fillText('distances compressed · directions real', pad, h - pad);
-  drawClock(c, w);
+  drawClock(c, w, cw);
   COS.ms = performance.now() - tPerf;
 }
 
