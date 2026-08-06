@@ -135,6 +135,13 @@
   #viewSky{order:2;}
   #viewPath:not([hidden]), #viewCosmos:not([hidden]){display:contents;}
   #viewPath > .mapwrap, #viewCosmos > .mapwrap{order:2;}
+  #tbClock{display:none;}
+  @media(max-width:760px){
+    /* the clock rides at the top of the remote, directly above the scrubber */
+    #tbClock{display:block; order:0; flex:1 0 100%; text-align:center; margin:0 0 6px; line-height:1;}
+    #tbClock .wnt{font-size:34px; letter-spacing:.01em; color:var(--ink); font-weight:300;}
+    #tbClock .wnl{display:none;}
+  }
   .timebar{order:10;}                        /* the instruments — directly under the canvas */
   .whenbar{order:20;}                        /* "at what time" */
   .livebar{order:30;}                        /* "how long until" */
@@ -387,7 +394,6 @@
     /* The canvas stamp carries the live clock at 32px directly above the scrubber, so a second
        copy 370px down the page was the same number twice on one screen. The when-bar goes back
        to being purely the answer. */
-    .whenbar .wnow{display:none;}
     .whenbar .wnl{display:none;}
     .whenbar .wl{order:3;}
     .whenbar .wnt{font-size:30px; letter-spacing:.01em;}
@@ -1066,6 +1072,9 @@
   <div class="livebar" id="liveBar" hidden><b id="liveHead"></b><span id="liveSub"></span></div>
 
   <div class="timebar">
+    <!-- On a phone the live clock is relocated here by JS (see moveClockToTimebar): the number
+         you watch belongs against the control your thumb is on, not 370px down the page. -->
+    <div id="tbClock"></div>
     <div class="playctl">
       <button id="live" title="follow real time"><i></i>LIVE</button>
       <!-- transport glyph, not a word: "PLAY" → "PAUSE" is a wider label, and on a phone that
@@ -2008,7 +2017,17 @@ function recomputeEclipse(){
   try{ computePath(); }
   catch(err){ MAP.path = []; MAP.distKm = null; MAP.stat = null; MAP.statKey = ''; console.warn('path compute failed:', err); }
   updateReadout();
-  updateObstVerdict();
+  // The live clock lives in the when-bar on desktop and at the top of the remote on a phone —
+// one node, moved, so there is never a second copy to drift out of sync.
+(function(){
+  const mq = matchMedia('(max-width:760px)');
+  const node = $('whenNow'), mount = $('tbClock'), home = node && node.parentNode;
+  if(!node || !mount || !home) return;
+  const place = () => { (mq.matches ? mount : home).appendChild(node); };
+  place();
+  mq.addEventListener ? mq.addEventListener('change', place) : mq.addListener(place);
+})();
+updateObstVerdict();
   updatePhoto();
   updateNovice();
   updateMapNote();
@@ -2142,7 +2161,7 @@ function stampMetrics(c, w, cssW, l1){
   const pad = Math.round(w*0.012) + 8;
   const m = {
     pad, phone, k,
-    fs1: phone ? Math.round(clamp(w/k/11, 26, 34)*k) : Math.round(clamp(w/40, 14, 24)),  // the time
+    fs1: phone ? Math.round(clamp(w/k/22, 14, 17)*k) : Math.round(clamp(w/40, 14, 24)),  // the time
     fs2: phone ? Math.round(clamp(w/k/28, 11, 14)*k) : Math.round(clamp(w/72, 10, 14)),  // place / coords / UTC
     y: pad,
     weight: phone ? '400 ' : '300 ',
@@ -2156,7 +2175,7 @@ function stampMetrics(c, w, cssW, l1){
     const need = c.measureText(l1).width;
     if(need > room){
       const fit = Math.floor(m.fs1 * room / need);            // monospace: width scales with size
-      if(fit >= Math.round(22*k)) m.fs1 = fit;                // still well up on the stamp it replaces
+      if(fit >= Math.round(12*k)) m.fs1 = fit;                // still well up on the stamp it replaces
       else m.y = m.below;                                     // nothing fits beside it — sit under the chip
     }
   }
