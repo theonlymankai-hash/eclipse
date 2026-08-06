@@ -2350,8 +2350,13 @@ function draw(f){
   // for screenshots. Also suppressed under the dimmed cover (see the ruler note above).
   if(!coverUp){
     const pad = Math.round(w*0.012) + 8;
-    const fs1 = Math.round(clamp(w/40, 14, 24));   // time — the prominent line
-    const fs2 = Math.round(clamp(w/72, 10, 14));   // place / coords
+    // Sizes are chosen in CSS px and then converted, because `w` is the backing store: on a
+    // dpr-3 phone the old device-px clamp bottomed out at 24 device px — eight CSS px, which
+    // is why the clock was unreadable there while desktop looked fine.
+    const PR = w / (cv.clientWidth || w);
+    const cssW = w / PR;
+    const fs1 = Math.round(clamp(cssW/16, 18, 24) * PR);   // time — the prominent line
+    const fs2 = Math.round(clamp(cssW/30, 10, 13) * PR);   // place / coords
     const halo = (txt,x,y)=>{ ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(10,12,16,0.55)'; ctx.strokeText(txt,x,y); };
     ctx.textAlign = 'right'; ctx.textBaseline = 'top';
     const x = w - pad; let y = pad;
