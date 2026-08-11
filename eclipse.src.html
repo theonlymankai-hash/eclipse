@@ -354,6 +354,16 @@
              line-height:1.05; letter-spacing:.02em; color:#ffe1a8; margin-top:3px;}
   .whenbar .wz{font-family:var(--mono); font-size:12px; color:var(--dim);}
   .whenbar .ws{flex:1 0 100%; font-size:13.5px; color:var(--ink); margin-top:5px;}
+  /* TOTALITY, in the bar's empty middle. Amber when there is some, dim when there isn't —
+     "none" is an answer too, and the one that decides whether a trip is worth taking. */
+  .whenbar .wtot{position:absolute; right:210px; top:50%; transform:translateY(-50%);
+                 text-align:right; line-height:1.15;}
+  .whenbar .wtot b{display:block; font:300 30px/1 ui-monospace,monospace; color:var(--accent);
+                   letter-spacing:.01em;}
+  .whenbar .wtot.no b{color:var(--dim);}
+  .whenbar .wtot i{display:block; font-style:normal; font-size:10px; letter-spacing:.16em;
+                   text-transform:uppercase; color:var(--dim); margin-bottom:3px;}
+  @media(max-width:900px){ .whenbar .wtot{display:none;} }
   .whenbar .wsS{display:none;}          /* the phone cut of the same sentence — see updateWhen() */
   .whenbar.none{border-left-color:var(--dim);}
   .whenbar.none b{color:var(--dim); font-size:clamp(18px,5vw,24px);}
@@ -708,7 +718,13 @@
   .kv .k{color:var(--dim);}
   .kv .warn{color:var(--bad);}
   .contacts{font-family:var(--mono); font-size:12.5px; margin-top:8px; width:100%; border-collapse:collapse; display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  /* the contact times are the answer people came for — amber, like every other time on the page */
+  .contacts td:nth-child(2){color:var(--accent);}
   .contacts td{padding:2px 10px 2px 0; white-space:nowrap;}
+  /* Copy link is the share action — amber so it reads as a thing you do, not a label */
+  #share{border-color:rgba(232,179,74,0.45); color:var(--accent);}
+  #share:hover{border-color:var(--accent); background:rgba(232,179,74,0.10);}
+  #share .bi{stroke:var(--accent);}
   .contacts .dim{color:var(--dim);}
   .contacts .below{color:var(--bad);}
   .verdict{font-family:var(--mono); font-size:12.5px; margin-top:6px;}
@@ -1057,6 +1073,8 @@
          only then" reads as one small line, and the big type in this block goes to the clock
          that actually moves. -->
     <span class="ws wsL" id="whenSub"></span>
+    <!-- the third headline fact, in the empty middle of the bar on desktop: how long you get -->
+    <span class="wtot" id="whenTot"></span>
     <span class="ws wsS" id="whenSubS"></span>
     <span class="ws wsS wsS2" id="whenSubS2"></span>
   </div>
@@ -4145,6 +4163,7 @@ function updateWhen(){
     $('whenTz').textContent = '';
     sub(`${place} sees nothing of this eclipse — tap the red band on the PATH map, or jump to this location's next one below.`,
         '', `${place} misses this one — see the PATH map`);
+    $('whenTot').innerHTML = '';
     bar.classList.add('none');
     return;
   }
@@ -4166,6 +4185,8 @@ function updateWhen(){
           (belowNow ? ', but below the horizon here' : '. Glasses come off only between those two times.'),
         durTxt,
         (tz ? tz + ' · ' : '') + (belowNow ? 'below the horizon here' : 'glasses off only then'));
+    $('whenTot').className = 'wtot';
+    $('whenTot').innerHTML = '<i>' + mid + '</i><b>' + durTxt + '</b>';
     bar.classList.add('tot');
   }else{
     $('whenLbl').textContent = 'MAXIMUM';
@@ -4174,6 +4195,8 @@ function updateWhen(){
     /* "MAXIMUM ... % covered at maximum" said the word twice in one line, once as the label
        and once inside the sentence it introduces. The label owns it: both cuts now read
        MAXIMUM · 20:32:14 · 100% covered, with the time next to the label that names it. */
+    $('whenTot').className = 'wtot no';
+    $('whenTot').innerHTML = '<i>totality</i><b>none</b>';
     sub(`${place} — ${obsc.toFixed(0)}% of the sun covered, local time` +
           (belowNow ? ', but below the horizon here' : '. No totality here, so eye protection stays on throughout.'),
         `${obsc.toFixed(0)}% covered`,
