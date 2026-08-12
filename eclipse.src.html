@@ -725,9 +725,13 @@
   .contacts td{padding:2px 10px 2px 0; white-space:nowrap;}
   /* Copy link is the share action — amber so it reads as a thing you do, not a label */
   /* the explicit "commit this place" action, and the flash that confirms a pick landed */
-  #placeGo{border-color:rgba(232,179,74,0.45); color:var(--accent); flex:0 0 auto;}
-  #placeGo:hover{border-color:var(--accent); background:rgba(232,179,74,0.10);}
-  #placeGo .bi{stroke:var(--accent);}
+  /* GO is the whole point of the field next to it: filled amber, unmissable, always the same
+     size. A reader on Reddit could not tell how to commit a typed city — this is the answer. */
+  #placeGo{flex:0 0 auto; min-width:72px; padding:0 18px; font:600 15px/1 var(--mono);
+           letter-spacing:.12em; color:#12151d; background:var(--accent);
+           border:1px solid var(--accent); border-radius:7px; cursor:pointer;}
+  #placeGo:hover{background:#f3c569; border-color:#f3c569;}
+  #placeGo:active{transform:translateY(1px);}
   @keyframes placeConfirm{0%{box-shadow:0 0 0 0 rgba(232,179,74,0.55);}100%{box-shadow:0 0 0 8px rgba(232,179,74,0);}}
   #place.confirmed{animation:placeConfirm .5s ease-out;}
   #share{border-color:rgba(232,179,74,0.45); color:var(--accent);}
@@ -831,6 +835,7 @@
   .locHero .lh{display:block; font-size:10.5px; letter-spacing:.24em; color:var(--accent);
                text-transform:uppercase; margin-bottom:9px;}
   .locHero .lhRow{display:flex; flex-wrap:wrap; gap:8px; align-items:stretch;}
+  .locHero .lhRow2{margin-top:8px;}
   #place{flex:1 1 240px; min-width:0; min-height:58px; padding:0 14px;
          font-size:20px; letter-spacing:.01em; background:#0a0c11;
          border:1px solid #574a33; border-radius:7px;}
@@ -839,7 +844,7 @@
   #geo{flex:0 1 auto; min-height:58px; padding:0 18px; font-size:13px; letter-spacing:.1em;
        border-radius:7px;}
   /* the icon faces exist only on a phone (see the 430px block); desktop keeps the words */
-  #geo .bi, #share .bi{display:none;}
+  #geo .bi, #share .bi, #placeGo .bi{display:none;}
   #share.ok{border-color:var(--accent); color:var(--accent);}
   /* the fine-tuning rows below are secondary — a little more air so the panel doesn't read
      as one dense block under the hero */
@@ -864,10 +869,10 @@
     #geo, #share{flex:0 0 48px; width:48px; min-width:48px; min-height:48px; padding:0;
                  display:inline-flex; align-items:center; justify-content:center;
                  border:1px solid #3a4459; border-radius:7px; background:#0f131b;}
-    #geo .bi, #share .bi{display:block; width:21px; height:21px; fill:none;
+    #geo .bi, #share .bi, #placeGo .bi{display:block; width:21px; height:21px; fill:none;
                          stroke:#b3bdcf; stroke-width:1.5; stroke-linecap:round;}
     #geo .bi .f{fill:#b3bdcf; stroke:none;}
-    #geo:hover .bi, #share:hover .bi, #share.ok .bi{stroke:var(--accent);}
+    #geo:hover .bi, #share:hover .bi, #share.ok .bi, #placeGo .bi{stroke:var(--accent);}
     #share.ok .bi{stroke:var(--accent);}
     #geo .bt, #share .bt{display:none;}
     /* the amber prompt IS the heading here — "Location + Date" above it is a second title for
@@ -1162,7 +1167,11 @@
                had to be told "click outside of it". This button is the explicit action, and
                matching-on-input below (see pickPlace) makes tapping a suggestion self-commit
                without needing it at all — belt and braces. -->
-          <button id="placeGo" type="button" title="set this location" aria-label="Set location"><svg class="bi" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg></button>
+          <button id="placeGo" type="button" title="set this location" aria-label="Set location">GO</button>
+        </div>
+        <!-- second row: the two things you do LESS often than typing a place. The input and its
+             GO own the first row, so the field is wide enough to read a long name in. -->
+        <div class="lhRow lhRow2">
           <button id="geo" title="use my location" aria-label="Use my location"><svg class="bi" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="4.2"/><circle cx="10" cy="10" r="1.1" class="f"/><path d="M10 1.2v3.1M10 15.7v3.1M1.2 10h3.1M15.7 10h3.1"/></svg><span class="bt">Use my location</span></button>
         </div>
       </div>
@@ -5371,6 +5380,10 @@ function pickPlace(){
 }
 function confirmFlash(){
   placeInput.classList.remove('confirmed'); void placeInput.offsetWidth; placeInput.classList.add('confirmed');
+  // Picking a place is the end of that errand: on a phone the panel is covering the picture the
+  // answer just changed, so put it away. Nobody should have to tap outside to get back to the sky.
+  if(typeof closeLoc === 'function') closeLoc(true);
+  placeInput.blur();
 }
 let listT = 0;
 placeInput.addEventListener('input', ()=>{
@@ -5567,7 +5580,7 @@ function setTab(tab){
    round on purpose: the markup ships in the DESKTOP arrangement, so if this never runs the
    button is still exactly where it always was. */
 (function(){
-  const btn = $('share'), home = $('shareHome'), row = document.querySelector('.locHero .lhRow');
+  const btn = $('share'), home = $('shareHome'), row = document.querySelector('.locHero .lhRow2');
   if(!btn || !home || !row) return;
   try{
     const mq = matchMedia('(max-width:430px)');
