@@ -725,6 +725,17 @@
   .contacts td{padding:2px 10px 2px 0; white-space:nowrap;}
   /* Copy link is the share action — amber so it reads as a thing you do, not a label */
   /* the explicit "commit this place" action, and the flash that confirms a pick landed */
+  /* Our own suggestion list. The native <datalist> is not dependable on mobile — in Instagram's
+     in-app browser it simply never opens, and where it does open it can run ten rows deep over
+     the keyboard. Four rows, drawn by us, tappable, identical everywhere. */
+  #placeSug{position:absolute; z-index:30; left:0; right:0; margin:2px 0 0; padding:4px;
+            list-style:none; background:#0e1219; border:1px solid rgba(232,179,74,0.35);
+            border-radius:8px; box-shadow:0 10px 26px rgba(0,0,0,.55); max-height:none;}
+  #placeSug li{padding:11px 12px; min-height:44px; display:flex; align-items:center;
+               font:400 15px/1.2 var(--mono); color:var(--ink); border-radius:5px; cursor:pointer;}
+  #placeSug li+li{margin-top:2px;}
+  #placeSug li:hover,#placeSug li[aria-selected="true"]{background:rgba(232,179,74,0.14); color:var(--accent);}
+  .locHero .lhRow{position:relative;}
   /* GO is the whole point of the field next to it: filled amber, unmissable, always the same
      size. A reader on Reddit could not tell how to commit a typed city — this is the answer. */
   #placeGo{flex:0 0 auto; min-width:72px; padding:0 18px; font:600 15px/1 var(--mono);
@@ -1160,7 +1171,8 @@
       <div class="locHero">
         <label class="lh" for="place">Where will you be?</label>
         <div class="lhRow">
-          <input type="text" id="place" list="placeList" placeholder="type a city…" autocomplete="off">
+          <input type="text" id="place" placeholder="type a city…" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="placeSug">
+          <ul id="placeSug" role="listbox" hidden></ul>
           <!-- The datalist commits silently on desktop (a mouse click blurs the field) but on
                touch, tapping a suggestion just fills the text — nothing tells you to press
                anything next, or that anything happened. A user on Reddit hit exactly this and
@@ -5351,27 +5363,36 @@ const MAX_OPTS = 4;
 const PRESET_LABELS = PRESETS.map(p => p.name);
 let lastMatches = [];
 function fillList(v){
-  const frag = document.createDocumentFragment();
-  const add = label => {
-    const o = document.createElement('option'); o.value = label; frag.appendChild(o);
-    const a = asciiLabel(label);                 // so the native filter matches "Chelm" too
-    if(a !== label){ const o2 = document.createElement('option'); o2.value = a; frag.appendChild(o2); }
-  };
-  // Presets are the empty-field shortlist only. Once someone is typing they are noise, and
-  // worse, they were padding a "show me 4" list back up to fourteen — enough to cover a phone
-  // keyboard and put Malabo where the user's thumb expected Maputo.
-  if(v.length < 2) PRESET_LABELS.forEach(add);
+  // Build OUR list, not the browser's. lastMatches stays the source of truth for pickPlace().
   lastMatches = [];
-  if(v.length >= 2){
-    const skip = new Set(PRESET_LABELS.map(deAcc));
-    for(const p of searchPlaces(v, MAX_OPTS)){
-      const k = deAcc(p.label);
-      if(skip.has(k)) continue;
-      skip.add(k); lastMatches.push(p); add(p.label);
-    }
+  const sug = $('placeSug');
+  if(v.length < 2){ sug.hidden = true; sug.replaceChildren(); placeInput.setAttribute('aria-expanded','false'); return; }
+  const seen = new Set();
+  const take = p => {
+    const k = deAcc(p.label);
+    if(seen.has(k)) return false;
+    seen.add(k); lastMatches.push(p);
+    return lastMatches.length >= MAX_OPTS;
+  };
+  let full = false;
+  // presets first, but only where the name STARTS with what was typed — a substring match
+  // anywhere offered "Nassau, Bahamas" for "ma", which is not what anyone means.
+  for(const p of PLACES){
+    const k = deAcc(p.label);
+    if((k.startsWith(v) || deAcc(p.label.split(',')[0]).startsWith(v)) && (full = take(p))) break;
   }
-  placeList.replaceChildren(frag);
+  if(!full) for(const p of searchPlaces(v, MAX_OPTS)){ if(take(p)) break; }
+  const frag = document.createDocumentFragment();
+  lastMatches.forEach((p,i) => {
+    const li = document.createElement('li');
+    li.textContent = p.label; li.setAttribute('role','option'); li.dataset.i = i;
+    frag.appendChild(li);
+  });
+  sug.replaceChildren(frag);
+  sug.hidden = !lastMatches.length;
+  placeInput.setAttribute('aria-expanded', lastMatches.length ? 'true' : 'false');
 }
+function closeSug(){ const s2=$('placeSug'); s2.hidden = true; placeInput.setAttribute('aria-expanded','false'); }
 fillList('');                                    // presets only until something is typed
 
 function findPlace(raw){
@@ -5402,6 +5423,7 @@ function confirmFlash(){
   placeInput.classList.remove('confirmed'); void placeInput.offsetWidth; placeInput.classList.add('confirmed');
   // Picking a place is the end of that errand: on a phone the panel is covering the picture the
   // answer just changed, so put it away. Nobody should have to tap outside to get back to the sky.
+  if(typeof closeSug === 'function') closeSug();
   if(typeof closeLoc === 'function') closeLoc(true);
   placeInput.blur();
 }
@@ -5423,6 +5445,16 @@ placeInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDe
 placeInput.addEventListener('focus', () => { gazWarm(); placeInput.select(); }); // one tap → whole list available again
 // The explicit fallback: a button that always works, for anyone the auto-commit above misses.
 $('placeGo').addEventListener('click', ()=>{ pickPlace(); confirmFlash(); placeInput.blur(); });
+// Tapping a suggestion is the main path on a phone: commit that exact place, no second action.
+$('placeSug').addEventListener('pointerdown', e => {
+  const li = e.target.closest('li'); if(!li) return;
+  e.preventDefault();                                   // don't blur the field before we read it
+  const p = lastMatches[+li.dataset.i]; if(!p) return;
+  placeInput.value = p.label; pickPlace(); confirmFlash();
+});
+document.addEventListener('pointerdown', e => {
+  if(!e.target.closest('#placeSug, #place')) closeSug();
+});
 
 /* ---------- timezone from arbitrary coordinates ----------
    Typed lat/lon and "use my location" used to fall back to the device zone, which quietly
