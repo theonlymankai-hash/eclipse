@@ -724,6 +724,12 @@
   .contacts td:nth-child(2){color:var(--accent);}
   .contacts td{padding:2px 10px 2px 0; white-space:nowrap;}
   /* Copy link is the share action — amber so it reads as a thing you do, not a label */
+  /* the explicit "commit this place" action, and the flash that confirms a pick landed */
+  #placeGo{border-color:rgba(232,179,74,0.45); color:var(--accent); flex:0 0 auto;}
+  #placeGo:hover{border-color:var(--accent); background:rgba(232,179,74,0.10);}
+  #placeGo .bi{stroke:var(--accent);}
+  @keyframes placeConfirm{0%{box-shadow:0 0 0 0 rgba(232,179,74,0.55);}100%{box-shadow:0 0 0 8px rgba(232,179,74,0);}}
+  #place.confirmed{animation:placeConfirm .5s ease-out;}
   #share{border-color:rgba(232,179,74,0.45); color:var(--accent);}
   #share:hover{border-color:var(--accent); background:rgba(232,179,74,0.10);}
   #share .bi{stroke:var(--accent);}
@@ -1150,6 +1156,13 @@
         <label class="lh" for="place">Where will you be?</label>
         <div class="lhRow">
           <input type="text" id="place" list="placeList" placeholder="type a city…" autocomplete="off">
+          <!-- The datalist commits silently on desktop (a mouse click blurs the field) but on
+               touch, tapping a suggestion just fills the text — nothing tells you to press
+               anything next, or that anything happened. A user on Reddit hit exactly this and
+               had to be told "click outside of it". This button is the explicit action, and
+               matching-on-input below (see pickPlace) makes tapping a suggestion self-commit
+               without needing it at all — belt and braces. -->
+          <button id="placeGo" type="button" title="set this location" aria-label="Set location"><svg class="bi" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg></button>
           <button id="geo" title="use my location" aria-label="Use my location"><svg class="bi" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="4.2"/><circle cx="10" cy="10" r="1.1" class="f"/><path d="M10 1.2v3.1M10 15.7v3.1M1.2 10h3.1M15.7 10h3.1"/></svg><span class="bt">Use my location</span></button>
         </div>
       </div>
@@ -5614,11 +5627,27 @@ function pickPlace(){
   $('lat').value = p.lat; $('lon').value = p.lon;
   recomputeEclipse();
 }
+function confirmFlash(){
+  placeInput.classList.remove('confirmed'); void placeInput.offsetWidth; placeInput.classList.add('confirmed');
+}
 let listT = 0;
-placeInput.addEventListener('input', ()=>{ clearTimeout(listT); listT = setTimeout(()=> fillList(deAcc(placeInput.value.trim())), 60); });
-placeInput.addEventListener('change', pickPlace);
-placeInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); pickPlace(); placeInput.blur(); } });
+placeInput.addEventListener('input', ()=>{
+  clearTimeout(listT); const v = placeInput.value.trim();
+  listT = setTimeout(()=> fillList(deAcc(v)), 60);
+  // Tapping a native datalist suggestion on touch fires 'input' with the exact label — often
+  // WITHOUT a 'change' event, and never with anything visible telling the user to do something
+  // next. A Reddit reader hit exactly this. So: the instant what's typed matches a real place
+  // exactly, commit it right there — no blur, no Enter, no second action required.
+  if(v.length >= 2){
+    const hit = (lastMatches.find(x => x.label === v)) || PLACES.find(x => x.label === v);
+    if(hit){ pickPlace(); confirmFlash(); }
+  }
+});
+placeInput.addEventListener('change', ()=>{ pickPlace(); confirmFlash(); });
+placeInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); pickPlace(); confirmFlash(); placeInput.blur(); } });
 placeInput.addEventListener('focus', () => { gazWarm(); placeInput.select(); }); // one tap → whole list available again
+// The explicit fallback: a button that always works, for anyone the auto-commit above misses.
+$('placeGo').addEventListener('click', ()=>{ pickPlace(); confirmFlash(); placeInput.blur(); });
 
 /* ---------- timezone from arbitrary coordinates ----------
    Typed lat/lon and "use my location" used to fall back to the device zone, which quietly
