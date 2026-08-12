@@ -3693,13 +3693,28 @@ function drawClock(c, w, cssW, avoid){
   c.font = fs2 + 'px monospace';
   c.lineWidth = 3; c.strokeStyle = 'rgba(7,12,20,0.7)';
   c.strokeText(l2, w - pad, ty); c.fillStyle = 'rgba(150,162,182,0.9)'; c.fillText(l2, w - pad, ty);
-  if(liveSt && liveSt.near){                      // same countdown as the sky view
+  if(liveSt && liveSt.near){
+    // The countdown belongs at the BOTTOM here, not under the clock: on the map and the cosmos
+    // the middle of the frame is the globe, and a line of amber type across it was covering the
+    // thing it is counting down to. The sky view keeps its own placement — nothing is drawn
+    // centre-frame there.
     const big = liveSt.lvl >= 2;
-    ty += Math.round(fs2*2.0);
-    ty = stampCountdown(c, M, w, ty, liveSt.head, big, avoid).y;
-    c.lineWidth = Math.max(4, M.halo + 1); c.strokeStyle = 'rgba(7,12,20,0.75)'; c.strokeText(liveSt.head, w - pad, ty);
+    const cs = big ? Math.round(M.fs1*1.05) : Math.round(M.fs2*1.25);
+    c.font = M.weight + cs + 'px monospace';
+    // clear the 2D/3D toggle, which lives in the map's bottom-right corner
+    let clear = 0;
+    if(c.canvas.id === 'map'){
+      const tg = document.querySelector('.mapmode');
+      if(tg){ const k = c.canvas.width / (c.canvas.clientWidth || c.canvas.width);
+              clear = Math.round((tg.getBoundingClientRect().height + 10) * k); }
+    }
+    const bottomPad = Math.round(pad + cs*0.6) + clear;
+    const by = c.canvas.height - bottomPad;
+    c.textBaseline = 'alphabetic';
+    c.lineWidth = Math.max(4, M.halo + 1); c.strokeStyle = 'rgba(7,12,20,0.75)'; c.strokeText(liveSt.head, w - pad, by);
     c.fillStyle = liveSt.lvl === 3 ? 'rgba(255,217,160,0.98)' : 'rgba(232,179,74,0.92)';
-    c.fillText(liveSt.head, w - pad, ty);
+    c.fillText(liveSt.head, w - pad, by);
+    c.textBaseline = 'top';
   }
   c.textAlign = 'left'; c.textBaseline = 'alphabetic';
   c.lineJoin = 'miter'; c.lineCap = 'butt';
