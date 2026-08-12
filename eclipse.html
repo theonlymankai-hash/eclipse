@@ -1599,11 +1599,11 @@ const wrapNear = (lon, ref) => ref + wrap180(lon - ref);
 /* ---------- state ---------- */
 const state = {
   t: Date.now(),                 // sim time, ms UTC
-  obs: { lat: 41.65, lon: -0.88, elev: 200 },
+  obs: { lat: 51.51, lon: -0.13, elev: 11 },
   date: '2026-08-12',     // the DISPLAYED eclipse (map path, title, share links)
   anchor: '2026-08-12',   // the search-from date (URL ?date=, date input) — never rolls
                           // forward just because one tapped location missed the eclipse
-  tz: 'Europe/Madrid',
+  tz: 'Europe/London',
   obstDeg: 0,
   // Landing FOV. 60° is the naked-eye-ish framing but renders the 0.53° sun as a speck
   // (1/114 of the frame) — a first-time visitor sees an empty sky. 8° makes the disc
@@ -5603,7 +5603,9 @@ function searchPlaces(raw, limit){
 
 // The datalist holds the 7 presets plus at most MAX_OPTS matches — never the whole gazetteer.
 // 25,000 <option> elements would freeze the DOM; the native dropdown look is unchanged.
-const MAX_OPTS = 25;
+// Four, not twenty-five: a long datalist opens over the keyboard on a phone, and typing
+// into it lands you in Malabo when you meant Maputo. Four fits above the keys.
+const MAX_OPTS = 4;
 const PRESET_LABELS = PRESETS.map(p => p.name);
 let lastMatches = [];
 function fillList(v){
@@ -5613,7 +5615,10 @@ function fillList(v){
     const a = asciiLabel(label);                 // so the native filter matches "Chelm" too
     if(a !== label){ const o2 = document.createElement('option'); o2.value = a; frag.appendChild(o2); }
   };
-  PRESET_LABELS.forEach(add);                    // presets stay pinned at the top
+  // Presets are the empty-field shortlist only. Once someone is typing they are noise, and
+  // worse, they were padding a "show me 4" list back up to fourteen — enough to cover a phone
+  // keyboard and put Malabo where the user's thumb expected Maputo.
+  if(v.length < 2) PRESET_LABELS.forEach(add);
   lastMatches = [];
   if(v.length >= 2){
     const skip = new Set(PRESET_LABELS.map(deAcc));
@@ -5934,7 +5939,7 @@ let savedModeOverride = null, initialTab = 'sky';
       gazPending = qPlace;
     }
   }else{
-    placeInput.value = 'Zaragoza'; pickedName = 'Zaragoza'; // default
+    placeInput.value = 'London'; pickedName = 'London'; // default — where the author is
   }
   const qObst = parseFloat(q.get('obst'));
   if(isFinite(qObst)){ state.obstDeg = clamp(qObst, 0, 15); $('obst').value = state.obstDeg; }
