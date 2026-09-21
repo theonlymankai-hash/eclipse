@@ -30,5 +30,6 @@ fs.unlinkSync(tmp);
 // --- inline the library ---
 if (!html.includes('/*INLINE_ASTRONOMY*/')) throw new Error('INLINE_ASTRONOMY marker missing');
 html = html.replace('/*INLINE_ASTRONOMY*/', () => fs.readFileSync(LIB, 'utf8'));
+if (html.includes('/*INLINE_SATELLITE*/')) html = html.replace('/*INLINE_SATELLITE*/', () => fs.readFileSync(path.join(DIR, 'satellite.min.js'), 'utf8'));
 fs.writeFileSync(OUT, html);
 console.log('built eclipse.html —', fs.statSync(OUT).size, 'bytes (syntax OK)');
