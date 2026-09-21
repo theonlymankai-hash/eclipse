@@ -151,6 +151,7 @@
   #viewPath > .maplegend, #viewCosmos > .maplegend{order:60;}
   #viewPath > .note, #viewPath > #shadowNote,
   #viewCosmos > .note, #viewCosmos > .scaleNote{order:61;}
+  #viewCosmos > #auLearn{order:3;}
   .grid{order:70;}
   #photo{order:80;}
   /* ---------- PHONE: READ AT THE TOP, OPERATE AT THE BOTTOM ----------
@@ -1106,6 +1107,9 @@
   .plCtl button{width:44px; height:44px; font:inherit; font-size:20px; line-height:1; color:var(--ink); background:rgba(11,13,17,0.86);
                 border:1px solid var(--line); border-radius:6px; cursor:pointer;}
   .plCtl button:active{border-color:var(--accent); color:var(--accent);}
+  .plCtl button.plTxt{font-size:11px; letter-spacing:.1em; font-weight:600; color:var(--accent);}
+  .plCtlL{right:auto; left:8px; top:auto; bottom:34px; flex-direction:row;}
+  .plCtlL #plSun{width:auto; padding:0 12px;}
   .plCtl button svg{width:20px; height:20px; display:block; margin:auto;}
   .plPanel[hidden]{display:none;}
   .plPanel{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px 14px 14px; margin-top:8px;}
@@ -1166,6 +1170,24 @@
   #auWhy li.no i{background:transparent; border:1.5px solid var(--bad);}
   #auWhy li.no{color:#aab2c4;}
   #auWhy li b{color:#fff; font-weight:500;}
+  #auHours{display:flex; align-items:flex-end; gap:3px; height:78px; padding-bottom:18px; margin-bottom:6px;}
+  #auHours:empty{display:none;}
+  #auHours .h{flex:1 1 0; height:100%; display:flex; align-items:flex-end; position:relative; background:rgba(255,255,255,0.02); border-radius:3px 3px 0 0;}
+  #auHours .h i{display:block; width:100%; background:#34405a; border-radius:3px 3px 0 0;}
+  #auHours .h.full i{background:#4a6a8a;}
+  #auHours .h.best{background:rgba(125,212,160,0.07);}
+  #auHours .h.best i{background:var(--good); box-shadow:0 0 10px rgba(125,212,160,.45);}
+  #auHours .h u{position:absolute; top:3px; left:50%; width:7px; height:7px; margin-left:-3.5px; border-radius:50%; background:#c9d6ee; text-decoration:none;}
+  #auHours .h em{position:absolute; left:0; right:0; bottom:-17px; text-align:center; font-style:normal; font-family:var(--mono); font-size:10.5px; color:var(--dim);}
+  #auHours .h.best em{color:var(--good);}
+  #auHoursNote{font-size:13px; color:#c9d1e0; line-height:1.5; margin:0 0 12px;}
+  #auHoursNote:empty{display:none;}
+  #auHoursNote b{color:#fff; font-weight:500;}
+  #auSpace{display:block; width:100%; text-align:left; font:inherit; font-size:12px; letter-spacing:.08em; color:var(--good); background:rgba(125,212,160,0.06);
+           border:1px solid rgba(125,212,160,0.35); border-radius:6px; min-height:44px; padding:0 14px; margin:0 0 10px; cursor:pointer;}
+  #auLearn{background:rgba(125,212,160,0.05); border:1px solid rgba(125,212,160,0.3); border-radius:6px; padding:12px 14px; margin-top:8px; font-size:13.5px; line-height:1.55; color:var(--ink);}
+  #auLearn b{color:var(--good); font-weight:500;}
+  #auLearn[hidden]{display:none;}
   canvas#auCv{display:block; width:100%; border:1px solid var(--line); border-radius:6px; background:#05070b;}
   #auLead{font-family:var(--mono); font-size:12px; color:var(--dim); margin:8px 0 12px; line-height:1.45;}
   #auLead b{color:var(--accent); font-weight:500;}
@@ -1436,6 +1458,7 @@ try{
     <!-- the caveat matters (people ask "is this to scale?"), but as five lines of grey prose
          on a phone it is a wall. Shipped OPEN — that is the no-JS / desktop state, identical
          to before — and closed at load on a narrow screen, where it becomes one tappable line. -->
+    <div id="auLearn" hidden><b>The green ring is the aurora, right now</b> (NOAA’s forecast for the next half hour). The sun blows a thin wind of charged particles past us all the time. Earth’s magnetic field turns most of it away — but near the magnetic poles the field lines plunge into the ground, and particles ride them down into the air about 100 km up, where oxygen glows green. So the aurora is not a patch in the sky: it is a permanent <b>ring round each magnetic pole</b>, always there, mostly too far north to see. When the wind’s own magnetic field tips <b>south</b> (that is the Bz number) it links up with ours, far more energy gets in, and the ring <b>brightens and swells towards the equator</b> — that is the night it reaches you. Drag the globe: the ring is off-centre from the axis the earth spins on, because the magnetic pole is in the Canadian Arctic. Your pin is the white dot.</div>
     <details class="scaleNote" id="cosScale" open>
       <summary>illustrative scale</summary>
       <div class="note">Sun and moon sit along their <b>true directions</b> for this moment, the earth carries its true rotation, and the shadow lands at its true position; distances and sizes are compressed for clarity (at true scale the moon would be sub-pixel).</div>
@@ -1484,16 +1507,23 @@ try{
     <div class="plWrap">
       <canvas id="plMap" role="application" aria-label="Street map with sun and moon directions. Drag to move, tap to stand somewhere else."></canvas>
       <div class="plCtl">
+        <button id="plTilt" type="button" aria-label="switch between the 3D view and the flat map" class="plTxt">2D</button>
         <button id="plIn" type="button" aria-label="zoom in">+</button>
         <button id="plOut" type="button" aria-label="zoom out">−</button>
         <button id="plMe" type="button" aria-label="centre on my pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></button>
+      </div>
+      <div class="plCtl plCtlL">
+        <button id="plRotL" type="button" aria-label="turn the view left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M3 4v5h5"/></svg></button>
+        <button id="plNorth" type="button" aria-label="north up"><svg id="plNorthN" viewBox="0 0 24 24"><path d="M12 3l4 9h-8z" fill="#e8b34a"/><path d="M12 21l-4-9h8z" fill="currentColor" opacity=".45"/></svg></button>
+        <button id="plRotR" type="button" aria-label="turn the view right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M21 4v5h-5"/></svg></button>
+        <button id="plSun" type="button" aria-label="face the sun" class="plTxt">FACE SUN</button>
       </div>
     </div>
     <div class="plLegend">
       <span><i style="background:#e8b34a"></i>sun path · direct sun here</span>
       <span><i style="background:#e07070"></i>sun behind the skyline</span>
       <span><i style="background:#aabede"></i>moon</span>
-      <span>tap = stand there · drag · pinch / wheel</span>
+      <span>tap = stand there · drag · pinch / wheel · two fingers or right-drag to turn</span>
     </div>
     <div class="plPanel" id="planPanel" hidden>
       <div id="plVerdict" class="auVerdict">—</div>
@@ -1526,6 +1556,10 @@ try{
       <div id="auVerdict" class="auVerdict">—</div>
       <div id="auSub"></div>
       <ul id="auWhy"></ul>
+      <div class="plSkyCap" id="auHoursCap" hidden>TONIGHT, HOUR BY HOUR</div>
+      <div id="auHours"></div>
+      <div id="auHoursNote"></div>
+      <button id="auSpace" type="button">SEE IT FROM SPACE — what the aurora actually is ›</button>
       <canvas id="auCv" role="img" aria-label="Your horizon, facing the aurora: where it sits and how high"></canvas>
       <div id="auLead"></div>
       <div class="auCards">
@@ -5245,6 +5279,24 @@ function cosEarth(c, w, h, base, E0, Spx, proj, rt, upv, eye, gast, sHat, S, M, 
     }
   }
 
+  /* THE AURORA, FROM OUTSIDE. If TONIGHT has fetched NOAA's oval this session it is drawn where
+     it really is: a ring of light round each MAGNETIC pole (not the geographic one — that is why
+     it reaches Scotland long before it reaches the same latitude in Siberia), brightest on the
+     night side. This is the thing the horizon picture in TONIGHT is a slice of. */
+  try{
+    if(AU.ov && state.cosAurora){
+      c.save(); c.globalCompositeOperation = 'lighter';
+      const g = AU.ov, r0 = Math.max(1.2, Spx * 0.012);
+      for(let la = 40; la <= 88; la += 1.5) for(const sg of [1, -1]) for(let lo = 0; lo < 360; lo += 2){
+        const p = g[(Math.round(sg * la) + 90) * 360 + lo]; if(p < 6) continue;
+        const q = ll2scr(sg * la, lo); if(!q.vis) continue;
+        const a = clamp(p / 45, 0.12, 0.9);
+        c.fillStyle = 'rgba(90,255,160,' + (a * 0.55).toFixed(3) + ')'; c.beginPath(); c.arc(q.x, q.y, r0 * (1 + a), 0, 7); c.fill();
+      }
+      c.restore();
+    }
+  }catch(e){}
+
   // observer pin — the same "you" as every other view
   const pin = ll2scr(state.obs.lat, state.obs.lon);
   if(pin.vis){
@@ -7539,7 +7591,7 @@ function auEval(){
   if(!w && !sc){ v = AU.busy ? 'Reading the solar wind…' : (navigator.onLine === false ? 'OFFLINE' : 'NO DATA'); cls = ''; }
   else if(reach && isDark && bzSouth){ v = moonOk ? 'GO OUT NOW' : 'GO — but the moon is in the way'; cls = 'go'; }
   else if(reach && isDark){ v = 'POSSIBLE — waiting on Bz'; cls = 'watch'; }
-  else if(reach && !isDark){ v = dk.never ? 'IT IS THERE — but it never gets dark here tonight' : 'IT IS THERE — but not dark until ' + auHM(dk.start); cls = 'watch'; }
+  else if(reach && !isDark){ v = dk.never ? 'IT IS THERE — but it never gets dark here tonight' : 'IT IS THERE — dark from ' + auHM(dk.start) + ', hours below'; cls = 'watch'; }
   else if(bzHard){ v = 'WATCH — Bz has turned hard south'; cls = 'watch'; }
   else { v = 'NOT FROM HERE, NOT NOW'; cls = 'no'; }
   const vd = $('auVerdict'); vd.textContent = v; vd.className = 'auVerdict ' + cls;
@@ -7576,6 +7628,7 @@ function auEval(){
     $('auKpW').textContent = 'a 3-hour planetary average — it lags. Read Bz first.';
   }
   auForecast(now);
+  auHours(now, dk);
   auShoot(w, sc);
   const bits = [];
   if(AU.at) bits.push('solar wind ' + auHM(AU.at));
@@ -7583,6 +7636,43 @@ function auEval(){
   $('auStamp').textContent = bits.length ? bits.join(' · ') + ' ' + tzShort(now) : 'online · NOAA SWPC';
   auSpark(w);
   auDraw(performance.now());
+}
+
+/* ---------- tonight, hour by hour ----------
+   The verdict is about this minute. The question people actually arrive with is "WHEN
+   tonight?", and part of that is answerable: which hours are dark here, when the moon gets
+   out of the way, and which three-hour block the forecasters expect to be most disturbed.
+   What is not answerable is the minute — displays come in bursts when Bz turns — and the
+   sentence says so instead of pretending. */
+function auHours(now, dk){
+  const host = $('auHours'), note = $('auHoursNote'); if(!host) return;
+  if(dk.never || !isFinite(dk.start)){ host.innerHTML = ''; note.textContent = ''; $('auHoursCap').hidden = true; return; }
+  $('auHoursCap').hidden = false;
+  const H = 3600000, t0 = Math.floor(Math.max(now, dk.start) / H) * H, t1 = isFinite(dk.end) ? dk.end : t0 + 10 * H;
+  const fc = (AU.fc || []).map(r => ({ t: auT(r.time_tag), kp: +r.kp })).filter(r => isFinite(r.t) && isFinite(r.kp));
+  const kpAt = t => { const b = fc.find(r => t >= r.t && t < r.t + 3 * H); return b ? b.kp : NaN; };
+  const hrs = [];
+  for(let t = t0; t < t1 && hrs.length < 14; t += H){
+    const mid = Math.min(t + H / 2, t1), sun = auAlt('Sun', mid), moon = auAlt('Moon', mid), ill = moonIllNow(mid), kp = kpAt(mid);
+    const dark = sun < -18 ? 1 : sun < -12 ? 0.7 : 0.25, mk = (moon < 0 || ill < 0.3) ? 1 : 1 - 0.6 * ill;
+    hrs.push({ t, sun, moon, ill, kp, moonUp: moon > 0 && ill >= 0.3, score: dark * mk * ((isFinite(kp) ? kp : 1) + 1.5) });
+  }
+  if(!hrs.length){ host.innerHTML = ''; note.textContent = ''; return; }
+  // best run of up to three consecutive hours
+  let bi = 0, bs = -1; const span = Math.min(3, hrs.length);
+  for(let i = 0; i + span <= hrs.length; i++){ let sc = 0; for(let j = 0; j < span; j++) sc += hrs[i + j].score; if(sc > bs){ bs = sc; bi = i; } }
+  const mx = Math.max(...hrs.map(h => h.score));
+  host.innerHTML = hrs.map((h, i) => '<span class="h' + (i >= bi && i < bi + span ? ' best' : '') + (h.sun < -18 ? ' full' : '') + '" title="Kp ' + (isFinite(h.kp) ? h.kp.toFixed(1) : '?') + '">' +
+    '<i style="height:' + Math.max(10, Math.round(h.score / mx * 100)) + '%"></i>' + (h.moonUp ? '<u></u>' : '') + '<em>' + auHM(h.t).slice(0, 2) + '</em></span>').join('');
+  const a = hrs[bi], b = hrs[bi + span - 1], kps = hrs.slice(bi, bi + span).map(h => h.kp).filter(isFinite), kmax = kps.length ? Math.max(...kps) : NaN;
+  const moonSet = hrs.find((h, i) => i > 0 && hrs[i - 1].moonUp && !h.moonUp);
+  note.innerHTML = 'Best odds tonight: <b>' + auHM(a.t) + '–' + auHM(Math.min(b.t + H, t1)) + '</b>' +
+    (isFinite(kmax) ? ' · forecast Kp ' + kmax.toFixed(1) : '') + (hrs.slice(bi, bi + span).every(h => h.sun < -18) ? ' · fully dark' : '') +
+    (hrs.slice(bi, bi + span).some(h => h.moonUp) ? ' · moon still up' : ' · moon out of the way') +
+    (moonSet ? ' (it sets about ' + auHM(moonSet.t) + ')' : '') +
+    '. Dark here ' + auHM(dk.start) + '–' + (isFinite(dk.end) ? auHM(dk.end) : '…') +
+    (hrs.some(h => h.moonUp) ? '. A dot over an hour = moon up' : '') +
+    '. Nobody can forecast the minute: displays come in 10–30 minute bursts when Bz turns south, so inside that window keep this page open and watch the top line.';
 }
 
 /* ---------- 3-day Kp, with the hours that are dark HERE marked ----------
@@ -7785,6 +7875,19 @@ function auroraClose(){
   if(AU.raf){ cancelAnimationFrame(AU.raf); AU.raf = 0; }
 }
 $('auRefresh').addEventListener('click', ()=> auRefresh(true));
+$('auSpace').addEventListener('click', ()=>{
+  state.cosAurora = true; $('auLearn').hidden = false;
+  setTab('cosmos');
+  try{ if(!state.live) setLive(true); }catch(e){}          // the oval is a statement about now
+  // look down on the pole from the observer's side of the planet, zoomed to the earth
+  try{
+    COS.dateKey = state.date;                                // or the first frame would re-aim at the eclipse
+    const gst = A.SiderealTime(A.MakeTime(new Date(nowMs()))) * 15;
+    COS.yaw = ((gst + state.obs.lon + 540) % 360) - 180;     // the observer’s meridian, facing the camera
+    COS.pitch = state.obs.lat >= 0 ? 58 : -58; COS.zoom = 2.1;
+  }catch(e){}
+  try{ $('cosmos').scrollIntoView({ block: 'start', behavior: 'smooth' }); }catch(e){}
+});
 $('tabAurora').addEventListener('click', ()=> setTab('aurora'));
 
 /* ==================== PLAN — the sun and moon over the real place ====================
@@ -7936,9 +8039,9 @@ function plSimplify(r, tol){
   return o;
 }
 const PL_ROAD = { motorway: 0, trunk: 0, primary: 0, secondary: 1, tertiary: 1, minor: 2, service: 3, track: 4, path: 4, rail: 5, transit: 5 };
-function plBuildTile(x, y, d){
-  const n = Math.pow(2, PL_TZ);
-  const T = { x, y, water: new Path2D(), green: new Path2D(), roads: [0,1,2,3,4,5].map(() => new Path2D()), bld: [], bldPath: [0,1,2,3].map(() => new Path2D()), names: [] };
+function plBuildTile(x, y, d, z){
+  const n = Math.pow(2, z);
+  const T = { z, places: [], x, y, water: new Path2D(), green: new Path2D(), roads: [0,1,2,3,4,5].map(() => new Path2D()), bld: [], bldPath: [0,1,2,3].map(() => new Path2D()), names: [] };
   const poly = (layer, path, ok) => {
     const L = d[layer]; if(!L) return;
     for(const f of L.features){ if(f.type !== 3 || (ok && !ok(f.tags))) continue;
@@ -7955,7 +8058,14 @@ function plBuildTile(x, y, d){
     const P = T.roads[c === 5 ? 4 : c];            // rail shares the faint bucket
     for(const r of f.geom){ P.moveTo(r[0], r[1]); for(let i = 2; i < r.length; i += 2) P.lineTo(r[i], r[i + 1]); }
   }
-  if(d.building){
+  // WHERE AM I: district and town names, so a zoomed-out map is a city and not a texture
+  if(d.place) for(const f of d.place.features){ const nm = f.tags['name:latin'] || f.tags.name, g = f.geom[0]; if(!nm || !g) continue;
+    const ext = d.place.extent || 4096; if(g[0] < 0 || g[1] < 0 || g[0] > ext || g[1] > ext) continue;
+    T.places.push({ nm, cls: f.tags.class, rank: +f.tags.rank || 9, p: [(x + g[0] / ext) / n, (y + g[1] / ext) / n] }); }
+  if(d.water_name) for(const f of d.water_name.features){ const nm = f.tags['name:latin'] || f.tags.name, g = f.geom[0]; if(!nm || !g || f.type !== 1) continue;
+    const ext = d.water_name.extent || 4096; if(g[0] < 0 || g[1] < 0 || g[0] > ext || g[1] > ext) continue;
+    T.places.push({ nm, cls: 'water', rank: 5, p: [(x + g[0] / ext) / n, (y + g[1] / ext) / n] }); }
+  if(d.building && z >= 14){
     const ext = d.building.extent || 4096;
     for(const f of d.building.features){
       if(f.type !== 3) continue;
@@ -7998,29 +8108,36 @@ function plBuildTile(x, y, d){
   }
   return T;
 }
-function plFetchTile(x, y){
-  const key = x + '/' + y;
+function plFetchTile(x, y, z){
+  z = z || PL_TZ;
+  const key = z + '/' + x + '/' + y;
   if(PL.tiles.has(key) || !PL.tpl) return;
   PL.tiles.set(key, { state: 'loading' });
-  fetch(PL.tpl.replace('{z}', PL_TZ).replace('{x}', x).replace('{y}', y))
+  fetch(PL.tpl.replace('{z}', z).replace('{x}', x).replace('{y}', y))
     .then(r => { if(!r.ok) throw 0; return r.arrayBuffer(); })
     .then(b => {
-      const T = plBuildTile(x, y, mvtDecode(b, ['water', 'waterway', 'park', 'landcover', 'transportation', 'transportation_name', 'building']));
+      const T = plBuildTile(x, y, mvtDecode(b, ['water', 'waterway', 'park', 'landcover', 'transportation', 'transportation_name', 'building', 'place', 'water_name']), z);
       T.state = 'ok'; PL.tiles.set(key, T); PL.dirty = true; PL.skyKey = '';
     })
     .catch(() => { PL.tiles.set(key, { state: 'err' }); PL.dirty = true; });
 }
+// which tile pyramid level the view is drawn from: streets-and-buildings (14) when close,
+// coarser tiles as the camera pulls back, so a whole city is a handful of requests
+const plTileZ = () => clamp(Math.floor(PL.z + 0.4), 10, PL_TZ);
 function plWant(){
   if(!PL.open || !PL.tpl) return;
-  const n = Math.pow(2, PL_TZ), c = $('plMap'); if(!c) return;
-  const W = plWorld(), w = c.clientWidth || 360, h = c.clientHeight || 300;
-  const x0 = Math.floor((PL.cx - w / 2 / W) * n), x1 = Math.floor((PL.cx + w / 2 / W) * n);
-  const y0 = Math.floor((PL.cy - h / 2 / W) * n), y1 = Math.floor((PL.cy + h / 2 / W) * n);
-  let budget = 12;
-  for(let x = x0; x <= x1; x++) for(let y = y0; y <= y1; y++) if(budget-- > 0 && y >= 0 && y < n) plFetchTile(((x % n) + n) % n, y);
-  // the skyline needs the ring of tiles round the observer whether or not they are on screen
-  const ox = Math.floor(plMX(state.obs.lon) * n), oy = Math.floor(plMY(state.obs.lat) * n);
-  for(let dx = -1; dx <= 1; dx++) for(let dy = -1; dy <= 1; dy++) plFetchTile((((ox + dx) % n) + n) % n, clamp(oy + dy, 0, n - 1));
+  const tz = plTileZ(), n = Math.pow(2, tz), c = $('plMap'); if(!c) return;
+  const w = c.clientWidth || 360, h = c.clientHeight || 300, C = plCam(w, h);
+  // the ground the camera can see: its four screen corners, un-projected
+  let x0 = 9, y0 = 9, x1 = -9, y1 = -9;
+  for(const [X, Y] of [[0, 0], [w, 0], [0, h], [w, h]]){ const g = C.U(X, Y); if(g[0] < x0) x0 = g[0]; if(g[0] > x1) x1 = g[0]; if(g[1] < y0) y0 = g[1]; if(g[1] > y1) y1 = g[1]; }
+  let budget = 16; const want = [];
+  for(let x = Math.floor(x0 * n); x <= Math.floor(x1 * n); x++) for(let y = Math.floor(y0 * n); y <= Math.floor(y1 * n); y++) want.push([x, y, Math.hypot((x + 0.5) / n - PL.cx, (y + 0.5) / n - PL.cy)]);
+  want.sort((a, b) => a[2] - b[2]);                       // nearest the middle of the view first
+  for(const [x, y] of want) if(budget-- > 0 && y >= 0 && y < n) plFetchTile(((x % n) + n) % n, y, tz);
+  // the skyline needs the ring of z14 tiles round the observer whether or not they are on screen
+  const n14 = Math.pow(2, PL_TZ), ox = Math.floor(plMX(state.obs.lon) * n14), oy = Math.floor(plMY(state.obs.lat) * n14);
+  for(let dx = -1; dx <= 1; dx++) for(let dy = -1; dy <= 1; dy++) plFetchTile((((ox + dx) % n14) + n14) % n14, clamp(oy + dy, 0, n14 - 1), PL_TZ);
 }
 
 /* ---------- terrain (terrarium PNG: h = R*256 + G + B/256 - 32768) ---------- */
@@ -8151,45 +8268,135 @@ function plLayer(name, w, h, pr){
   if(c.width !== Math.round(w * pr) || c.height !== Math.round(h * pr)){ c.width = Math.round(w * pr); c.height = Math.round(h * pr); }
   return c;
 }
+/* ---------- the camera ----------
+   One orthographic camera does both views. Flat is pitch 0; 3D tips it over and lets it turn.
+   Orthographic on purpose: the ground stays an AFFINE image of the map, so every tile is still
+   one Path2D under one setTransform, a tap still inverts exactly, and a building is its
+   footprint drawn twice — once on the ground, once lifted by (height × sin pitch) — with
+   walls between. No perspective divide, no depth buffer, no library. */
+function plCam(w, h){
+  const b = PL.bear * Math.PI / 180, p = (PL.tilt ? PL.pitch : 0) * Math.PI / 180, W = plWorld();
+  const cb = Math.cos(b), sb = Math.sin(b), cp = Math.cos(p), sp = Math.sin(p);
+  const ox = w / 2, oy = PL.tilt ? h * 0.56 : h / 2, ppm = W / plMPW();          // css px per metre on the ground
+  return { W, cb, sb, cp, sp, ox, oy, ppm, w, h,
+    // world (mercator) point + height in metres → screen
+    P(wx, wy, z){ const dx = (wx - PL.cx) * W, dy = (wy - PL.cy) * W; return [ox + cb * dx + sb * dy, oy + (-sb * dx + cb * dy) * cp - (z || 0) * ppm * sp]; },
+    // screen → world, on the ground plane
+    U(X, Y){ const u = X - ox, v = (Y - oy) / cp; return [PL.cx + (cb * u - sb * v) / W, PL.cy + (sb * u + cb * v) / W]; },
+    // a compass direction from a screen point: r px along the ground at bearing az, lifted to altitude alt
+    D(px, py, az, r, alt){ const a = az * Math.PI / 180, al = (alt || 0) * Math.PI / 180, g = r * Math.cos(al), e = Math.sin(a) * g, n = Math.cos(a) * g;
+      return [px + cb * e - sb * n, py + (-sb * e + cb * -n) * cp - r * Math.sin(al) * sp]; } };
+}
 function plRenderStatic(w, h, pr){
-  const n = Math.pow(2, PL_TZ), W = plWorld(), Tpx = W / n;
-  const base = plLayer('base', w, h, pr), top = plLayer('top', w, h, pr);
-  const b = base.getContext('2d'), t = top.getContext('2d');
+  const tz = plTileZ(), C = plCam(w, h), W = C.W;
+  const base = plLayer('base', w, h, pr);
+  const b = base.getContext('2d');
   b.setTransform(1, 0, 0, 1, 0, 0); b.fillStyle = PL_COL.ground; b.fillRect(0, 0, base.width, base.height);
-  t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, top.width, top.height);
-  const vis = [];
+  const vis = []; PL.vis = vis;
+  const haveTz = [...PL.tiles.values()].some(T => T.state === 'ok' && T.z === tz);
   for(const T of PL.tiles.values()){
-    if(T.state !== 'ok') continue;
-    let tx = (T.x / n - PL.cx) * W + w / 2; const ty = (T.y / n - PL.cy) * W + h / 2;
-    if(tx > w || ty > h || tx + Tpx < 0 || ty + Tpx < 0) continue;
-    vis.push([T, tx, ty]);
+    if(T.state !== 'ok' || (haveTz ? T.z !== tz : T.z !== PL_TZ)) continue;
+    const n = Math.pow(2, T.z);
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for(const [i, j] of [[0, 0], [1, 0], [0, 1], [1, 1]]){ const q = C.P((T.x + i) / n, (T.y + j) / n, 0); if(q[0] < x0) x0 = q[0]; if(q[0] > x1) x1 = q[0]; if(q[1] < y0) y0 = q[1]; if(q[1] > y1) y1 = q[1]; }
+    if(x0 > w + 400 || y0 > h + 400 || x1 < -400 || y1 < -400) continue;
+    vis.push(T);
   }
-  const s = Tpx / 4096;
-  const pass = (ctx, fn) => { for(const [T, tx, ty] of vis){ ctx.setTransform(pr * s, 0, 0, pr * s, pr * tx, pr * ty); fn(T); } };
+  const pass = (ctx, fn) => { for(const T of vis){ const n = Math.pow(2, T.z), s = W / n / 4096, tx = (T.x / n - PL.cx) * W, ty = (T.y / n - PL.cy) * W; PL._s = s;
+    ctx.setTransform(pr * C.cb * s, pr * -C.sb * C.cp * s, pr * C.sb * s, pr * C.cb * C.cp * s, pr * (C.ox + C.cb * tx + C.sb * ty), pr * (C.oy + (-C.sb * tx + C.cb * ty) * C.cp)); fn(T); } };
   pass(b, T => { b.fillStyle = PL_COL.green; b.fill(T.green); });
   pass(b, T => { b.fillStyle = PL_COL.water; b.fill(T.water); });
   const zk = Math.pow(2, PL.z - 16);
-  const widths = [9, 6.5, 4.5, 2.6, 1.2].map(v => Math.max(0.8, v * Math.min(2.2, Math.max(0.35, zk))));
+  const widths = [9, 6.5, 4.5, 2.6, 1.2].map((v, i) => Math.max(i < 2 ? 1.1 : 0.5, v * Math.min(2.2, Math.max(0.12, zk))));
   b.lineCap = 'round'; b.lineJoin = 'round';
-  for(let c = 4; c >= 0; c--) pass(b, T => { b.strokeStyle = PL_COL.road[c]; b.lineWidth = widths[c] / s; b.stroke(T.roads[c]); });
-  for(let k = 0; k < 4; k++) pass(t, T => { t.fillStyle = PL_COL.bld[k]; t.fill(T.bldPath[k]); t.strokeStyle = PL_COL.bldEdge; t.lineWidth = 0.8 / s; t.stroke(T.bldPath[k]); });
-  // street names: one per street per ~260px, along its longest straight, only when it fits
+  for(let c = 4; c >= 0; c--) pass(b, T => { b.strokeStyle = PL_COL.road[c]; b.lineWidth = widths[c] / PL._s; b.stroke(T.roads[c]); });
+  // street names go on the GROUND layer: in 3D a building in front really does hide them
+  {
+    b.setTransform(pr, 0, 0, pr, 0, 0); b.textAlign = 'center'; b.textBaseline = 'middle';
+    const want = PL.z < 12.5 ? ['city', 'town'] : PL.z < 14.6 ? ['city', 'town', 'suburb', 'village', 'water'] : ['suburb', 'quarter', 'neighbourhood', 'village', 'water'];
+    const all = []; for(const T of vis) for(const q of T.places) if(want.indexOf(q.cls) >= 0) all.push(q);
+    all.sort((a, c2) => a.rank - c2.rank); const put = [];
+    for(const q of all){ const P1 = C.P(q.p[0], q.p[1], 0); if(P1[0] < 30 || P1[1] < 16 || P1[0] > w - 30 || P1[1] > h - 30) continue;
+      if(put.some(o => Math.abs(o[0] - P1[0]) < 110 && Math.abs(o[1] - P1[1]) < 26) || put.some(o => o[2] === q.nm)) continue; put.push([P1[0], P1[1], q.nm]);
+      const big = q.cls === 'city' || q.cls === 'town', wat = q.cls === 'water';
+      b.font = (wat ? 'italic 500 ' : '600 ') + (big ? 15 : 12) + 'px system-ui, -apple-system, Segoe UI, sans-serif';
+      const txt = wat ? q.nm : q.nm.toUpperCase(); try{ b.letterSpacing = wat ? '0px' : '1.5px'; }catch(e){}
+      b.lineWidth = 4; b.strokeStyle = 'rgba(12,15,21,0.85)'; b.strokeText(txt, P1[0], P1[1]);
+      b.fillStyle = wat ? 'rgba(120,160,215,0.85)' : big ? 'rgba(235,240,250,0.95)' : 'rgba(201,209,224,0.8)'; b.fillText(txt, P1[0], P1[1]); }
+    try{ b.letterSpacing = '0px'; }catch(e){}
+  }
   if(PL.z >= 15.3){
-    t.setTransform(pr, 0, 0, pr, 0, 0);
-    t.font = '500 10.5px system-ui, -apple-system, Segoe UI, sans-serif'; t.textAlign = 'center'; t.textBaseline = 'middle';
+    b.setTransform(pr, 0, 0, pr, 0, 0);
+    b.font = '500 10.5px system-ui, -apple-system, Segoe UI, sans-serif'; b.textAlign = 'center'; b.textBaseline = 'middle';
     const done = [];
-    for(const [T] of vis) for(const nm of T.names){
-      const ax = (nm.a[0] - PL.cx) * W + w / 2, ay = (nm.a[1] - PL.cy) * W + h / 2, bx = (nm.b[0] - PL.cx) * W + w / 2, by = (nm.b[1] - PL.cy) * W + h / 2;
-      const mx = (ax + bx) / 2, my = (ay + by) / 2; if(mx < 0 || my < 0 || mx > w || my > h) continue;
-      const len = Math.hypot(bx - ax, by - ay), tw = t.measureText(nm.nm).width; if(len < tw * 0.9) continue;
+    for(const T of vis) for(const nm of T.names){
+      const A1 = C.P(nm.a[0], nm.a[1], 0), B1 = C.P(nm.b[0], nm.b[1], 0);
+      const mx = (A1[0] + B1[0]) / 2, my = (A1[1] + B1[1]) / 2; if(mx < 0 || my < 0 || mx > w || my > h) continue;
+      const len = Math.hypot(B1[0] - A1[0], B1[1] - A1[1]), tw = b.measureText(nm.nm).width; if(len < tw * 0.9) continue;
       if(done.some(d => d[0] === nm.nm && Math.hypot(d[1] - mx, d[2] - my) < 260)) continue;
       done.push([nm.nm, mx, my]);
-      let ang = Math.atan2(by - ay, bx - ax); if(ang > Math.PI / 2) ang -= Math.PI; else if(ang < -Math.PI / 2) ang += Math.PI;
-      t.save(); t.translate(mx, my); t.rotate(ang);
-      t.lineWidth = 3; t.strokeStyle = 'rgba(12,15,21,0.9)'; t.strokeText(nm.nm, 0, 0);
-      t.fillStyle = 'rgba(201,209,224,0.62)'; t.fillText(nm.nm, 0, 0); t.restore();
+      let ang = Math.atan2(B1[1] - A1[1], B1[0] - A1[0]); if(ang > Math.PI / 2) ang -= Math.PI; else if(ang < -Math.PI / 2) ang += Math.PI;
+      b.save(); b.translate(mx, my); b.rotate(ang);
+      b.lineWidth = 3; b.strokeStyle = 'rgba(12,15,21,0.9)'; b.strokeText(nm.nm, 0, 0);
+      b.fillStyle = 'rgba(201,209,224,0.62)'; b.fillText(nm.nm, 0, 0); b.restore();
     }
   }
+}
+/* ---------- buildings ----------
+   Flat: the four height buckets as Path2Ds, one fill each. 3D: every footprint on screen is
+   a prism — sorted far to near, each wall shaded by how squarely it faces the sun at the
+   scrubbed moment, roof last. Redrawn only when the view moves or the light changes. */
+function plBuildings(w, h, pr, az, alt){
+  const top = plLayer('top', w, h, pr), C = plCam(w, h), lightKey = PL.tilt ? Math.round(az / 3) + ',' + Math.round(alt / 2) : '';
+  const key = [w, h, pr, PL.cx, PL.cy, PL.z, PL.bear, PL.tilt, PL.pitch, lightKey, (PL.vis || []).length, [...PL.tiles.values()].filter(t => t.state === 'ok').length].join(',');
+  if(key === PL.topKey) return top;
+  PL.topKey = key;
+  const t = top.getContext('2d'), n = Math.pow(2, PL_TZ);
+  t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, top.width, top.height);
+  if(PL.z < 13.6) return top;                      // from this far up a building is a pixel; the streets and names carry it
+  if(!PL.tilt){
+    const s = C.W / n / 4096;
+    for(let k = 0; k < 4; k++) for(const T of (PL.vis || [])){ const tx = (T.x / n - PL.cx) * C.W, ty = (T.y / n - PL.cy) * C.W;
+      t.setTransform(pr * C.cb * s, pr * -C.sb * s, pr * C.sb * s, pr * C.cb * s, pr * (C.ox + C.cb * tx + C.sb * ty), pr * (C.oy - C.sb * tx + C.cb * ty));
+      t.fillStyle = PL_COL.bld[k]; t.fill(T.bldPath[k]); t.strokeStyle = PL_COL.bldEdge; t.lineWidth = 0.8 / s; t.stroke(T.bldPath[k]); }
+    return top;
+  }
+  t.setTransform(pr, 0, 0, pr, 0, 0);
+  const list = [];
+  for(const T of (PL.vis || [])) for(const b of T.bld){
+    const q = C.P((b.bb[0] + b.bb[2]) / 2, (b.bb[1] + b.bb[3]) / 2, 0), lift = b.h * C.ppm * C.sp;
+    if(q[0] < -260 || q[0] > w + 260 || q[1] < -120 || q[1] - lift > h + 120) continue;
+    list.push([q[1], b]);
+  }
+  list.sort((a, b) => a[0] - b[0]);                       // far (top of screen) first
+  const day = clamp((alt + 4) / 14, 0, 1), sa = Math.sin(az * Math.PI / 180), ca = Math.cos(az * Math.PI / 180);
+  const mixc = (c0, c1, k) => 'rgb(' + Math.round(c0[0] + (c1[0] - c0[0]) * k) + ',' + Math.round(c0[1] + (c1[1] - c0[1]) * k) + ',' + Math.round(c0[2] + (c1[2] - c0[2]) * k) + ')';
+  const SHADE = [30, 37, 52], LIT = [214, 176, 118], ROOF0 = [52, 62, 82], ROOF1 = [112, 124, 150];
+  t.lineJoin = 'round';
+  for(const [, b] of list){
+    const lift = b.h * C.ppm * C.sp;
+    for(const r of b.rings){
+      const m = r.length / 2, sx = new Float32Array(m), sy = new Float32Array(m);
+      for(let i = 0; i < m; i++){ const q = C.P(r[i * 2], r[i * 2 + 1], 0); sx[i] = q[0]; sy[i] = q[1]; }
+      for(let i = 0; i + 1 < m; i++){
+        // only walls turned towards the camera: in screen space, their ground edge runs left→right
+        // for a clockwise ring — cheaper than a normal, and exact under an orthographic camera
+        const ex = sx[i + 1] - sx[i]; if(Math.abs(ex) < 0.3) continue;
+        const dxw = r[i * 2 + 2] - r[i * 2], dyw = r[i * 2 + 3] - r[i * 2 + 1], L = Math.hypot(dxw, dyw) || 1;
+        // outward normal of a clockwise ring in y-down map space is (dy, -dx); east = x, north = -y
+        const ne = dyw / L, nn = dxw / L, facing = (-C.sb * ne + C.cb * -nn);        // >0 = normal points down-screen = towards the camera
+        if(facing <= 0) continue;
+        const lit = alt > 0 ? clamp(ne * sa + nn * ca, 0, 1) * clamp(alt / 12, 0.25, 1) : 0;
+        t.fillStyle = mixc(SHADE, LIT, lit * 0.78 * day + 0.06 * day);
+        t.beginPath(); t.moveTo(sx[i], sy[i]); t.lineTo(sx[i + 1], sy[i + 1]); t.lineTo(sx[i + 1], sy[i + 1] - lift); t.lineTo(sx[i], sy[i] - lift); t.closePath(); t.fill();
+      }
+    }
+    t.beginPath();
+    for(const r of b.rings){ for(let i = 0; i < r.length; i += 2){ const q = C.P(r[i], r[i + 1], b.h); i ? t.lineTo(q[0], q[1]) : t.moveTo(q[0], q[1]); } t.closePath(); }
+    t.fillStyle = mixc(ROOF0, ROOF1, (0.25 + 0.75 * clamp(Math.sin(Math.max(0, alt) * Math.PI / 180) * 1.6, 0, 1)) * day * clamp(0.55 + b.h / 160, 0.55, 1));
+    t.fill('evenodd'); t.strokeStyle = 'rgba(170,184,212,0.28)'; t.lineWidth = 0.7; t.stroke();
+  }
+  return top;
 }
 function plShadows(w, h, pr, az, alt){
   // Half the CSS resolution whatever the screen: the cost here is overdraw (long strips from
@@ -8198,37 +8405,38 @@ function plShadows(w, h, pr, az, alt){
   const c = plLayer('shad', w, h, pr);
   if(alt <= 0.4) return null;
   // the sun moves a quarter of a degree a minute: redraw only when it, or the view, has actually changed
-  const key = [w, h, pr, PL.cx, PL.cy, PL.z, Math.round(az * 5), Math.round(alt * 10), PL.tiles.size, [...PL.tiles.values()].filter(t => t.state === 'ok').length].join(',');
+  const key = [w, h, pr, PL.cx, PL.cy, PL.z, PL.bear, PL.tilt, PL.pitch, Math.round(az * 5), Math.round(alt * 10), PL.tiles.size, [...PL.tiles.values()].filter(t => t.state === 'ok').length].join(',');
   if(key === PL.shadKey) return c;
   // while a finger is dragging the scrubber, ten redraws a second is plenty
   const nowT = performance.now(); if(PL.shadKey && nowT - (PL.shadAt || 0) < 90) return c;
   PL.shadAt = nowT; PL.shadKey = key;
-  const x = c.getContext('2d');
+  const x = c.getContext('2d'), C = plCam(w, h);
   x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, c.width, c.height);
   x.setTransform(pr, 0, 0, pr, 0, 0);
-  const W = plWorld(), mpp = plMPW() / W, a = (az + 180) * Math.PI / 180, sa = Math.sin(a), ca = -Math.cos(a);
+  const a = (az + 180) * Math.PI / 180, se = Math.sin(a), sn = Math.cos(a);
   const cap = Math.max(w, h) * 0.7, tan = Math.tan(alt * Math.PI / 180);
   x.fillStyle = '#000';
-  for(const T of PL.tiles.values()){
-    if(T.state !== 'ok') continue;
+  for(const T of (PL.vis || [])){
     for(const b of T.bld){
-      const L = Math.min(cap, b.h / tan / mpp), dx = sa * L, dy = ca * L;
-      const bx0 = (b.bb[0] - PL.cx) * W + w / 2, by0 = (b.bb[1] - PL.cy) * W + h / 2, bx1 = (b.bb[2] - PL.cx) * W + w / 2, by1 = (b.bb[3] - PL.cy) * W + h / 2;
-      if(Math.max(bx1, bx1 + dx) < 0 || Math.min(bx0, bx0 + dx) > w || Math.max(by1, by1 + dy) < 0 || Math.min(by0, by0 + dy) > h) continue;
+      const L = Math.min(cap, b.h / tan * C.ppm), e = se * L, nn = -sn * L;               // shadow vector on the ground, map px (y down)
+      const dx = C.cb * e + C.sb * nn, dy = (-C.sb * e + C.cb * nn) * C.cp;               // …and on screen
+      const q0 = C.P((b.bb[0] + b.bb[2]) / 2, (b.bb[1] + b.bb[3]) / 2, 0), rad = Math.hypot(b.bb[2] - b.bb[0], b.bb[3] - b.bb[1]) * C.W / 2 + 2;
+      if(Math.max(q0[0], q0[0] + dx) < -rad || Math.min(q0[0], q0[0] + dx) > w + rad || Math.max(q0[1], q0[1] + dy) < -rad || Math.min(q0[1], q0[1] + dy) > h + rad) continue;
       // One fill per building and the canvas is opaque black, so overlaps cost nothing and
       // nothing can cancel. The swept shape is: the footprint moved to the shadow's far end,
       // plus the strip each wall on ONE side sweeps on the way there.
       x.beginPath();
       for(const r of b.rings){
+        let p = C.P(r[0], r[1], 0);
         for(let i = 0; i + 3 < r.length; i += 2){
-          const x1 = (r[i] - PL.cx) * W + w / 2, y1 = (r[i + 1] - PL.cy) * W + h / 2, x2 = (r[i + 2] - PL.cx) * W + w / 2, y2 = (r[i + 3] - PL.cy) * W + h / 2;
-          if((x2 - x1) * dy - (y2 - y1) * dx > 0){ x.moveTo(x1, y1); x.lineTo(x2, y2); x.lineTo(x2 + dx, y2 + dy); x.lineTo(x1 + dx, y1 + dy); x.closePath(); }
+          const q = C.P(r[i + 2], r[i + 3], 0);
+          if((q[0] - p[0]) * dy - (q[1] - p[1]) * dx > 0){ x.moveTo(p[0], p[1]); x.lineTo(q[0], q[1]); x.lineTo(q[0] + dx, q[1] + dy); x.lineTo(p[0] + dx, p[1] + dy); x.closePath(); }
+          p = q;
         }
       }
       x.fill();
       x.beginPath();
-      for(const r of b.rings){ x.moveTo((r[0] - PL.cx) * W + w / 2 + dx, (r[1] - PL.cy) * W + h / 2 + dy);
-        for(let i = 2; i < r.length; i += 2) x.lineTo((r[i] - PL.cx) * W + w / 2 + dx, (r[i + 1] - PL.cy) * W + h / 2 + dy); x.closePath(); }
+      for(const r of b.rings){ for(let i = 0; i < r.length; i += 2){ const q = C.P(r[i], r[i + 1], 0); i ? x.lineTo(q[0] + dx, q[1] + dy) : x.moveTo(q[0] + dx, q[1] + dy); } x.closePath(); }
       x.fill('evenodd');
     }
   }
@@ -8239,20 +8447,23 @@ function plDrawMap(f){
   const w = c.clientWidth, h = c.clientHeight; if(!w || !h) return;
   const pr = Math.min(window.devicePixelRatio || 1, 2);
   if(c.width !== Math.round(w * pr) || c.height !== Math.round(h * pr)){ c.width = Math.round(w * pr); c.height = Math.round(h * pr); PL.dirty = true; }
-  if(PL.dirty){ plRenderStatic(w, h, pr); PL.dirty = false; plWant(); }
-  const x = c.getContext('2d');
+  // the turn and the tip are eased, so the 2D/3D button and the rotate buttons read as one camera moving
+  if(PL.bearTo != null){ const d = (((PL.bearTo - PL.bear) + 540) % 360) - 180; if(Math.abs(d) < 0.3){ PL.bear = (PL.bearTo + 360) % 360; PL.bearTo = null; } else PL.bear = (PL.bear + d * 0.18 + 360) % 360; PL.dirty = true; }
+  if(PL.pitchTo != null){ const d = PL.pitchTo - PL.pitch; if(Math.abs(d) < 0.3){ PL.pitch = PL.pitchTo; PL.pitchTo = null; if(PL.pitch < 1){ PL.tilt = false; PL.pitch = 0; } } else PL.pitch += d * 0.16; PL.dirty = true; }
+  if(PL.dirty){ plRenderStatic(w, h, pr); PL.dirty = false; PL.topKey = ''; PL.shadKey = ''; PL.shadAt = 0; plWant(); }
+  const x = c.getContext('2d'), C = plCam(w, h);
   x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(PL.base, 0, 0);
   const sh = plShadows(w, h, pr, f.sunAz, f.sunAlt);
   if(sh){ x.globalAlpha = 0.5 * clamp((f.sunAlt - 0.4) / 4, 0, 1); x.imageSmoothingEnabled = true; x.drawImage(sh, 0, 0, c.width, c.height); x.globalAlpha = 1; }
-  x.drawImage(PL.top, 0, 0);
+  x.drawImage(plBuildings(w, h, pr, f.sunAz, f.sunAlt), 0, 0);
   // night falls on the map too
   const night = clamp((-f.sunAlt + 1) / 10, 0, 1);
   if(night > 0){ x.fillStyle = 'rgba(4,6,12,' + (0.42 * night).toFixed(3) + ')'; x.fillRect(0, 0, c.width, c.height); }
   x.setTransform(pr, 0, 0, pr, 0, 0);
 
-  const W = plWorld(), px = (plMX(state.obs.lon) - PL.cx) * W + w / 2, py = (plMY(state.obs.lat) - PL.cy) * W + h / 2;
-  const day = plDay(), R = Math.max(70, Math.min(w, h) * 0.40), far = Math.hypot(w, h);
-  const dir = (az, r) => [px + Math.sin(az * Math.PI / 180) * r, py - Math.cos(az * Math.PI / 180) * r];
+  const me = C.P(plMX(state.obs.lon), plMY(state.obs.lat), 0), px = me[0], py = me[1];
+  const day = plDay(), R = Math.max(70, Math.min(w, h) * 0.40), far = Math.hypot(w, h) * 1.6;
+  const dir = (az, r, alt) => C.D(px, py, az, r, alt);
   const mono = getComputedStyle(document.body).getPropertyValue('--mono');
 
   // the building in the way, named
@@ -8263,12 +8474,13 @@ function plDrawMap(f){
   }
   if(blocker){
     x.beginPath();
-    for(const r of blocker.b.rings){ for(let i = 0; i < r.length; i += 2){ const bx = (r[i] - PL.cx) * W + w / 2, by = (r[i + 1] - PL.cy) * W + h / 2; i ? x.lineTo(bx, by) : x.moveTo(bx, by); } x.closePath(); }
-    x.fillStyle = 'rgba(224,112,112,0.30)'; x.fill(); x.strokeStyle = 'rgba(240,130,120,0.95)'; x.lineWidth = 1.6; x.stroke();
+    for(const r of blocker.b.rings){ for(let i = 0; i < r.length; i += 2){ const q = C.P(r[i], r[i + 1], PL.tilt ? blocker.b.h : 0); i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); } x.closePath(); }
+    x.fillStyle = 'rgba(224,112,112,0.34)'; x.fill('evenodd'); x.strokeStyle = 'rgba(240,130,120,0.95)'; x.lineWidth = 1.6; x.stroke();
   }
 
-  // horizon ring + compass
-  x.strokeStyle = 'rgba(201,209,224,0.22)'; x.lineWidth = 1; x.beginPath(); x.arc(px, py, R, 0, Math.PI * 2); x.stroke();
+  // horizon ring + compass — a circle on the ground, so an ellipse once the camera tips
+  x.strokeStyle = 'rgba(201,209,224,0.24)'; x.lineWidth = 1; x.beginPath();
+  for(let a = 0; a <= 360; a += 5){ const q = dir(a, R); a ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); } x.stroke();
   x.font = '600 11px ' + mono; x.textAlign = 'center'; x.textBaseline = 'middle';
   for(let a = 0; a < 360; a += 45){
     const p1 = dir(a, R), p2 = dir(a, R + (a % 90 ? 4 : 7)); x.strokeStyle = 'rgba(201,209,224,0.4)'; x.beginPath(); x.moveTo(p1[0], p1[1]); x.lineTo(p2[0], p2[1]); x.stroke();
@@ -8287,19 +8499,24 @@ function plDrawMap(f){
   if(day.rise)  ray(day.rise.az,  'rgba(232,179,74,0.6)', [6, 5], 'sunrise ' + plHM(day.rise.t));
   if(day.set)   ray(day.set.az,   'rgba(232,179,74,0.6)', [6, 5], 'sunset ' + plHM(day.set.t));
 
-  // the day's sun path as a dome over the spot: ring = horizon, pin = straight up.
-  // Bright where this spot gets direct sun, faint red where the skyline takes it.
-  const dome = s => dir(s.az, R * (1 - Math.max(0, s.alt) / 90));
+  /* The day's sun path as a DOME over the spot: a hemisphere of radius R, the sun drawn where
+     it really is on it. Seen from straight above it is the classic sun-path diagram; tip the
+     camera and it stands up off the map. Bright where this spot gets direct sun, red where
+     the skyline takes it. In 3D each hour also drops a faint line to the ground, which is
+     what makes the height of the arc readable. */
+  const dome = s => dir(s.az, R, Math.max(0, s.alt));
   x.lineWidth = 2.4; x.lineCap = 'round';
   for(let i = 1; i < day.sun.length; i++){
     const a = day.sun[i - 1], b = day.sun[i]; if(a.alt < 0 && b.alt < 0) continue;
     const litNow = b.alt > plSkyAt(b.az), p1 = dome(a), p2 = dome(b);
-    x.strokeStyle = litNow ? 'rgba(232,179,74,0.9)' : 'rgba(224,112,112,0.55)';
+    x.strokeStyle = litNow ? 'rgba(232,179,74,0.92)' : 'rgba(224,112,112,0.6)';
     x.beginPath(); x.moveTo(p1[0], p1[1]); x.lineTo(p2[0], p2[1]); x.stroke();
   }
-  x.font = '500 9.5px ' + mono; x.fillStyle = 'rgba(232,200,140,0.85)';
+  x.font = '500 9.5px ' + mono;
   for(const s of day.sun){ if(s.alt < 1) continue; const hm = plHM(s.t); if(hm.slice(3) !== '00' || (+hm.slice(0, 2)) % 3) continue;
-    const p = dome(s); x.beginPath(); x.arc(p[0], p[1], 2.2, 0, 6.3); x.fill(); x.fillText(hm.slice(0, 2), p[0], p[1] - 9); }
+    const p = dome(s);
+    if(PL.tilt){ const g0 = dir(s.az, R * Math.cos(s.alt * Math.PI / 180), 0); x.strokeStyle = 'rgba(232,200,140,0.22)'; x.lineWidth = 1; x.beginPath(); x.moveTo(p[0], p[1]); x.lineTo(g0[0], g0[1]); x.stroke(); }
+    x.fillStyle = 'rgba(232,200,140,0.9)'; x.beginPath(); x.arc(p[0], p[1], 2.2, 0, 6.3); x.fill(); x.fillText(hm.slice(0, 2), p[0], p[1] - 9); }
   // the eclipse on that path
   if(contacts && contacts.length){
     x.font = '600 10px ' + mono;
@@ -8310,14 +8527,16 @@ function plDrawMap(f){
   // moon now
   if(f.moonAlt > 0){ ray(f.moonAz, 'rgba(170,190,225,0.75)', null, null, 1.6); const p = dome({ az: f.moonAz, alt: f.moonAlt });
     x.fillStyle = '#c4d2ec'; x.beginPath(); x.arc(p[0], p[1], 4.5, 0, 6.3); x.fill(); }
-  // sun now: the line you would walk along
+  // sun now: on the ground, the line you would walk along; in 3D also the ray itself, from the sun down to you
   const up = f.sunAlt > 0, sp = dir(f.sunAz, far);
   const g = x.createLinearGradient(px, py, sp[0], sp[1]);
   g.addColorStop(0, up ? 'rgba(255,205,110,0.95)' : 'rgba(232,179,74,0.35)'); g.addColorStop(1, up ? 'rgba(255,205,110,0.12)' : 'rgba(232,179,74,0.05)');
   x.save(); x.strokeStyle = g; x.lineWidth = up ? 3 : 1.5; if(!up) x.setLineDash([3, 6]);
   if(up){ x.shadowColor = 'rgba(255,190,80,0.8)'; x.shadowBlur = 10; }
   x.beginPath(); x.moveTo(px, py); x.lineTo(sp[0], sp[1]); x.stroke(); x.restore();
-  if(up){ const p = dome({ az: f.sunAz, alt: f.sunAlt }); x.save(); x.shadowColor = 'rgba(255,190,80,0.95)'; x.shadowBlur = 16;
+  if(up){ const p = dome({ az: f.sunAz, alt: f.sunAlt });
+    if(PL.tilt){ x.save(); x.strokeStyle = blocker ? 'rgba(240,130,120,0.75)' : 'rgba(255,215,140,0.75)'; x.lineWidth = 1.4; x.setLineDash([2, 4]); x.beginPath(); x.moveTo(p[0], p[1]); x.lineTo(px, py); x.stroke(); x.restore(); }
+    x.save(); x.shadowColor = 'rgba(255,190,80,0.95)'; x.shadowBlur = 16;
     x.fillStyle = blocker ? 'rgba(255,205,110,0.45)' : '#ffd27a'; x.beginPath(); x.arc(p[0], p[1], 7, 0, 6.3); x.fill(); x.restore();
     if(blocker){ x.strokeStyle = 'rgba(240,130,120,0.95)'; x.lineWidth = 1.6; x.beginPath(); x.arc(p[0], p[1], 7, 0, 6.3); x.stroke(); } }
   // you
@@ -8325,7 +8544,7 @@ function plDrawMap(f){
   x.fillStyle = '#fff'; x.beginPath(); x.arc(px, py, 4.5, 0, 6.3); x.fill();
   x.strokeStyle = 'rgba(232,179,74,0.95)'; x.lineWidth = 2; x.beginPath(); x.arc(px, py, 7.5, 0, 6.3); x.stroke();
 
-  // status bottom-left, attribution bottom-right (both required reading, neither in the way)
+  // status bottom-left
   x.textAlign = 'left'; x.font = '500 11px ' + mono;
   const stat = (up ? 'sun ' + f.sunAlt.toFixed(1) + '° up · ' + Math.round(f.sunAz) + '° ' + plCompass(f.sunAz) : 'sun is down') +
                (blocker ? '  ·  BEHIND a ' + Math.round(blocker.b.h) + ' m building, ' + Math.round(blocker.d) + ' m away' : (up && f.sunAlt <= plSkyAt(f.sunAz) ? '  ·  behind the hills' : ''));
@@ -8335,6 +8554,8 @@ function plDrawMap(f){
   const loading = [...PL.tiles.values()].some(t => t.state === 'loading') || PL.tplBusy;
   if(PL.err === 'map' || loading){ x.textAlign = 'center'; x.fillStyle = 'rgba(201,209,224,0.7)';
     x.fillText(PL.err === 'map' ? 'street map unavailable — directions still work' : 'loading streets and building heights…', w / 2, 18); }
+  // the north needle on the rotate button follows the camera
+  const nd = $('plNorthN'); if(nd && nd._b !== Math.round(PL.bear)){ nd._b = Math.round(PL.bear); nd.style.transform = 'rotate(' + (-PL.bear) + 'deg)'; }
 }
 
 /* ---------- the skyline strip ---------- */
@@ -8443,7 +8664,10 @@ function plWords(){
 function planDraw(f){
   if(!PL.open) return;
   const k = state.obs.lat.toFixed(5) + ',' + state.obs.lon.toFixed(5);
-  if(k !== PL.followed){ PL.followed = k; PL.cx = plMX(state.obs.lon); PL.cy = plMY(state.obs.lat); PL.dirty = true; plTerrain(); plWant(); }
+  if(k !== PL.followed){ PL.followed = k; PL.cx = plMX(state.obs.lon); PL.cy = plMY(state.obs.lat); PL.dirty = true; plTerrain(); plWant();
+    // The camera opens FACING THE EVENT. Not a nicety: from mid-latitudes a camera looking due
+    // north at this pitch sees the sun's daily path exactly edge-on, and the dome collapses to a line.
+    if(!PL.turned){ let fo = eclWin ? plPos('Sun', eclWin.mx) : null; if(!fo || fo.alt < -3 || (ecl && ecl.kind === 'none')) fo = { az: state.obs.lat >= 0 ? 180 : 0 }; PL.bear = fo.az; PL.bearTo = null; } }
   plSkyline();
   plDrawMap(f);
   plDrawSky(f);
@@ -8468,31 +8692,41 @@ function planClose(){ PL.open = false; const pp = $('planPanel'); if(pp) pp.hidd
 /* ---------- hands ---------- */
 (function(){
   const c = $('plMap'); if(!c) return;
+  PL.bear = 0; PL.pitch = 52; PL.tilt = true; PL.bearTo = null; PL.pitchTo = null;
+  const cam = () => plCam(c.clientWidth, c.clientHeight);
   const zoomAt = (nz, ax, ay) => {
-    nz = clamp(nz, 14, 18.6); if(nz === PL.z) return;
-    const w = c.clientWidth, h = c.clientHeight, W0 = plWorld(), wx = PL.cx + (ax - w / 2) / W0, wy = PL.cy + (ay - h / 2) / W0;
-    PL.z = nz; const W1 = plWorld(); PL.cx = wx - (ax - w / 2) / W1; PL.cy = wy - (ay - h / 2) / W1; PL.dirty = true;
+    nz = clamp(nz, 10.5, 18.6); if(nz === PL.z) return;
+    const before = cam().U(ax, ay); PL.z = nz; const after = cam().U(ax, ay);
+    PL.cx += before[0] - after[0]; PL.cy += before[1] - after[1]; PL.dirty = true;
   };
+  const pair = () => { const p = [...PL.ptr.values()]; return { d: Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]), a: Math.atan2(p[1][1] - p[0][1], p[1][0] - p[0][0]) * 180 / Math.PI, mx: (p[0][0] + p[1][0]) / 2, my: (p[0][1] + p[1][1]) / 2 }; };
   c.addEventListener('pointerdown', e => { c.setPointerCapture(e.pointerId); PL.ptr.set(e.pointerId, [e.offsetX, e.offsetY]);
-    if(PL.ptr.size === 1){ PL.moved = false; PL.downAt = performance.now(); } else { PL.moved = true; const p = [...PL.ptr.values()]; PL.pinch = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]); } });
+    if(PL.ptr.size === 1){ PL.moved = false; PL.downAt = performance.now(); PL.rot = e.button === 2 || e.shiftKey; } else { PL.moved = true; PL.pinch = pair(); } });
+  c.addEventListener('contextmenu', e => e.preventDefault());
   c.addEventListener('pointermove', e => {
     const o = PL.ptr.get(e.pointerId); if(!o) return;
     if(PL.ptr.size === 1){
       const dx = e.offsetX - o[0], dy = e.offsetY - o[1];
       if(!PL.moved && Math.hypot(dx, dy) < 7) return;
-      PL.moved = true; const W = plWorld(); PL.cx -= dx / W; PL.cy -= dy / W; PL.dirty = true; PL.ptr.set(e.pointerId, [e.offsetX, e.offsetY]);
+      PL.moved = true;
+      if(PL.rot){ PL.turned = true; PL.bearTo = null; PL.bear = (PL.bear - dx * 0.35 + 360) % 360; }        // right-drag / shift-drag turns the camera
+      else { const C = cam(), a = C.U(o[0], o[1]), b = C.U(e.offsetX, e.offsetY); PL.cx -= b[0] - a[0]; PL.cy -= b[1] - a[1]; }
+      PL.dirty = true; PL.ptr.set(e.pointerId, [e.offsetX, e.offsetY]);
     }else{
-      PL.ptr.set(e.pointerId, [e.offsetX, e.offsetY]); const p = [...PL.ptr.values()], d = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]);
-      if(PL.pinch > 0 && d > 0) zoomAt(PL.z + Math.log2(d / PL.pinch), (p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2);
-      PL.pinch = d;
+      PL.ptr.set(e.pointerId, [e.offsetX, e.offsetY]); const q = pair(), p0 = PL.pinch;
+      if(p0 && p0.d > 0 && q.d > 0){
+        zoomAt(PL.z + Math.log2(q.d / p0.d), q.mx, q.my);
+        const da = (((q.a - p0.a) + 540) % 360) - 180;                                       // two fingers twist the map
+        if(Math.abs(da) < 40){ if(Math.abs(da) > 0.5) PL.turned = true; PL.bearTo = null; PL.bear = (PL.bear - da + 360) % 360; PL.dirty = true; }
+      }
+      PL.pinch = q;
     }
   });
   const up = e => {
     const had = PL.ptr.has(e.pointerId); PL.ptr.delete(e.pointerId);
-    if(!had || PL.moved || PL.ptr.size || e.type !== 'pointerup' || performance.now() - PL.downAt > 600) return;
-    // a tap: stand here
-    const w = c.clientWidth, h = c.clientHeight, W = plWorld();
-    const lat = plLat(PL.cy + (e.offsetY - h / 2) / W), lon = plLon(PL.cx + (e.offsetX - w / 2) / W);
+    if(!had || PL.moved || PL.ptr.size || e.type !== 'pointerup' || e.button === 2 || performance.now() - PL.downAt > 600) return;
+    // a tap: stand here (the ground point under the finger — exact, the camera is orthographic)
+    const g = cam().U(e.offsetX, e.offsetY), lat = plLat(g[1]), lon = plLon(g[0]);
     const keepX = PL.cx, keepY = PL.cy;
     $('lat').value = lat.toFixed(5); $('lon').value = (((lon + 540) % 360) - 180).toFixed(5);
     customLoc();
@@ -8501,9 +8735,23 @@ function planClose(){ PL.open = false; const pp = $('planPanel'); if(pp) pp.hidd
   };
   c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
   c.addEventListener('wheel', e => { e.preventDefault(); zoomAt(PL.z - e.deltaY * 0.0022, e.offsetX, e.offsetY); }, { passive: false });
-  $('plIn').addEventListener('click', () => zoomAt(PL.z + 0.6, c.clientWidth / 2, c.clientHeight / 2));
-  $('plOut').addEventListener('click', () => zoomAt(PL.z - 0.6, c.clientWidth / 2, c.clientHeight / 2));
+  const mid = () => [c.clientWidth / 2, PL.tilt ? c.clientHeight * 0.56 : c.clientHeight / 2];
+  $('plIn').addEventListener('click', () => zoomAt(PL.z + 0.6, mid()[0], mid()[1]));
+  $('plOut').addEventListener('click', () => zoomAt(PL.z - 0.6, mid()[0], mid()[1]));
   $('plMe').addEventListener('click', () => { PL.cx = plMX(state.obs.lon); PL.cy = plMY(state.obs.lat); PL.dirty = true; });
+  const tiltFace = () => { const b = $('plTilt'); b.textContent = (PL.tilt && PL.pitchTo !== 0) ? '2D' : '3D'; };
+  const stand = () => { if(!PL.tilt || PL.pitchTo === 0){ PL.tilt = true; PL.pitchTo = 52; tiltFace(); } };
+  $('plTilt').addEventListener('click', () => {
+    if(PL.tilt && PL.pitchTo !== 0){ PL.pitchTo = 0; PL.bearTo = 0; }                         // lie flat, north up: the measuring view
+    else { PL.tilt = true; PL.pitchTo = 52; }
+    PL.dirty = true; tiltFace();
+  });
+  $('plRotL').addEventListener('click', () => { PL.turned = true; PL.bearTo = ((PL.bearTo != null ? PL.bearTo : PL.bear) - 45 + 360) % 360; stand(); });
+  $('plRotR').addEventListener('click', () => { PL.turned = true; PL.bearTo = ((PL.bearTo != null ? PL.bearTo : PL.bear) + 45) % 360; stand(); });
+  $('plNorth').addEventListener('click', () => { PL.turned = true; PL.bearTo = 0; });
+  // FACE THE SUN: turn the camera to look along the sun's bearing at the scrubbed moment
+  $('plSun').addEventListener('click', () => { const f = computeFrame(state.t); PL.bearTo = (f.sunAlt > -6 ? f.sunAz : f.moonAz); stand(); });
+  tiltFace();
   $('plEye').addEventListener('change', e => { PL.eye = clamp(+e.target.value || 1.6, 0, 400); e.target.value = PL.eye; PL.skyKey = ''; });
   $('plUse').addEventListener('click', e => { const v = +e.currentTarget.dataset.v; if(!isFinite(v)) return; const s = $('obst'); s.value = v; s.dispatchEvent(new Event('input', { bubbles: true })); plWordsKey = ''; });
   $('tabPlan').addEventListener('click', () => setTab('plan'));
