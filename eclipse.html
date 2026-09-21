@@ -152,6 +152,12 @@
   #viewPath > .note, #viewPath > #shadowNote,
   #viewCosmos > .note, #viewCosmos > .scaleNote{order:61;}
   #viewCosmos > #auLearn{order:3;}
+  .cosCtl{position:absolute; right:8px; bottom:8px; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; max-width:min(330px, calc(100% - 16px));}
+  .cosCtl button{min-width:44px; height:40px; padding:0 11px; font:inherit; font-size:10.5px; letter-spacing:.1em; color:var(--ink); background:rgba(11,13,17,0.86); border:1px solid var(--line); border-radius:6px; cursor:pointer;}
+  .cosCtl button.on{color:var(--accent); border-color:var(--accent);}
+  .cosCtl button:active{border-color:var(--accent);}
+  #viewCosmos .mapwrap{position:relative;}
+  @media(max-width:430px){ #viewCosmos .mapwrap .cosCtl{bottom:46px;} }
   .grid{order:70;}
   #photo{order:80;}
   /* ---------- PHONE: READ AT THE TOP, OPERATE AT THE BOTTOM ----------
@@ -1448,7 +1454,11 @@ try{
     <div id="shadowNote" hidden></div>
   </div>
   <div id="viewCosmos" hidden>
-    <div class="mapwrap"><canvas id="cosmos"></canvas></div>
+    <div class="mapwrap"><canvas id="cosmos"></canvas>
+      <div class="cosCtl" id="cosCtl">
+        <button type="button" data-k="earth" id="cosEarthBtn">EARTH</button><button type="button" data-k="me">MY SIDE</button><button type="button" data-k="n">N POLE</button><button type="button" data-k="s">S POLE</button><button type="button" data-k="in" aria-label="zoom in">+</button><button type="button" data-k="out" aria-label="zoom out">−</button>
+      </div>
+    </div>
     <div class="maplegend">
       <span><i class="sw" style="background:#131019;border:1px solid rgba(150,160,190,0.55)"></i>umbra + penumbra cones</span>
       <span><i class="sw el"></i>the shadow on the surface</span>
@@ -5068,8 +5078,14 @@ function drawCosmos(){
   // so a 16:9 box can measure 1.7739 and would otherwise fall down the portrait branch
   const wide = MAP_ASPECT >= REF_ASPECT - 1e-3;
   const fit = wide ? null : cosFit(w, h, rt, upv, sHat, mHat, T);
-  const Spx = COS.zoom * (wide ? w/COS_ACROSS : fit.s);      // px per earth radius
-  const off = vMul(wide ? mHat : fit.c, (wide ? 1.8 : 1)/Math.max(1, COS.zoom));
+  // eased camera moves (the steering buttons) — one target, approached a little each frame
+  if(COS.to){ const T2 = COS.to, dy = (((T2.yaw - COS.yaw) + 540) % 360) - 180;
+    COS.yaw = ((COS.yaw + dy * 0.16 + 540) % 360) - 180; COS.pitch += (T2.pitch - COS.pitch) * 0.16; COS.zoom += (T2.zoom - COS.zoom) * 0.16;
+    if(Math.abs(dy) < 0.3 && Math.abs(T2.pitch - COS.pitch) < 0.3 && Math.abs(T2.zoom - COS.zoom) < 0.01) COS.to = null; }
+  // EARTH focus: the planet sits dead centre and zoom means "bigger earth", instead of the
+  // sun–earth–moon line being framed and the earth drifting off as you zoom
+  const Spx = COS.earth ? COS.zoom * Math.min(w, h) / 2.7 : COS.zoom * (wide ? w/COS_ACROSS : fit.s);      // px per earth radius
+  const off = COS.earth ? [0, 0, 0] : vMul(wide ? mHat : fit.c, (wide ? 1.8 : 1)/Math.max(1, COS.zoom));
   const ccx = vDot(off, rt), ccy = vDot(off, upv);
   const proj = p => ({ x: w/2 + (vDot(p, rt) - ccx)*Spx, y: h/2 - (vDot(p, upv) - ccy)*Spx, z: vDot(p, eye) });
   COS.spx = Spx;                                             // exposed for the verify harness
@@ -7875,6 +7891,15 @@ function auroraClose(){
   if(AU.raf){ cancelAnimationFrame(AU.raf); AU.raf = 0; }
 }
 $('auRefresh').addEventListener('click', ()=> auRefresh(true));
+function cosSteer(k){
+  const gst = A.SiderealTime(A.MakeTime(new Date(state.t))) * 15, mine = ((gst + state.obs.lon + 540) % 360) - 180;
+  const cur = COS.to || { yaw: COS.yaw, pitch: COS.pitch, zoom: COS.zoom };
+  if(k === 'earth'){ COS.earth = !COS.earth; COS.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: COS.earth ? 1 : 1 }; }
+  else if(k === 'in' || k === 'out'){ COS.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: clamp(cur.zoom * (k === 'in' ? 1.45 : 1 / 1.45), 0.45, 6) }; }
+  else { COS.earth = true; COS.to = { yaw: mine, pitch: k === 'n' ? 80 : k === 's' ? -80 : clamp(state.obs.lat, -70, 70), zoom: k === 'me' ? 1.2 : 1.1 }; }
+  $('cosEarthBtn').classList.toggle('on', !!COS.earth);
+}
+$('cosCtl').addEventListener('click', e => { const b = e.target.closest('button'); if(b) cosSteer(b.dataset.k); });
 $('auSpace').addEventListener('click', ()=>{
   state.cosAurora = true; $('auLearn').hidden = false;
   setTab('cosmos');
@@ -7884,7 +7909,7 @@ $('auSpace').addEventListener('click', ()=>{
     COS.dateKey = state.date;                                // or the first frame would re-aim at the eclipse
     const gst = A.SiderealTime(A.MakeTime(new Date(nowMs()))) * 15;
     COS.yaw = ((gst + state.obs.lon + 540) % 360) - 180;     // the observer’s meridian, facing the camera
-    COS.pitch = state.obs.lat >= 0 ? 58 : -58; COS.zoom = 2.1;
+    COS.pitch = state.obs.lat >= 0 ? 58 : -58; COS.zoom = 1.25; COS.earth = true; COS.to = null; $('cosEarthBtn').classList.add('on');
   }catch(e){}
   try{ $('cosmos').scrollIntoView({ block: 'start', behavior: 'smooth' }); }catch(e){}
 });
@@ -8117,7 +8142,7 @@ function plFetchTile(x, y, z){
     .then(r => { if(!r.ok) throw 0; return r.arrayBuffer(); })
     .then(b => {
       const T = plBuildTile(x, y, mvtDecode(b, ['water', 'waterway', 'park', 'landcover', 'transportation', 'transportation_name', 'building', 'place', 'water_name']), z);
-      T.state = 'ok'; PL.tiles.set(key, T); PL.dirty = true; PL.skyKey = '';
+      T.state = 'ok'; PL.tiles.set(key, T); PL.dirty = true; PL.quiet = true; PL.skyKey = '';
     })
     .catch(() => { PL.tiles.set(key, { state: 'err' }); PL.dirty = true; });
 }
@@ -8311,7 +8336,7 @@ function plRenderStatic(w, h, pr){
   b.lineCap = 'round'; b.lineJoin = 'round';
   for(let c = 4; c >= 0; c--) pass(b, T => { b.strokeStyle = PL_COL.road[c]; b.lineWidth = widths[c] / PL._s; b.stroke(T.roads[c]); });
   // street names go on the GROUND layer: in 3D a building in front really does hide them
-  {
+  if(!PL.fast){
     b.setTransform(pr, 0, 0, pr, 0, 0); b.textAlign = 'center'; b.textBaseline = 'middle';
     const want = PL.z < 12.5 ? ['city', 'town'] : PL.z < 14.6 ? ['city', 'town', 'suburb', 'village', 'water'] : ['suburb', 'quarter', 'neighbourhood', 'village', 'water'];
     const all = []; for(const T of vis) for(const q of T.places) if(want.indexOf(q.cls) >= 0) all.push(q);
@@ -8325,7 +8350,7 @@ function plRenderStatic(w, h, pr){
       b.fillStyle = wat ? 'rgba(120,160,215,0.85)' : big ? 'rgba(235,240,250,0.95)' : 'rgba(201,209,224,0.8)'; b.fillText(txt, P1[0], P1[1]); }
     try{ b.letterSpacing = '0px'; }catch(e){}
   }
-  if(PL.z >= 15.3){
+  if(PL.z >= 15.3 && !PL.fast){
     b.setTransform(pr, 0, 0, pr, 0, 0);
     b.font = '500 10.5px system-ui, -apple-system, Segoe UI, sans-serif'; b.textAlign = 'center'; b.textBaseline = 'middle';
     const done = [];
@@ -8366,6 +8391,8 @@ function plBuildings(w, h, pr, az, alt){
   for(const T of (PL.vis || [])) for(const b of T.bld){
     const q = C.P((b.bb[0] + b.bb[2]) / 2, (b.bb[1] + b.bb[3]) / 2, 0), lift = b.h * C.ppm * C.sp;
     if(q[0] < -260 || q[0] > w + 260 || q[1] < -120 || q[1] - lift > h + 120) continue;
+    // in motion, skip what could not be read anyway: footprints a few pixels across
+    if(PL.fast && (b.bb[2] - b.bb[0] + b.bb[3] - b.bb[1]) * C.W < 14 && lift < 10) continue;
     list.push([q[1], b]);
   }
   list.sort((a, b) => a[0] - b[0]);                       // far (top of screen) first
@@ -8450,12 +8477,23 @@ function plDrawMap(f){
   // the turn and the tip are eased, so the 2D/3D button and the rotate buttons read as one camera moving
   if(PL.bearTo != null){ const d = (((PL.bearTo - PL.bear) + 540) % 360) - 180; if(Math.abs(d) < 0.3){ PL.bear = (PL.bearTo + 360) % 360; PL.bearTo = null; } else PL.bear = (PL.bear + d * 0.18 + 360) % 360; PL.dirty = true; }
   if(PL.pitchTo != null){ const d = PL.pitchTo - PL.pitch; if(Math.abs(d) < 0.3){ PL.pitch = PL.pitchTo; PL.pitchTo = null; if(PL.pitch < 1){ PL.tilt = false; PL.pitch = 0; } } else PL.pitch += d * 0.16; PL.dirty = true; }
-  if(PL.dirty){ plRenderStatic(w, h, pr); PL.dirty = false; PL.topKey = ''; PL.shadKey = ''; PL.shadAt = 0; plWant(); }
+  /* WHILE IT IS MOVING the picture is drawn for speed: half the pixels, no shadows, and only
+     the buildings big enough to read. The instant the hand stops (0.22 s) one full-quality
+     frame replaces it. A 3D city redrawn at full density on every pointer event was a
+     slideshow — reported as "barely moving". */
+  const nowT = performance.now();
+  if(PL.dirty && !PL.quiet) PL.movedAt = nowT;          // a tile arriving is not the hand moving
+  PL.quiet = false;
+  const moving = nowT - (PL.movedAt || 0) < 220 && PL.everDrawn;
+  if(!moving && PL.wasMoving) PL.dirty = true;                 // settle: one clean frame
+  PL.wasMoving = moving;
+  const lpr = moving ? Math.min(pr, 1) * 0.6 : pr; PL.fast = moving;
+  if(PL.dirty){ const keepMoved = PL.movedAt; plRenderStatic(w, h, lpr); PL.dirty = false; PL.topKey = ''; PL.shadKey = ''; PL.shadAt = 0; if(!moving) plWant(); PL.movedAt = keepMoved; PL.everDrawn = true; }
   const x = c.getContext('2d'), C = plCam(w, h);
-  x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(PL.base, 0, 0);
-  const sh = plShadows(w, h, pr, f.sunAz, f.sunAlt);
+  x.setTransform(1, 0, 0, 1, 0, 0); x.imageSmoothingEnabled = true; x.drawImage(PL.base, 0, 0, c.width, c.height);
+  const sh = moving ? null : plShadows(w, h, pr, f.sunAz, f.sunAlt);
   if(sh){ x.globalAlpha = 0.5 * clamp((f.sunAlt - 0.4) / 4, 0, 1); x.imageSmoothingEnabled = true; x.drawImage(sh, 0, 0, c.width, c.height); x.globalAlpha = 1; }
-  x.drawImage(plBuildings(w, h, pr, f.sunAz, f.sunAlt), 0, 0);
+  x.drawImage(plBuildings(w, h, lpr, f.sunAz, f.sunAlt), 0, 0, c.width, c.height);
   // night falls on the map too
   const night = clamp((-f.sunAlt + 1) / 10, 0, 1);
   if(night > 0){ x.fillStyle = 'rgba(4,6,12,' + (0.42 * night).toFixed(3) + ')'; x.fillRect(0, 0, c.width, c.height); }
