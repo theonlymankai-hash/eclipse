@@ -1087,6 +1087,63 @@
      which moment to pick. They come straight back — untouched — on any other tab. */
   body.alignTab .timebar, body.alignTab .whenbar, body.alignTab .livebar{display:none;}
 
+  /* ==================== AURORA — the online view ====================
+     A panel like ALIGN, not a canvas view like SKY: it has no scrubber to drive, because the
+     only moment it can speak about is now. Same register as the rest — dark ground, thin type —
+     with one new colour, and only where it means "south / go". */
+  body.auroraTab .timebar, body.auroraTab .whenbar, body.auroraTab .livebar{display:none;}
+  /* the eclipse read-out and the eclipse shot plan say nothing about tonight */
+  body.auroraTab #secRead, body.auroraTab #photo{display:none;}
+  #viewAurora{order:2;}
+  @media(max-width:520px){ .auVerdict{font-size:21px;} }
+  .auPanel{background:var(--panel); border:1px solid var(--line); border-radius:0 6px 6px 6px; padding:12px 14px 16px;}
+  @media(max-width:760px){ body.chip .auPanel{padding-top:60px;} }
+  .auHead{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .auHead .auStamp{flex:1; font-family:var(--mono); font-size:11px; color:var(--dim); min-width:0;}
+  #auRefresh{font:inherit; font-size:11px; letter-spacing:.12em; color:var(--ink); background:#0c0f15; border:1px solid var(--line);
+             border-radius:5px; padding:0 14px; min-height:44px; cursor:pointer;}
+  #auRefresh:disabled{opacity:.45;}
+  .auVerdict{font-size:26px; font-weight:300; letter-spacing:.06em; line-height:1.15; color:var(--ink); margin:2px 0 6px;}
+  .auVerdict.go{color:var(--good);} .auVerdict.watch{color:var(--accent);} .auVerdict.no{color:var(--dim);}
+  #auSub{font-size:13.5px; color:var(--ink); opacity:.85; line-height:1.45; margin-bottom:10px; max-width:70ch;}
+  #auSub:empty{display:none;}
+  #auWhy{list-style:none; margin:0 0 12px; padding:0; display:grid; gap:1px; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+  #auWhy li{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; background:#0c0f15; font-size:13.5px; line-height:1.4; color:var(--ink);}
+  #auWhy li i{flex:0 0 9px; height:9px; border-radius:50%; margin-top:5px; background:var(--dim);}
+  #auWhy li.ok i{background:var(--good); box-shadow:0 0 8px rgba(125,212,160,.6);}
+  #auWhy li.no i{background:transparent; border:1.5px solid var(--bad);}
+  #auWhy li.no{color:#aab2c4;}
+  #auWhy li b{color:#fff; font-weight:500;}
+  canvas#auCv{display:block; width:100%; border:1px solid var(--line); border-radius:6px; background:#05070b;}
+  #auLead{font-family:var(--mono); font-size:12px; color:var(--dim); margin:8px 0 12px; line-height:1.45;}
+  #auLead b{color:var(--accent); font-weight:500;}
+  .auCards{display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:10px; margin-bottom:12px;}
+  @media(max-width:620px){ .auCards{grid-template-columns:1fr 1fr;} .auCards .auCard:first-child{grid-column:1 / -1;} }
+  .auCard{background:#0c0f15; border:1px solid var(--line); border-radius:6px; padding:10px 12px 11px; min-width:0;}
+  .auCard h4{margin:0 0 4px; font-size:10.5px; font-weight:400; letter-spacing:.18em; color:var(--dim);}
+  .auBig{font-family:var(--mono); font-size:34px; line-height:1.05; color:var(--ink);}
+  .auBig small{font-size:12px; color:var(--dim); margin-left:4px;}
+  .auBig.go{color:var(--good);} .auBig.watch{color:var(--accent);} .auBig.no{color:#8d96aa;}
+  .auCard p{margin:4px 0 0; font-size:12.5px; line-height:1.4; color:#aab2c4;}
+  canvas#auSpark{display:block; width:100%; height:54px; margin-top:8px;}
+  .auFcWrap h4{margin:0 0 8px; font-size:10.5px; font-weight:400; letter-spacing:.18em; color:var(--dim);}
+  #auFc{display:flex; align-items:flex-end; gap:2px; height:74px; padding-bottom:16px; position:relative;}
+  #auFc .b{flex:1 1 0; height:100%; display:flex; align-items:flex-end; position:relative; background:rgba(255,255,255,0.015);}
+  #auFc .b i{display:block; width:100%; background:#2a3142; border-radius:2px 2px 0 0;}
+  #auFc .b.dk{background:rgba(125,212,160,0.05);}
+  #auFc .b.dk i{background:#5f9c7c;}
+  #auFc .b.dk.mid i{background:var(--accent);}
+  #auFc .b.dk.hi i{background:var(--good); box-shadow:0 0 10px rgba(125,212,160,.5);}
+  #auFc .b.hi i{background:#4a5468;}
+  #auFc .b em{position:absolute; left:0; bottom:-16px; font-style:normal; font-family:var(--mono); font-size:10px; color:var(--dim); white-space:nowrap;}
+  #auFcNote{font-size:12.5px; color:#aab2c4; margin:8px 0 12px; line-height:1.45;}
+  #auFcNote b{color:#fff; font-weight:500;}
+  details.auFold{border-top:1px solid var(--line); padding-top:10px;}
+  details.auFold summary{cursor:pointer; font-size:11px; letter-spacing:.16em; color:var(--dim); min-height:32px; display:flex; align-items:center;}
+  #auShoot{font-size:13px; line-height:1.5; color:var(--ink); margin:4px 0 10px;}
+  #auShoot b{color:var(--accent); font-weight:500; font-family:var(--mono);}
+  .auSrc{font-size:11.5px; color:var(--dim); line-height:1.45; margin-top:6px;}
+
   /* ==================== SIDEREAL — the stargazing layer ====================
      Stars, constellation lines and the controls that go with them, all inside the SKY view
      that already existed. Nothing here adds a tab: SKY generalised from two objects to
@@ -1258,7 +1315,7 @@ try{
 <div class="wrap">
 
   <div class="tabs viewtabs">
-    <button id="tabSky" class="on">SKY</button><button id="tabPath">PATH</button><button id="tabCosmos">COSMOS</button><button id="tabAlign">ALIGN</button>
+    <button id="tabSky" class="on">SKY</button><button id="tabPath">PATH</button><button id="tabCosmos">COSMOS</button><button id="tabAlign">ALIGN</button><button id="tabAurora">AURORA</button>
   </div>
   <!-- LOCATION CHIP — one for all three views. It sits here, as a sibling of the view
        wrappers rather than inside #viewSky, so PATH and COSMOS get it too; syncChip() lays it
@@ -1367,6 +1424,28 @@ try{
       <div class="note" id="aFrameNote"></div>
       <div id="aResults"></div>
       <button id="aMore" type="button" hidden>show more</button>
+    </div>
+  </div>
+
+  <!-- AURORA — the only view that goes online, and only when it is opened. Everything around
+       the aurora (where to look, how high, is it dark, is the moon up, does it clear the
+       horizon the visitor set) is the engine that was already here; the space weather is NOAA. -->
+  <div id="viewAurora" hidden>
+    <div class="auPanel">
+      <div class="auHead"><span class="auStamp" id="auStamp">online · NOAA SWPC</span><button id="auRefresh" type="button">REFRESH</button></div>
+      <div id="auVerdict" class="auVerdict">—</div>
+      <div id="auSub"></div>
+      <ul id="auWhy"></ul>
+      <canvas id="auCv" role="img" aria-label="Your horizon, facing the aurora: where it sits and how high"></canvas>
+      <div id="auLead"></div>
+      <div class="auCards">
+        <div class="auCard"><h4>Bz · THE TRIGGER</h4><div class="auBig"><span id="auBz">—</span><small>nT</small></div><p id="auBzW">south is what matters</p><canvas id="auSpark"></canvas></div>
+        <div class="auCard"><h4>SOLAR WIND</h4><div class="auBig"><span id="auV">—</span><small>km/s</small></div><p id="auVW"></p></div>
+        <div class="auCard"><h4>Kp · NOW</h4><div class="auBig"><span id="auKp">—</span></div><p id="auKpW"></p></div>
+      </div>
+      <div class="auFcWrap"><h4>Kp · NEXT 3 DAYS</h4><div id="auFc"></div><div id="auFcNote"></div></div>
+      <details class="auFold"><summary>SHOOTING IT</summary><div id="auShoot"></div></details>
+      <div class="auSrc">Space weather: NOAA SWPC, read live — this is the one view that needs a connection. Where it sits in your sky, the darkness, the moon and your horizon are computed here, for your coordinates. Set your blocked horizon under the location panel: from Britain the whole event lives in the bottom ten degrees.</div>
     </div>
   </div>
 
@@ -2353,6 +2432,8 @@ function applyRange(mode){
 addEventListener('resize', placeMarkers);
 
 function recomputeEclipse(){
+  // AURORA reads the same observer — a new place is a new horizon, a new night and a new oval geometry
+  try{ if(AU.open) setTimeout(auEval, 0); }catch(_){}
   const err = $('errBox');
   err.hidden = true;
   hideShareFallback();          // the link it holds is for the old location/date
@@ -6278,7 +6359,7 @@ cv.addEventListener('touchmove', e=>{
 }, { passive:false });
 cv.addEventListener('touchend', ()=>{ pinchD = 0; });
 $('obst').addEventListener('input', e=>{
-  state.obstDeg = +e.target.value; updateObstVerdict();
+  state.obstDeg = +e.target.value; updateObstVerdict(); try{ if(AU.open) auEval(); }catch(_){}
   // ALIGN reads the same number: the dial's blocked band and every result's verdict move with it
   if(typeof drawDial === 'function'){ drawDial(); if(ALIGN.view && ALIGN.view.length) alignRender(true); }
 });
@@ -7064,13 +7145,19 @@ function setTab(tab){
   $('viewPath').hidden = tab !== 'path';
   $('viewCosmos').hidden = tab !== 'cosmos';
   $('viewAlign').hidden = tab !== 'align';
+  $('viewAurora').hidden = tab !== 'aurora';
   $('tabSky').classList.toggle('on', tab === 'sky');
   $('tabPath').classList.toggle('on', tab === 'path');
   $('tabCosmos').classList.toggle('on', tab === 'cosmos');
   $('tabAlign').classList.toggle('on', tab === 'align');
+  $('tabAurora').classList.toggle('on', tab === 'aurora');
   // ALIGN has no clock of its own — the transport, the when-bar and the countdown are hidden
   // by this class alone, and come straight back on any other tab
   document.body.classList.toggle('alignTab', tab === 'align');
+  // AURORA is the same, and is also the only view that touches the network — it starts and
+  // stops its own polling here, so no other tab ever pays for it
+  document.body.classList.toggle('auroraTab', tab === 'aurora');
+  if(tab === 'aurora') auroraOpen(); else auroraClose();
   /* SIDEREAL's strip belongs to SKY and only SKY — stars, lines, labels and a one-star
      calibration have nothing to control on a map. Pressing SKY while already on SKY is also
      the way back from a dragged camera: the sun-tracking framing returns. */
@@ -7126,6 +7213,465 @@ $('tabSky').addEventListener('click', ()=> setTab('sky'));
 $('tabPath').addEventListener('click', ()=> setTab('path'));
 $('tabCosmos').addEventListener('click', ()=> setTab('cosmos'));
 $('tabAlign').addEventListener('click', ()=> setTab('align'));
+
+/* ==================== AURORA — the one layer that is weather, not geometry ====================
+   Everything else in this file can be computed for any date, offline, from first principles.
+   Aurora cannot: it is space weather, live, forecast an hour ahead at best. So this view is the
+   single sanctioned network user in the app, it fetches only when it is opened, and nothing
+   outside it ever waits on it.
+
+   What it does NOT do is alert on Kp. Kp is a three-hour planetary average — by the time it
+   rises the substorm may be over. The trigger is Bz: the interplanetary field has to point
+   SOUTH to couple with the magnetosphere, and if it points north nothing happens however high
+   Kp climbs. So Bz is the big number, and the verdict is a conjunction — Bz, the oval's reach
+   from HERE, darkness HERE, the moon, and the obstruction the user already set — of which the
+   engine already computes everything except the space weather.
+
+   Feeds (NOAA SWPC, public domain, CORS-open, verified 21 Sep 2026):
+     products/geospace/propagated-solar-wind-1-hour.json   Bz, Bt, speed, density + arrival time
+     json/planetary_k_index_1m.json                        estimated Kp, by the minute
+     products/noaa-planetary-k-index-forecast.json         3-day Kp, three-hour bins
+     json/ovation_aurora_latest.json                       1° grid of aurora probability, ~30-60 min ahead
+   The older products/solar-wind/*.json paths are gone; json/rtsw/* carries the same numbers
+   but at 1.6 MB and 2.9 MB a poll, which is no way to treat a phone in a field. */
+const AU = { wind: null, kp: null, fc: null, ov: null, ovMeta: null, err: {}, at: 0, ovAt: 0,
+             timer: 0, raf: 0, busy: false, cols: null, best: null, dark: null, open: false };
+const AU_BASE = 'https://services.swpc.noaa.gov/';
+const AU_RE = 6371, AU_H0 = 110, AU_H1 = 260;     // km: the green lower border, and where the rays thin out
+
+function auFetch(path){
+  const ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+  const to = setTimeout(()=>{ if(ctl) ctl.abort(); }, 15000);
+  return fetch(AU_BASE + path, { signal: ctl ? ctl.signal : undefined, cache: 'no-store' })
+    .then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .finally(()=> clearTimeout(to));
+}
+function auAlt(body, ms){
+  const t = A.MakeTime(new Date(ms));
+  const o = new A.Observer(state.obs.lat, state.obs.lon, state.obs.elev);
+  const eq = A.Equator(A.Body[body], t, o, true, true);
+  return A.Horizon(t, o, eq.ra, eq.dec, 'normal').altitude;
+}
+const AU_PTS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+const auCompass = az => AU_PTS[Math.round((((az % 360) + 360) % 360) / 22.5) % 16];
+const auHM = ms => fmtLocal(ms).slice(0, 5);
+function auDay(ms){
+  try{ return new Intl.DateTimeFormat('en-GB', { timeZone: state.tz, weekday: 'short' }).format(new Date(ms)); }
+  catch(e){ return ''; }
+}
+// SWPC time tags come with and without a trailing Z; all of them are UTC
+const auT = s => Date.parse(/Z$/.test(s) ? s : s.replace(' ', 'T') + 'Z');
+
+/* ---------- the solar wind ---------- */
+function auWind(){
+  const w = AU.wind; if(!w || w.length < 3) return null;
+  const H = w[0], ix = k => H.indexOf(k);
+  const iT = ix('time_tag'), iV = ix('speed'), iN = ix('density'), iBz = ix('bz'), iBt = ix('bt'), iP = ix('propagated_time_tag');
+  const rows = [];
+  for(let i = 1; i < w.length; i++){
+    const r = w[i], bz = r[iBz] == null ? NaN : +r[iBz];
+    if(!isFinite(bz)) continue;
+    rows.push({ t: auT(r[iT]), bz, bt: +r[iBt], v: +r[iV], n: +r[iN], arr: r[iP] ? auT(r[iP]) : NaN });
+  }
+  if(!rows.length) return null;
+  const last = rows[rows.length - 1];
+  const recent = rows.filter(r => r.t >= last.t - 15*60000);
+  const mean = recent.reduce((s, r) => s + r.bz, 0) / recent.length;
+  const southFrac = recent.filter(r => r.bz < 0).length / recent.length;
+  let southMin = 0;
+  for(let i = rows.length - 1; i >= 0 && rows[i].bz < 0; i--) southMin = Math.round((last.t - rows[i].t) / 60000) + 1;
+  const vs = rows.filter(r => isFinite(r.v) && r.v > 0), ns = rows.filter(r => isFinite(r.n) && r.n >= 0);
+  return { rows, last, mean, southFrac, southMin,
+           v: vs.length ? vs[vs.length - 1].v : NaN, n: ns.length ? ns[ns.length - 1].n : NaN };
+}
+function auBzWords(bz){
+  if(bz <= -10) return 'strongly south — the door is wide open';
+  if(bz <= -5)  return 'south — energy is getting in';
+  if(bz < -1)   return 'slightly south — a weak connection';
+  if(bz <= 1)   return 'neutral — nothing either way';
+  return 'north — the door is shut, whatever Kp says';
+}
+function auSpeedWords(v){
+  if(!isFinite(v)) return '';
+  return v < 400 ? 'slow' : v < 500 ? 'moderate' : v < 700 ? 'fast' : 'very fast';
+}
+
+/* ---------- the oval, as seen from here ----------
+   OVATION is a 1° grid of "probability of visible aurora overhead". What a person wants is
+   not that: they want "which way, and how high above MY horizon". So walk outward from the
+   observer along every bearing, and for each cell with aurora in it work out where its light
+   sits in this observer's sky — lower border at ~110 km, ray tops at ~260 km. Anything past
+   about 17° of ground distance is below the horizon by geometry alone, however bright. */
+function auElev(dDeg, h){
+  const d = dDeg * Math.PI / 180;
+  return Math.atan2(Math.cos(d) - AU_RE / (AU_RE + h), Math.sin(d)) * 180 / Math.PI;
+}
+function auDest(lat, lon, az, dDeg){
+  const R = Math.PI / 180, p = lat * R, a = az * R, d = dDeg * R;
+  const sl = Math.sin(p) * Math.cos(d) + Math.cos(p) * Math.sin(d) * Math.cos(a);
+  const l2 = Math.asin(clamp(sl, -1, 1));
+  const o2 = lon * R + Math.atan2(Math.sin(a) * Math.sin(d) * Math.cos(p), Math.cos(d) - Math.sin(p) * sl);
+  return [l2 / R, o2 / R];
+}
+function auGridOf(ov){
+  const g = new Uint8Array(360 * 181), c = ov.coordinates || [];
+  for(let i = 0; i < c.length; i++){
+    const lo = ((c[i][0] % 360) + 360) % 360, la = c[i][1] + 90;
+    if(la >= 0 && la <= 180) g[la * 360 + lo] = Math.min(255, c[i][2]);
+  }
+  return g;
+}
+function auP(g, lat, lon){
+  const la = Math.round(lat) + 90, lo = ((Math.round(lon) % 360) + 360) % 360;
+  return (la < 0 || la > 180) ? 0 : g[la * 360 + lo];
+}
+const AU_AZ_STEP = 2, AU_PMIN = 5;
+function auScan(){
+  const g = AU.ov; if(!g) return null;
+  const lat = state.obs.lat, lon = state.obs.lon;
+  const cols = [];                       // per bearing: the envelope of visible aurora
+  let best = null, nearest = null;
+  for(let az = 0; az < 360; az += AU_AZ_STEP){
+    let e0 = 90, e1 = -90, pm = 0;
+    for(let d = 0.5; d <= 40; d += 0.5){
+      const q = auDest(lat, lon, az, d), p = auP(g, q[0], q[1]);
+      if(p < AU_PMIN) continue;
+      if(p >= 10 && (!nearest || d < nearest.d)) nearest = { d, az, p };
+      const top = auElev(d, AU_H1);
+      if(top <= 0) break;                // past here everything is under the horizon
+      const bot = Math.max(0, auElev(d, AU_H0));
+      if(bot < e0) e0 = bot;
+      if(top > e1) e1 = top;
+      if(p > pm) pm = p;
+    }
+    cols.push(pm ? { az, e0, e1, p: pm } : { az, e0: 0, e1: 0, p: 0 });
+    // "best" is where to point the camera: the bearing whose aurora is brightest and clears most sky
+    if(pm >= 10){ const score = pm * Math.min(e1, 40); if(!best || score > best.score) best = { az, e0, e1, p: pm, score }; }
+  }
+  return { cols, best, nearest, here: auP(g, lat, lon) };
+}
+
+/* ---------- darkness, tonight, here ---------- */
+function auDarkness(now){
+  const step = 5 * 60000, out = { now: auAlt('Sun', now), start: NaN, end: NaN, never: false, min: 90 };
+  let inDark = out.now < -12;
+  if(inDark) out.start = now;
+  for(let t = now + step; t <= now + 30 * 3600000; t += step){
+    const a = auAlt('Sun', t);
+    if(a < out.min) out.min = a;
+    if(!inDark && a < -12 && !isFinite(out.start)){ out.start = t; inDark = true; }
+    else if(inDark && a >= -12){ out.end = t; break; }
+  }
+  if(!isFinite(out.start)) out.never = true;
+  return out;
+}
+
+/* ---------- the verdict ---------- */
+function auEval(){
+  if(!AU.open) return;
+  const now = Date.now();
+  const w = auWind(), sc = auScan(), dk = auDarkness(now);
+  AU.dark = dk; AU.cols = sc ? sc.cols : null; AU.best = sc ? sc.best : null;
+  const obst = state.obstDeg > 0 ? state.obstDeg : 0;
+  const moonAlt = auAlt('Moon', now), ill = moonIllNow(now);
+  const isDark = dk.now < -12, fullDark = dk.now < -18;
+  const bzSouth = !!w && w.mean < -2 && w.southFrac >= 0.6;
+  const bzHard = !!w && w.mean <= -8;
+  const reach = !!(sc && sc.best && sc.best.e1 > obst + 1);
+  const moonOk = moonAlt < 0 || ill < 0.3;
+  const rows = [];
+  const row = (ok, txt) => rows.push('<li class="' + (ok === null ? 'na' : ok ? 'ok' : 'no') + '"><i></i><span>' + txt + '</span></li>');
+
+  // 1 — Bz
+  if(w){
+    const bz = w.last.bz;
+    row(bzSouth, '<b>Bz ' + (bz > 0 ? '+' : '') + bz.toFixed(1) + ' nT</b> · ' + auBzWords(w.mean) +
+        (w.southMin >= 5 ? ' · south for ' + w.southMin + ' min' : ''));
+  }else row(null, 'solar wind — ' + (AU.err.wind ? 'feed unreachable' : 'loading…'));
+
+  // 2 + 5 — the oval's reach from here, against the user's own horizon
+  if(sc){
+    if(sc.best){
+      const b = sc.best;
+      row(reach, 'aurora to the <b>' + auCompass(b.az) + '</b>, reaching <b>' + Math.round(Math.min(b.e1, 90)) + '°</b> up' +
+          (sc.here >= 30 ? ' — <b>overhead</b> (' + sc.here + '%)' : '') +
+          (obst > 0 ? (reach ? ' · clears your ' + obst.toFixed(1) + '° horizon by ' + Math.round(b.e1 - obst) + '°'
+                             : ' · <b>hidden behind your ' + obst.toFixed(1) + '° horizon</b>') : ''));
+    }else if(sc.nearest){
+      const km = Math.round(sc.nearest.d * 111.2 / 50) * 50;
+      row(false, 'nearest aurora is ~' + km.toLocaleString('en-GB') + ' km to the ' + auCompass(sc.nearest.az) +
+          ' — below your horizon by the curve of the earth');
+    }else row(false, 'no aurora within reach of this place right now');
+  }else row(null, 'aurora oval — ' + (AU.err.ov ? 'feed unreachable' : 'loading…'));
+
+  // 3 — dark
+  if(isDark) row(true, (fullDark ? 'fully dark' : 'dark enough for a strong display') + ' · sun ' + dk.now.toFixed(0) + '°' +
+                 (isFinite(dk.end) ? ' · until ' + auHM(dk.end) : ''));
+  else if(dk.never) row(false, 'no real darkness here tonight — the sun never gets 12° below your horizon (lowest ' + dk.min.toFixed(0) + '°)');
+  else row(false, (dk.now > 0 ? 'daylight' : 'twilight') + ' · sun ' + (dk.now > 0 ? '+' : '') + dk.now.toFixed(0) + '° · dark from <b>' + auHM(dk.start) + '</b>' +
+           (isFinite(dk.end) ? ' to ' + auHM(dk.end) : ''));
+
+  // 4 — moon
+  row(moonOk, moonAlt < 0 ? 'moon is down' : 'moon ' + Math.round(ill * 100) + '% lit, ' + Math.round(moonAlt) + '° up' +
+      (moonOk ? ' — thin enough not to matter' : ' — washes out all but the bright parts'));
+
+  $('auWhy').innerHTML = rows.join('');
+
+  // the sentence. One of six, in order of how much the visitor should care.
+  let v, cls;
+  if(!w && !sc){ v = AU.busy ? 'Reading the solar wind…' : (navigator.onLine === false ? 'OFFLINE' : 'NO DATA'); cls = ''; }
+  else if(reach && isDark && bzSouth){ v = moonOk ? 'GO OUT NOW' : 'GO — but the moon is in the way'; cls = 'go'; }
+  else if(reach && isDark){ v = 'POSSIBLE — waiting on Bz'; cls = 'watch'; }
+  else if(reach && !isDark){ v = dk.never ? 'IT IS THERE — but it never gets dark here tonight' : 'IT IS THERE — but not dark until ' + auHM(dk.start); cls = 'watch'; }
+  else if(bzHard){ v = 'WATCH — Bz has turned hard south'; cls = 'watch'; }
+  else { v = 'NOT FROM HERE, NOT NOW'; cls = 'no'; }
+  const vd = $('auVerdict'); vd.textContent = v; vd.className = 'auVerdict ' + cls;
+
+  let sub = '';
+  if(!w && !sc && !AU.busy) sub = 'Aurora is the one part of this app that is weather, not geometry — it needs a connection. Everything else here still works offline.';
+  else if(cls === 'go') sub = 'Every condition is true at once: the field is south, the oval reaches your sky, it is dark, and your horizon is clear. Look ' + (sc.best ? auCompass(sc.best.az) : 'north') + '.';
+  else if(v.indexOf('POSSIBLE') === 0) sub = 'The oval reaches your sky and it is dark, but the field is not south. Displays switch on within minutes of Bz turning — this page re-reads it every minute.';
+  else if(bzHard && !reach) sub = 'The oval grows towards the equator 30–60 minutes after a turn like this. Keep this open.';
+  else if(cls === 'no' && sc && sc.nearest) sub = 'Alerts that fire on Kp alone would not know this. The geometry from your coordinates does.';
+  $('auSub').textContent = sub;
+
+  // arrival: what the upstream spacecraft measures now has not hit Earth yet
+  let lead = '';
+  if(w && isFinite(w.last.arr)){
+    const mins = Math.round((w.last.arr - now) / 60000);
+    lead = mins > 1 ? 'measured a million miles upstream — this wind reaches Earth in <b>' + mins + ' min</b> (' + auHM(w.last.arr) + ')'
+                    : 'this wind is arriving at Earth now';
+  }
+  $('auLead').innerHTML = lead;
+
+  // cards
+  if(w){
+    const bz = w.last.bz, el = $('auBz');
+    el.textContent = (bz > 0 ? '+' : '') + bz.toFixed(1);
+    el.className = 'auBig ' + (bz <= -5 ? 'go' : bz < -1 ? 'watch' : bz > 1 ? 'no' : '');
+    $('auBzW').textContent = auBzWords(bz);
+    $('auV').textContent = isFinite(w.v) ? Math.round(w.v) : '—';
+    $('auVW').textContent = auSpeedWords(w.v) + (isFinite(w.n) ? ' · density ' + w.n.toFixed(1) + ' /cm³' : '');
+  }
+  if(AU.kp && AU.kp.length){
+    const k = AU.kp[AU.kp.length - 1], kv = +k.estimated_kp;
+    $('auKp').textContent = isFinite(kv) ? kv.toFixed(1) : '—';
+    $('auKpW').textContent = 'a 3-hour planetary average — it lags. Read Bz first.';
+  }
+  auForecast(now);
+  auShoot(w, sc);
+  const bits = [];
+  if(AU.at) bits.push('solar wind ' + auHM(AU.at));
+  if(AU.ovMeta && AU.ovMeta['Forecast Time']) bits.push('oval forecast for ' + auHM(auT(AU.ovMeta['Forecast Time'])));
+  $('auStamp').textContent = bits.length ? bits.join(' · ') + ' ' + tzShort(now) : 'online · NOAA SWPC';
+  auSpark(w);
+  auDraw(performance.now());
+}
+
+/* ---------- 3-day Kp, with the hours that are dark HERE marked ----------
+   A Kp 6 forecast for 14:00 is no use to anyone. The bins are shaded by whether the sun is
+   12° down at these coordinates, and the sentence only ever names a dark one. */
+function auForecast(now){
+  const host = $('auFc'); if(!host) return;
+  const fc = (AU.fc || []).map(r => ({ t: auT(r.time_tag), kp: +r.kp, kind: r.observed }))
+                          .filter(r => isFinite(r.t) && isFinite(r.kp) && r.t + 3 * 3600000 > now).slice(0, 24);
+  if(!fc.length){ host.innerHTML = ''; $('auFcNote').textContent = ''; return; }
+  let html = '', best = null, lastDay = '';
+  fc.forEach(b => {
+    const mid = b.t + 1.5 * 3600000, dark = auAlt('Sun', mid) < -12;
+    if(dark && (!best || b.kp > best.kp)) best = b;
+    const day = auDay(b.t), h = Math.max(6, Math.round(b.kp / 9 * 100));
+    html += '<span class="b' + (dark ? ' dk' : '') + (b.kp >= 5 ? ' hi' : b.kp >= 4 ? ' mid' : '') + '" title="' + day + ' ' + auHM(b.t) + ' · Kp ' + b.kp.toFixed(1) + '">' +
+            '<i style="height:' + h + '%"></i>' + (day !== lastDay ? '<em>' + day + '</em>' : '') + '</span>';
+    lastDay = day;
+  });
+  host.innerHTML = html;
+  $('auFcNote').innerHTML = best
+    ? 'Highest forecast while it is dark here: <b>Kp ' + best.kp.toFixed(1) + '</b>, ' + auDay(best.t) + ' ' + auHM(best.t) + '–' + auHM(best.t + 3 * 3600000) + '. Bright bars are your dark hours.'
+    : 'None of the next three days of forecast falls in darkness at this place.';
+}
+
+/* ---------- shooting it — a different regime from the eclipse table ---------- */
+function auShoot(w, sc){
+  const el = $('auShoot'); if(!el) return;
+  const active = (w && w.mean <= -5) || (sc && sc.best && sc.best.p >= 50);
+  el.innerHTML =
+    '<b>' + (active ? '2–5 s' : '8–15 s') + '</b> · ISO ' + (active ? '1600–3200' : '3200–6400') + ' · widest lens you own, wide open (f/1.4–2.8) · manual focus at infinity, set before dark.' +
+    '<br>' + (active ? 'It is moving fast right now — a long exposure smears the curtains into green fog. Keep it short.'
+                     : 'Faint and slow right now, so you can afford longer — shorten as soon as you see structure.');
+}
+
+/* ---------- Bz, the last hour ---------- */
+function auSpark(w){
+  const c = $('auSpark'); if(!c) return;
+  const cssW = c.clientWidth || 200, cssH = 54, pr = Math.min(window.devicePixelRatio || 1, 3);
+  c.width = Math.round(cssW * pr); c.height = Math.round(cssH * pr);
+  const x = c.getContext('2d'); x.setTransform(pr, 0, 0, pr, 0, 0); x.clearRect(0, 0, cssW, cssH);
+  if(!w) return;
+  const rows = w.rows, t0 = rows[0].t, t1 = rows[rows.length - 1].t || t0 + 1;
+  let m = 6; rows.forEach(r => { m = Math.max(m, Math.abs(r.bz)); }); m = Math.ceil(m / 2) * 2;
+  const X = t => (t - t0) / Math.max(1, t1 - t0) * cssW, Y = b => cssH / 2 - b / m * (cssH / 2 - 3);
+  // south is the half that matters, so it is the half that is lit
+  x.fillStyle = 'rgba(125,212,160,0.07)'; x.fillRect(0, cssH / 2, cssW, cssH / 2);
+  x.strokeStyle = 'rgba(107,116,136,0.55)'; x.lineWidth = 1; x.beginPath(); x.moveTo(0, cssH / 2 + .5); x.lineTo(cssW, cssH / 2 + .5); x.stroke();
+  x.beginPath(); rows.forEach((r, i) => { i ? x.lineTo(X(r.t), Y(r.bz)) : x.moveTo(X(r.t), Y(r.bz)); });
+  x.lineTo(cssW, cssH / 2); x.lineTo(0, cssH / 2); x.closePath();
+  x.save(); x.beginPath(); x.rect(0, cssH / 2, cssW, cssH / 2); x.clip();
+  x.fillStyle = 'rgba(125,212,160,0.35)';
+  x.beginPath(); rows.forEach((r, i) => { i ? x.lineTo(X(r.t), Y(r.bz)) : x.moveTo(X(r.t), Y(r.bz)); });
+  x.lineTo(cssW, cssH / 2); x.lineTo(0, cssH / 2); x.closePath(); x.fill(); x.restore();
+  x.strokeStyle = '#c9d1e0'; x.lineWidth = 1.4; x.beginPath();
+  rows.forEach((r, i) => { i ? x.lineTo(X(r.t), Y(r.bz)) : x.moveTo(X(r.t), Y(r.bz)); }); x.stroke();
+  x.font = '10px ' + getComputedStyle(document.body).getPropertyValue('--mono'); x.fillStyle = 'rgba(107,116,136,0.9)';
+  x.fillText('north +' + m, 3, 11); x.fillText('south −' + m, 3, cssH - 4);
+}
+
+/* ---------- the picture: your horizon, facing the aurora ----------
+   Azimuth runs across, altitude runs up, 0–50°. The glow is drawn where the geometry puts it,
+   and the obstruction the user set is drawn over it as the solid thing it is — because from
+   the UK the whole event lives in the bottom ten degrees, and a treeline there is the event. */
+const AU_SPAN = 180, AU_TOP = 50;
+function auDraw(ms){
+  const c = $('auCv'); if(!c) return;
+  const cssW = c.clientWidth || 320; if(!cssW) return;
+  const cssH = Math.round(cssW * (cssW < 520 ? 0.62 : 0.40));
+  const pr = Math.min(window.devicePixelRatio || 1, 2.5);
+  if(c.width !== Math.round(cssW * pr) || c.height !== Math.round(cssH * pr)){
+    c.width = Math.round(cssW * pr); c.height = Math.round(cssH * pr); c.style.height = cssH + 'px';
+  }
+  const x = c.getContext('2d'); x.setTransform(pr, 0, 0, pr, 0, 0);
+  const gH = Math.round(cssH * 0.13), skyH = cssH - gH;          // ground strip under the horizon
+  const Y = alt => skyH - clamp(alt, 0, AU_TOP) / AU_TOP * skyH;
+  const sun = AU.dark ? AU.dark.now : -30;
+  const tw = clamp((sun + 18) / 18, 0, 1);                        // 0 = astronomical dark, 1 = sun on the horizon
+  const day = clamp(sun / 8, 0, 1);
+  const sky = x.createLinearGradient(0, 0, 0, skyH);
+  const mix = (a, b, k) => Math.round(a + (b - a) * k);
+  sky.addColorStop(0, 'rgb(' + mix(mix(4, 18, tw), 70, day) + ',' + mix(mix(6, 28, tw), 120, day) + ',' + mix(mix(12, 58, tw), 185, day) + ')');
+  sky.addColorStop(1, 'rgb(' + mix(mix(8, 60, tw), 150, day) + ',' + mix(mix(12, 58, tw), 180, day) + ',' + mix(mix(22, 84, tw), 215, day) + ')');
+  x.fillStyle = sky; x.fillRect(0, 0, cssW, skyH);
+
+  // a few fixed stars so a dark, empty sky still reads as sky
+  if(tw < 0.6){
+    let s = 1234567; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    x.fillStyle = 'rgba(220,228,245,' + (0.75 * (1 - tw / 0.6)).toFixed(2) + ')';
+    for(let i = 0; i < 90; i++){ const sx = rnd() * cssW, sy = rnd() * skyH * 0.96, r = rnd() < 0.12 ? 1.1 : 0.6; x.fillRect(sx, sy, r, r); }
+  }
+
+  const centre = AU.best ? AU.best.az : (state.obs.lat >= 0 ? 0 : 180);
+  const az0 = centre - AU_SPAN / 2;
+  const cols = AU.cols;
+  let drew = false;
+  if(cols){
+    const seen = 1 - 0.85 * clamp((sun + 12) / 12, 0, 1);         // daylight does not hide where it is, only that you can see it
+    const step = cssW < 520 ? 3 : 2, tt = ms / 1000;
+    x.save(); x.globalCompositeOperation = 'lighter';
+    for(let px = 0; px < cssW; px += step){
+      const az = az0 + px / cssW * AU_SPAN;
+      const f = ((((az % 360) + 360) % 360) / AU_AZ_STEP), i0 = Math.floor(f) % cols.length, i1 = (i0 + 1) % cols.length, k = f - Math.floor(f);
+      const a = cols[i0], b = cols[i1];
+      const p = a.p + (b.p - a.p) * k; if(p < AU_PMIN) continue;
+      const e0 = (a.p ? a.e0 : b.e0) + ((b.p ? b.e0 : a.e0) - (a.p ? a.e0 : b.e0)) * k;
+      const e1 = (a.p ? a.e1 : b.e1) + ((b.p ? b.e1 : a.e1) - (a.p ? a.e1 : b.e1)) * k;
+      if(e1 <= 0) continue;
+      // curtains: slow swell along the arc, fine rays across it
+      const ray = 0.70 + 0.24 * Math.sin(az * 0.9 + tt * 0.7) + 0.14 * Math.sin(az * 3.7 - tt * 1.3) + 0.10 * Math.sin(az * 11.0 + tt * 2.1);
+      const al = clamp(p / 38, 0.22, 0.95) * clamp(ray, 0.15, 1) * seen;
+      const yb = Y(e0), yt = Y(Math.min(e1, AU_TOP * 1.4)), hgt = Math.max(6, yb - yt);
+      const g = x.createLinearGradient(0, yb, 0, yb - hgt);
+      g.addColorStop(0,    'rgba(120,255,170,0)');
+      g.addColorStop(0.06, 'rgba(120,255,170,' + al.toFixed(3) + ')');
+      g.addColorStop(0.45, 'rgba(70,230,150,' + (al * 0.55).toFixed(3) + ')');
+      g.addColorStop(0.8,  'rgba(150,90,210,' + (al * 0.22).toFixed(3) + ')');
+      g.addColorStop(1,    'rgba(170,70,160,0)');
+      x.fillStyle = g; x.fillRect(px, yb - hgt, step, hgt);
+      drew = true;
+    }
+    x.restore();
+  }
+
+  // altitude ruler
+  x.font = '10px ' + getComputedStyle(document.body).getPropertyValue('--mono');
+  x.textBaseline = 'middle';
+  [10, 20, 30, 40].forEach(a => {
+    x.strokeStyle = 'rgba(201,209,224,0.10)'; x.beginPath(); x.moveTo(0, Y(a) + .5); x.lineTo(cssW, Y(a) + .5); x.stroke();
+    x.fillStyle = 'rgba(201,209,224,0.45)'; x.fillText(a + '°', 5, Y(a) - 7);
+  });
+
+  // the user's own obstruction — solid, because it is
+  const obst = state.obstDeg > 0 ? state.obstDeg : 0;
+  if(obst > 0){
+    const oy = Y(obst);
+    x.fillStyle = 'rgba(6,7,10,0.94)'; x.fillRect(0, oy, cssW, skyH - oy);
+    x.strokeStyle = 'rgba(232,179,74,0.7)'; x.setLineDash([5, 4]); x.beginPath(); x.moveTo(0, oy + .5); x.lineTo(cssW, oy + .5); x.stroke(); x.setLineDash([]);
+    x.fillStyle = 'rgba(232,179,74,0.95)'; x.textAlign = 'right'; x.fillText('your horizon · blocked to ' + obst.toFixed(1) + '°', cssW - 6, oy - 8); x.textAlign = 'left';
+  }
+  // ground + compass
+  x.fillStyle = '#06070a'; x.fillRect(0, skyH, cssW, gH);
+  x.strokeStyle = 'rgba(201,209,224,0.35)'; x.beginPath(); x.moveTo(0, skyH + .5); x.lineTo(cssW, skyH + .5); x.stroke();
+  x.textAlign = 'center';
+  for(let a = Math.ceil(az0 / 22.5) * 22.5; a <= az0 + AU_SPAN; a += 22.5){
+    const px = (a - az0) / AU_SPAN * cssW, major = Math.abs(a / 45 - Math.round(a / 45)) < 1e-6;
+    if(px < 12 || px > cssW - 12) continue;
+    x.strokeStyle = 'rgba(201,209,224,0.35)'; x.beginPath(); x.moveTo(px + .5, skyH); x.lineTo(px + .5, skyH + (major ? 6 : 3)); x.stroke();
+    if(major || cssW > 620){
+      const lab = auCompass(a);
+      x.fillStyle = (lab === 'N' || lab === 'S') ? 'rgba(232,179,74,0.95)' : 'rgba(201,209,224,0.6)';
+      x.fillText(lab, px, skyH + gH * 0.62);
+    }
+  }
+  x.textAlign = 'left';
+  if(!drew){
+    x.fillStyle = 'rgba(201,209,224,0.55)'; x.textAlign = 'center';
+    x.fillText(cols ? 'nothing above this horizon right now' : (AU.err.ov ? 'aurora oval unavailable' : 'reading the oval…'), cssW / 2, skyH * 0.45);
+    x.textAlign = 'left';
+  }else if(day > 0 || tw > 0.66){
+    x.fillStyle = 'rgba(11,13,17,0.72)'; x.fillRect(0, 0, cssW, 22);
+    x.fillStyle = 'rgba(232,179,74,0.95)'; x.fillText('this is where it IS — it is not dark, so you cannot see it yet', 8, 11);
+  }
+}
+function auLoop(ms){
+  if(!AU.open){ AU.raf = 0; return; }
+  if(!document.hidden && AU.cols) auDraw(ms);
+  AU.raf = requestAnimationFrame(auLoop);
+}
+
+/* ---------- fetching ---------- */
+function auRefresh(force){
+  if(!AU.open || AU.busy) return;
+  const now = Date.now();
+  AU.busy = true; $('auRefresh').disabled = true;
+  const jobs = [
+    auFetch('products/geospace/propagated-solar-wind-1-hour.json').then(j => { AU.wind = j; AU.at = Date.now(); delete AU.err.wind; }).catch(()=>{ AU.err.wind = 1; }),
+    auFetch('json/planetary_k_index_1m.json').then(j => { AU.kp = j; }).catch(()=>{ AU.err.kp = 1; })
+  ];
+  // the oval moves on a ~5 minute cadence and is the heavy one; the forecast changes twice a day
+  if(force || !AU.ov || now - AU.ovAt > 5 * 60000){
+    jobs.push(auFetch('json/ovation_aurora_latest.json').then(j => { AU.ov = auGridOf(j); AU.ovMeta = j; AU.ovAt = Date.now(); delete AU.err.ov; }).catch(()=>{ AU.err.ov = 1; }));
+  }
+  if(force || !AU.fc) jobs.push(auFetch('products/noaa-planetary-k-index-forecast.json').then(j => { AU.fc = j; }).catch(()=>{}));
+  auEval();
+  Promise.all(jobs).then(()=>{ AU.busy = false; $('auRefresh').disabled = false; auEval(); });
+}
+function auroraOpen(){
+  if(AU.open) return;
+  AU.open = true;
+  auRefresh(false);
+  AU.timer = setInterval(()=>{ if(!document.hidden) auRefresh(false); }, 60000);
+  const still = (()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } })();
+  if(!still && !AU.raf) AU.raf = requestAnimationFrame(auLoop);
+}
+function auroraClose(){
+  if(!AU.open) return;
+  AU.open = false;
+  clearInterval(AU.timer); AU.timer = 0;
+  if(AU.raf){ cancelAnimationFrame(AU.raf); AU.raf = 0; }
+}
+$('auRefresh').addEventListener('click', ()=> auRefresh(true));
+$('tabAurora').addEventListener('click', ()=> setTab('aurora'));
+window.addEventListener('resize', ()=>{ if(AU.open){ auSpark(auWind()); auDraw(performance.now()); } });
+document.addEventListener('visibilitychange', ()=>{ if(AU.open && !document.hidden && Date.now() - AU.at > 60000) auRefresh(false); });
+
 
 /* ==================== SIDEREAL — THE CONTROLS ====================
    Five buttons, three folds and a camera. Everything here hangs off the SKY view that already
@@ -7660,7 +8206,7 @@ let savedModeOverride = null, initialTab = 'sky';
   const qNow = q.get('now') ? Date.parse(q.get('now')) : NaN;
   if(isFinite(qNow)) nowOffset = qNow - Date.now();
   if(q.get('mode') === 'novice') savedModeOverride = 'novice';
-  if(q.get('tab') === 'path' || q.get('tab') === 'cosmos' || q.get('tab') === 'align') initialTab = q.get('tab');
+  if(q.get('tab') === 'path' || q.get('tab') === 'cosmos' || q.get('tab') === 'align' || q.get('tab') === 'aurora') initialTab = q.get('tab');
   $('lat').value = state.obs.lat; $('lon').value = state.obs.lon;
   $('date').value = state.date;
 })();
@@ -7679,7 +8225,7 @@ const CHIP_MQ = (()=>{ try{ return matchMedia('(max-width:760px)'); }catch(e){ r
 // ALIGN's host is the panel itself — it has no canvas, and the panel reserves a top strip
 // (see .alignPanel padding-top) so the chip never lands on a control
 function chipHost(){ return state.tab === 'path' ? mapCv : state.tab === 'cosmos' ? cosCv
-                          : state.tab === 'align' ? $('viewAlign') : cv; }
+                          : state.tab === 'align' ? $('viewAlign') : state.tab === 'aurora' ? $('viewAurora') : cv; }
 function syncChip(){
   const ov = $('locOverlay'), chip = $('locChip'), wrapEl = document.querySelector('.wrap');
   const on = !!(CHIP_MQ && CHIP_MQ.matches);
