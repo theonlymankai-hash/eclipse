@@ -1001,6 +1001,91 @@
     #cover, #cover .cvi, header, .wrap > *:not(#viewSky), canvas#sky{transition:none;}
     #cover .cvEnter{animation:none;}
   }
+
+  /* ---------- ALIGN — the same engine, asked backwards ----------
+     Every other view answers "where is it at time T". This one answers "at what times is it
+     THERE", which is the question a photographer standing in front of a building actually has.
+     It is a panel, not a canvas view: the dial is the only picture, and it is an instrument —
+     tap a bearing, read a list of dates, tap one and the whole app goes to that moment in SKY.
+     Visual register is the rest of the app's: dark ground, thin type, one amber. */
+  #viewAlign{order:2;}
+  /* FOUR TABS ON A PHONE. Three fitted 355px at a fixed 110px each; four do not, so below
+     430px they share the track equally instead — exactly what .captabs already does one level
+     down. Height (48px), border treatment and the amber rail are untouched, and desktop keeps
+     its tuned 136×52 fixed width. */
+  @media(max-width:430px){
+    .viewtabs{gap:4px;}
+    .viewtabs button{flex:1 1 0; min-width:0; padding:13px 2px 12px; font-size:12px; letter-spacing:.07em;}
+  }
+  .alignPanel{background:var(--panel); border:1px solid var(--line); border-top-left-radius:0;
+              border-radius:0 6px 6px 6px; padding:12px 14px 14px;}
+  /* the location chip is laid over this panel's top-left corner on a phone (see chipHost),
+     so the first row of content starts below it — nothing important ever sits under the chip */
+  @media(max-width:760px){ body.chip .alignPanel{padding-top:60px;} }
+  #alignObj{margin-bottom:10px;}
+  /* dial + the two numbers it sets: side by side everywhere, because they are one control */
+  .alignMain{display:flex; gap:14px; align-items:flex-start; margin-bottom:10px;}
+  canvas#alignDial{display:block; flex:0 0 auto; width:212px; height:212px;
+                   background:#0a0c10; border:1px solid var(--line); border-radius:6px;
+                   touch-action:none; cursor:crosshair;}
+  canvas#alignDial:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .alignFields{flex:1 1 180px; min-width:0; display:flex; flex-direction:column; gap:9px;}
+  .alignFields .af{display:flex; align-items:center; gap:8px;}
+  .alignFields .af label{flex:0 0 66px; font-size:11px;}
+  .alignFields .af input{flex:1 1 0; min-width:0; width:auto; font-size:16px; padding:10px;
+                         min-height:44px; background:#0a0c10; border-color:#2b3346;}
+  .alignFields .af input:focus{outline:none; border-color:var(--accent);}
+  .alignFields .af .u{flex:0 0 34px; font:300 12px var(--mono); color:var(--dim); letter-spacing:.06em;}
+  #aFromSky{min-height:44px; letter-spacing:.14em; font-size:11.5px;
+            border-color:rgba(232,179,74,0.45); color:var(--accent);}
+  #aFromSky:hover{background:rgba(232,179,74,0.10); border-color:var(--accent);}
+  .alignRow{gap:8px 10px; padding:8px 10px; margin-bottom:7px;
+            background:#12151d; border:1px solid #2b3346; border-radius:7px;}
+  .alignRow .pf{display:flex; align-items:center; gap:8px; flex:1 1 auto; min-width:0;}
+  .alignRow label{font-size:11px; letter-spacing:.13em; color:#a7b4c9;}
+  .alignRow input{flex:1 1 0; min-width:0; width:auto; font-size:15px; padding:10px;
+                  min-height:44px; background:#0a0c10; border-color:#2b3346;}
+  .alignRow input:focus{outline:none; border-color:var(--accent);}
+  .alignRow .u{font:300 12px var(--mono); color:var(--dim);}
+  /* the one button that does the work — the panel's call to action, sized like #placeGo */
+  #aGo{display:block; width:100%; min-height:50px; margin-top:2px;
+       font:600 14px/1 var(--mono); letter-spacing:.22em;
+       color:#12151d; background:var(--accent); border:1px solid var(--accent); border-radius:6px;}
+  #aGo:hover{background:#f3c569; border-color:#f3c569; color:#12151d;}
+  #aGo:active{transform:translateY(1px);}
+  #aGo[disabled]{opacity:.55; cursor:default; transform:none;}
+  #aProg{height:4px; margin-top:9px; background:#1b2030; border-radius:2px; overflow:hidden;}
+  #aProg i{display:block; height:100%; width:0; background:var(--accent); border-radius:2px;}
+  #aVerdict{line-height:1.5;}
+  #aResults{margin-top:9px;}
+  /* one row per hit. The whole row is the button — a date, a time and a direction, in the
+     same monospace as every other number in the app, and pressing it takes the app there. */
+  .ares{display:grid; grid-template-columns:max-content 1fr; align-items:baseline;
+        gap:0 12px; width:100%; min-height:48px; padding:9px 10px; text-align:left;
+        font:300 12px var(--mono); color:var(--ink);
+        background:#0a0c10; border:1px solid var(--line); border-radius:5px; margin-bottom:5px;}
+  .ares:hover{border-color:var(--accent); color:var(--ink);}
+  .ares:active{background:rgba(232,179,74,0.10);}
+  .ares:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .ares .ad{color:#a7b4c9; letter-spacing:.02em;}
+  .ares .at{font-size:16px; font-weight:600; color:var(--accent);}
+  .ares .am{grid-column:1/-1; margin-top:3px; font-size:10.5px; color:var(--dim); letter-spacing:.04em;}
+  .ares .am b{color:#a7b4c9; font-weight:400;}
+  .ares .blk{color:var(--bad);}
+  #aMore{width:100%; min-height:44px; margin-top:2px; letter-spacing:.16em; font-size:11px;}
+  @media(max-width:430px){
+    .alignPanel{padding:11px 11px 12px;}
+    .alignMain{gap:11px;}
+    canvas#alignDial{width:150px; height:150px;}
+    .alignFields{flex:1 1 120px; gap:8px;}
+    .alignFields .af{flex-wrap:wrap; gap:4px 8px;}
+    .alignFields .af label{flex:1 0 100%;}
+    .alignFields .af input{flex:1 1 60px;}
+  }
+  /* ALIGN has no scrubber to drive and no eclipse window to sit in: the transport, the
+     "at what time" bar and the countdown all belong to a moment, and this view is asking
+     which moment to pick. They come straight back — untouched — on any other tab. */
+  body.alignTab .timebar, body.alignTab .whenbar, body.alignTab .livebar{display:none;}
 </style>
 </head>
 <body>
@@ -1033,7 +1118,7 @@
 <div class="wrap">
 
   <div class="tabs viewtabs">
-    <button id="tabSky" class="on">SKY</button><button id="tabPath">PATH</button><button id="tabCosmos">COSMOS</button>
+    <button id="tabSky" class="on">SKY</button><button id="tabPath">PATH</button><button id="tabCosmos">COSMOS</button><button id="tabAlign">ALIGN</button>
   </div>
   <!-- LOCATION CHIP — one for all three views. It sits here, as a sibling of the view
        wrappers rather than inside #viewSky, so PATH and COSMOS get it too; syncChip() lays it
@@ -1070,6 +1155,43 @@
       <summary>illustrative scale</summary>
       <div class="note">Sun and moon sit along their <b>true directions</b> for this moment, the earth carries its true rotation, and the shadow lands at its true position; distances and sizes are compressed for clarity (at true scale the moon would be sub-pixel).</div>
     </details>
+  </div>
+  <!-- ALIGN — the inversion. SKY/PATH/COSMOS all take a time and give you a geometry; this
+       takes a geometry and gives you the times. Same engine, same observer, same horizon
+       obstruction — the only new thing is the direction of the search. -->
+  <div id="viewAlign" hidden>
+    <div class="alignPanel">
+      <div class="tabs captabs" id="alignObj">
+        <button data-obj="Sun" class="on">SUN</button><button data-obj="Moon">MOON</button>
+      </div>
+      <div class="alignMain">
+        <!-- the dial is a sky dome seen from above: centre is straight up, the ring is the
+             horizon, and the shaded outer band is below it. Drag anywhere on it to set both
+             numbers at once; type into the fields when you know the bearing exactly. -->
+        <canvas id="alignDial" tabindex="0" role="application" aria-label="Target direction dial — drag to set azimuth and altitude"></canvas>
+        <div class="alignFields">
+          <div class="af"><label for="aAz">azimuth</label><input type="number" id="aAz" value="270" step="1" min="0" max="360"><span class="u" id="aAzC">W</span></div>
+          <div class="af"><label for="aAlt">altitude</label><input type="number" id="aAlt" value="0" step="0.5" min="-10" max="90"><span class="u">°</span></div>
+          <button id="aFromSky" type="button">USE SKY NOW</button>
+          <div class="note" id="aDialNote"></div>
+        </div>
+      </div>
+      <div class="row alignRow">
+        <span class="pf"><label for="aFrom">from</label><input type="date" id="aFrom"></span>
+        <span class="pf"><label for="aTo">to</label><input type="date" id="aTo"></span>
+      </div>
+      <div class="row alignRow" style="margin-bottom:8px">
+        <span class="pf"><label for="aTol">within</label><input type="number" id="aTol" value="1" step="0.25" min="0.25" max="15"><span class="u">°</span></span>
+        <span class="pf" id="aIllWrap" hidden><label for="aIll">at least</label><input type="number" id="aIll" value="90" step="5" min="0" max="100"><span class="u">% lit</span></span>
+      </div>
+      <div class="note" id="aTolNote"></div>
+      <button id="aGo" type="button">FIND THE TIMES</button>
+      <div id="aProg" hidden><i></i></div>
+      <div id="aVerdict" class="verdict"></div>
+      <div class="note" id="aFrameNote"></div>
+      <div id="aResults"></div>
+      <button id="aMore" type="button" hidden>show more</button>
+    </div>
   </div>
 
   <!-- THE ANSWER TO "WHAT TIME?" — the one thing every visitor asks first, above the fold on
@@ -1375,6 +1497,7 @@ const state = {
   tab: 'sky',        // which view fills the main area: 'sky' | 'path'
   cap: 'stills',     // shot plan is generated for ONE capture mode: stills|timelapse|video
   lens: 'tele',      // NOVICE's visual focal picker (see LENSES) — PRO types a number instead
+  skyLook: null,     // {az,alt} — SKY parked on an ALIGN moon result instead of tracking the sun
 };
 /* ---------- CANVAS ASPECT ----------
    The shape of the canvas is declared once, in CSS, as --cv-aspect (see the note there), and
@@ -1648,7 +1771,9 @@ let peakFrame = null;    // frame data at peak
 // switch the scrubber between eclipse-only (C1→C4) and extended (±3h) ranges.
 // Keeps the handle at its current time; clamps it into the window when collapsing.
 const RANGES = ['eclipse', 'ext', 'global'];
-const RANGE_LABEL = { eclipse:'C1–C4', ext:'±3h', global:'GLOBAL' };
+// 'align' is not in RANGES — it is not a rung of the cycle, it is where an ALIGN result drops
+// the scrubber (±3h around that moment). Pressing the button once returns to the eclipse window.
+const RANGE_LABEL = { eclipse:'C1–C4', ext:'±3h', global:'GLOBAL', align:'±3h' };
 // MARKERS vs THE THUMB. A range input's thumb does NOT travel the full width of its track:
 // its centre runs from half a thumb in on the left to half a thumb in on the right. The band
 // and the MAX tick used to be painted at a plain percentage of .scrubwrap, so they drifted
@@ -1665,6 +1790,14 @@ function placeMarkers(){
   if(!eclWin || !span) return;
   const f = ms => clamp((ms - span.t0)/(span.t1 - span.t0), 0, 1);
   const band = $('eclBand'), extended = state.range !== 'eclipse';
+  // an ALIGN jump parks the track months away from the eclipse: its band and MAX tick would be
+  // a sliver pinned to one end, claiming the eclipse is happening at the edge of this window
+  if(state.range === 'align'){
+    band.style.display = 'none'; $('maxTick').style.display = 'none';
+    const ln = $('snapLine'); if(ln) ln.hidden = true;
+    return;
+  }
+  $('maxTick').style.display = '';
   band.style.display = extended ? '' : 'none';   // eclipse mode: the whole track IS the window
   if(extended){
     const a = f(eclWin.c1), b = f(eclWin.c4);
@@ -1728,6 +1861,7 @@ function applyRange(mode){
   if(mode === true) mode = 'ext'; else if(mode === false) mode = 'eclipse';
   if(mode === 'global' && !(MAP.global && MAP.global.t1 > MAP.global.t0)) mode = 'ext';
   state.range = mode;
+  state.skyLook = null;          // leaving an ALIGN window: the camera goes back to the sun
   state.extended = mode !== 'eclipse';
   if(mode === 'global') span = { t0: MAP.global.t0, t1: MAP.global.t1 };
   else span = { t0: eclWin.c1 - (mode === 'ext' ? 3*3600e3 : 0), t1: eclWin.c4 + (mode === 'ext' ? 3*3600e3 : 0) };
@@ -1828,6 +1962,8 @@ updateObstVerdict();
   updateNovice();
   updateMapNote();
   if(typeof updateChip === 'function') updateChip();   // the chip carries the place name
+  // ALIGN's answers are answers FOR A PLACE — a new one invalidates every row on screen
+  if(typeof alignClear === 'function') alignClear();
   if(state.live) setLive(true);   // a new location reset the clock to MAX — LIVE wins
 }
 function updateMapNote(){
@@ -2050,7 +2186,14 @@ function draw(f){
   resize();
   const w = cv.width, h = cv.height;
   const pxPerDeg = w / state.fov;
-  const centreAz = f.sunAz;
+  /* THE CAMERA NORMALLY FOLLOWS THE SUN. The one exception is an ALIGN result for the MOON:
+     the moon can be anywhere in the sky relative to the sun, so framing the sun would land the
+     visitor on an empty patch of air. state.skyLook parks the view on the bearing they asked
+     for — which is what their tripod will be doing — and it lives only as long as the ±3h
+     window that jump created: any range change (the button below the scrubber, a new
+     location, a new search) drops it and the sun-tracking camera returns. */
+  const look = (state.range === 'align' && state.skyLook) ? state.skyLook : null;
+  const centreAz = look ? look.az : f.sunAz;
   // Continuous camera — one function of sun altitude, no mode switch:
   //   centreAlt = max(F, sunAlt), where F is the centre-altitude that rests the horizon at 58% height.
   // Low sun (the eclipse case): horizon sits at exactly 58%, sun between 50% and 58% on its way down.
@@ -2058,7 +2201,7 @@ function draw(f){
   // off the bottom; as it descends the horizon glides back up into frame and settles at 58%. After sunset
   // the camera parks and the afterglow band sits just under that horizon, mid-frame, not on the foot edge.
   // max() of a constant and the sun's real altitude — frame-to-frame change can never exceed real sun motion.
-  const centreAlt = viewCentreAlt(f.sunAlt, pxPerDeg, h, state.fov);
+  const centreAlt = look ? look.alt : viewCentreAlt(f.sunAlt, pxPerDeg, h, state.fov);
   const horizonY = h/2 + centreAlt*pxPerDeg;
   const azX  = az  => w/2 + ((((az - centreAz) + 540) % 360) - 180) * pxPerDeg;
   const altY = alt => horizonY - alt * pxPerDeg;
@@ -2133,6 +2276,28 @@ function draw(f){
   }else{
     drawCorona(sx, sy, rsPx, sunSq);
     ellipse(mx,my,rmPx*1.01,rmPx*1.01*moonSq,'#050608');
+  }
+  /* THE MOON, LIT. Everywhere else in this app the moon is a silhouette, because everywhere
+     else it is in front of the sun. An ALIGN moon result puts it on the far side of the sky,
+     where a black disc would simply be wrong — so when (and only when) the camera is parked on
+     a moon target well away from the sun, the silhouette is overpainted with the real phase:
+     bright limb toward the sun, terminator an ellipse of semi-axis r·cos(phase angle). */
+  if(look && f.sep > 3){
+    let phi = 0;
+    try{ phi = A.Illumination(A.Body.Moon, A.MakeTime(new Date(f.ms))).phase_angle; }catch(e){}
+    const kk = Math.cos(phi*D2R);                         // +1 full, 0 half, −1 new
+    const th = Math.atan2(sy - my, sx - mx);              // screen direction of the sun
+    ctx.save();
+    ctx.translate(mx, my); ctx.rotate(th); ctx.scale(1, moonSq);
+    ctx.beginPath(); ctx.arc(0,0,rmPx,0,7); ctx.fillStyle = '#14161c'; ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 0, rmPx, -Math.PI/2, Math.PI/2, false);    // the limb facing the sun
+    ctx.ellipse(0, 0, rmPx*Math.abs(kk), rmPx, 0, Math.PI/2, Math.PI*1.5, kk < 0);
+    ctx.closePath();
+    ctx.fillStyle = '#e4e7ee'; ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(mx,my,rmPx,rmPx*moonSq,0,0,7); ctx.stroke();
   }
 
   // ground
@@ -5089,6 +5254,8 @@ function setLive(on){
   $('live').classList.toggle('on', state.live);
   if(state.live){
     state.playing = false; setPlayFace();
+    // LIVE is "the real sky, now" — it can never be served from an ALIGN result's window
+    if(state.range === 'align') applyRange(state.skyRange || 'eclipse');
     const tn = nowMs();
     // the handle has to have a track it can actually sit on — widen if now falls outside
     if(span && (tn < span.t0 || tn > span.t1) && eclWin){
@@ -5128,6 +5295,9 @@ $('ext').addEventListener('click', ()=>{
 document.querySelectorAll('#snaps button, #snapLine button').forEach(b=>{
   b.addEventListener('click', ()=>{
     const c = contacts.find(x=>x.key===b.dataset.snap);
+    // an ALIGN jump left the track months away from the eclipse — asking for a contact is
+    // asking to be back at the eclipse, so put the window (and the sun-tracking camera) back
+    if(c && state.range === 'align') applyRange(state.skyRange || 'eclipse');
     if(c){ if(state.live) setLive(false); state.t = c.ms; state.playing=false; setPlayFace(); syncScrub(); }
   });
 });
@@ -5206,7 +5376,11 @@ cv.addEventListener('touchmove', e=>{
   }
 }, { passive:false });
 cv.addEventListener('touchend', ()=>{ pinchD = 0; });
-$('obst').addEventListener('input', e=>{ state.obstDeg = +e.target.value; updateObstVerdict(); });
+$('obst').addEventListener('input', e=>{
+  state.obstDeg = +e.target.value; updateObstVerdict();
+  // ALIGN reads the same number: the dial's blocked band and every result's verdict move with it
+  if(typeof drawDial === 'function'){ drawDial(); if(ALIGN.view && ALIGN.view.length) alignRender(true); }
+});
 
 /* --- share link --- */
 function buildShareUrl(){
@@ -5598,6 +5772,381 @@ $('frameShow').addEventListener('click', ()=>{
   $('frameShow').classList.toggle('on', state.showFrame);
 });
 $('photo').addEventListener('toggle', updatePhoto);
+
+/* ================= ALIGN — solve for TIME given a direction =================
+   The rest of the app runs the engine forwards: a moment in, a geometry out. Here the
+   geometry is the input. Step the object through the range at a coarse interval, find every
+   local minimum of its angular distance from the target direction, then squeeze each bracket
+   down to the second. Nothing new is computed — Equator() + Horizon() at the same observer,
+   with the same refraction SKY draws — only the direction of the question.
+   It runs in rAF slices rather than a worker: a blob worker would have to carry its own copy
+   of the astronomy bundle, and blob workers are blocked from a file:// page, which is the one
+   promise this app cannot break. A 12-month sun sweep is ~0.6s of maths; sliced at 12ms it
+   stays under a second and the page never freezes. */
+const ALIGN = {
+  obj: 'Sun', az: 270, alt: 0,
+  hits: [], shown: 0, running: false, took: 0, minIll: 0,
+};
+const ALIGN_STEP = 6*60e3;    // 6 min: the fastest either body crosses the sky is ~0.26°/min,
+                              // so no approach closer than ~1.6° can hide between two samples
+const ALIGN_RIM = -10;        // the dial's outer edge, in degrees of altitude
+const ALIGN_MAX_HITS = 400;
+const ALIGN_PAGE = 25;
+const dialCv = $('alignDial'), dialCtx = dialCv.getContext('2d');
+
+function alignBody(){ return ALIGN.obj === 'Moon' ? A.Body.Moon : A.Body.Sun; }
+// angular distance between two alt/az directions — spherical law of cosines, in degrees
+function alignSep(alt, az, alt0, az0){
+  const c = Math.sin(alt*D2R)*Math.sin(alt0*D2R) +
+            Math.cos(alt*D2R)*Math.cos(alt0*D2R)*Math.cos((az-az0)*D2R);
+  return Math.acos(clamp(c, -1, 1))*R2D;
+}
+function alignAltAz(body, obsv, ms){
+  const t = A.MakeTime(new Date(ms));
+  const eq = A.Equator(body, t, obsv, true, true);
+  const h = A.Horizon(t, obsv, eq.ra, eq.dec, 'normal');
+  return { alt: h.altitude, az: h.azimuth };
+}
+function alignIll(ms){
+  try{ return A.Illumination(A.Body.Moon, A.MakeTime(new Date(ms))).phase_fraction; }
+  catch(e){ return null; }
+}
+/* ---------- the dial ----------
+   A sky dome from above: centre = straight up, the bright ring = the horizon, the shaded band
+   outside it = below the horizon. Radius is linear in altitude, which keeps the low sky —
+   where every one of these shots happens — readable rather than crushed against the rim. */
+function dialGeom(){
+  const cssW = dialCv.clientWidth || 212;
+  return { cssW, cx: cssW/2, cy: cssW/2, R: cssW/2 - 12 };
+}
+const dialR = alt => (90 - clamp(alt, ALIGN_RIM, 90))/(90 - ALIGN_RIM);   // 0 at zenith, 1 at rim
+function dialPt(alt, az, g){
+  const r = dialR(alt)*g.R, a = az*D2R;
+  return { x: g.cx + r*Math.sin(a), y: g.cy - r*Math.cos(a) };
+}
+function drawDial(){
+  const g = dialGeom(), dpr = Math.min(devicePixelRatio||1, 2);
+  const px = Math.round(g.cssW*dpr);
+  if(dialCv.width !== px || dialCv.height !== px){ dialCv.width = px; dialCv.height = px; }
+  const c = dialCtx;
+  c.setTransform(dpr,0,0,dpr,0,0);
+  c.clearRect(0,0,g.cssW,g.cssW);
+  const rim = g.R, hz = dialR(0)*g.R;
+  // below the horizon — a dead band, drawn once so the ring reads as a real edge
+  c.beginPath(); c.arc(g.cx,g.cy,rim,0,7); c.fillStyle = '#080a0e'; c.fill();
+  c.beginPath(); c.arc(g.cx,g.cy,hz,0,7); c.fillStyle = '#0c1018'; c.fill();
+  // the obstruction the user already set, as the band of sky it actually eats
+  if(state.obstDeg > 0){
+    const ro = dialR(state.obstDeg)*g.R;
+    c.beginPath(); c.arc(g.cx,g.cy,hz,0,7); c.arc(g.cx,g.cy,ro,0,7,true);
+    c.fillStyle = 'rgba(224,112,112,0.13)'; c.fill();
+    c.beginPath(); c.arc(g.cx,g.cy,ro,0,7);
+    c.strokeStyle = 'rgba(224,112,112,0.45)'; c.lineWidth = 1; c.stroke();
+  }
+  // altitude rings
+  c.strokeStyle = '#222838'; c.lineWidth = 1;
+  for(const a of [30, 60]){ c.beginPath(); c.arc(g.cx,g.cy,dialR(a)*g.R,0,7); c.stroke(); }
+  c.beginPath(); c.arc(g.cx,g.cy,hz,0,7); c.strokeStyle = '#39435a'; c.stroke();
+  c.beginPath(); c.arc(g.cx,g.cy,rim,0,7); c.strokeStyle = '#1e2330'; c.stroke();
+  // bearings: a tick every 30°, the four cardinals named
+  c.font = '300 9px system-ui,sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  for(let a = 0; a < 360; a += 30){
+    const p0 = dialPt(ALIGN_RIM, a, g), p1 = dialPt(-4, a, g);
+    c.beginPath(); c.moveTo(p0.x,p0.y); c.lineTo(p1.x,p1.y);
+    c.strokeStyle = (a % 90 === 0) ? '#5b657c' : '#2a3142'; c.stroke();
+    if(a % 90 === 0){
+      const lp = { x: g.cx + (rim+7)*Math.sin(a*D2R), y: g.cy - (rim+7)*Math.cos(a*D2R) };
+      c.fillStyle = '#6b7488'; c.fillText(CARDS[a/22.5], lp.x, lp.y);
+    }
+  }
+  // where the two bodies are at the moment SKY is showing — the dial's tie to the rest of the app
+  if(peakFrame){
+    const f = computeFrame(state.t);
+    const mark = (alt, az, col, txt, dy) => {
+      if(alt < ALIGN_RIM) return;
+      const p = dialPt(alt, az, g);
+      c.beginPath(); c.arc(p.x,p.y,3.2,0,7); c.fillStyle = col; c.fill();
+      c.fillStyle = col; c.font = '300 8.5px system-ui,sans-serif';
+      c.fillText(txt, p.x, p.y + dy);
+    };
+    // on eclipse day these two sit on top of each other, so the labels are parked on
+    // opposite sides rather than drawn over one another
+    mark(f.moonAlt, f.moonAz, 'rgba(160,172,196,0.75)', 'moon', 11);
+    mark(f.sunAlt, f.sunAz, 'rgba(232,179,74,0.75)', 'sun', -9);
+  }
+  // the target
+  const tp = dialPt(ALIGN.alt, ALIGN.az, g);
+  c.strokeStyle = '#e8b34a'; c.lineWidth = 1.4;
+  c.beginPath(); c.arc(tp.x,tp.y,6.5,0,7); c.stroke();
+  c.beginPath();
+  c.moveTo(tp.x-11,tp.y); c.lineTo(tp.x-2.5,tp.y); c.moveTo(tp.x+2.5,tp.y); c.lineTo(tp.x+11,tp.y);
+  c.moveTo(tp.x,tp.y-11); c.lineTo(tp.x,tp.y-2.5); c.moveTo(tp.x,tp.y+2.5); c.lineTo(tp.x,tp.y+11);
+  c.stroke();
+}
+function alignSetTarget(az, alt){
+  ALIGN.az = (az % 360 + 360) % 360;
+  ALIGN.alt = clamp(alt, ALIGN_RIM, 90);
+  $('aAz').value = ALIGN.az.toFixed(ALIGN.az % 1 ? 1 : 0);
+  $('aAlt').value = ALIGN.alt.toFixed(Math.abs(ALIGN.alt % 1) > 0.049 ? 1 : 0);
+  $('aAzC').textContent = azName(ALIGN.az);
+  $('aDialNote').textContent = ALIGN.alt < 0
+    ? `${azName(ALIGN.az)} · ${ALIGN.alt.toFixed(1)}° — below the horizon`
+    : `${azName(ALIGN.az)} · ${ALIGN.alt.toFixed(1)}° above the horizon`;
+  drawDial();
+}
+function dialFromPoint(clientX, clientY){
+  const r = dialCv.getBoundingClientRect(), g = dialGeom();
+  const dx = clientX - r.left - g.cx, dy = clientY - r.top - g.cy;
+  const rad = Math.hypot(dx, dy)/g.R;
+  const az = (Math.atan2(dx, -dy)*R2D + 360) % 360;
+  alignSetTarget(az, 90 - rad*(90 - ALIGN_RIM));
+}
+let dialDrag = false;
+dialCv.addEventListener('pointerdown', e=>{
+  e.preventDefault(); dialDrag = true;
+  try{ dialCv.setPointerCapture(e.pointerId); }catch(err){}
+  dialFromPoint(e.clientX, e.clientY);
+});
+dialCv.addEventListener('pointermove', e=>{ if(dialDrag){ e.preventDefault(); dialFromPoint(e.clientX, e.clientY); } });
+const dialEnd = ()=>{ dialDrag = false; };
+dialCv.addEventListener('pointerup', dialEnd);
+dialCv.addEventListener('pointercancel', dialEnd);
+// keyboard: the dial is a control, so it can be driven without a pointer
+dialCv.addEventListener('keydown', e=>{
+  const s = e.shiftKey ? 0.5 : 5;
+  if(e.key === 'ArrowLeft'){ alignSetTarget(ALIGN.az - s, ALIGN.alt); }
+  else if(e.key === 'ArrowRight'){ alignSetTarget(ALIGN.az + s, ALIGN.alt); }
+  else if(e.key === 'ArrowUp'){ alignSetTarget(ALIGN.az, ALIGN.alt + s); }
+  else if(e.key === 'ArrowDown'){ alignSetTarget(ALIGN.az, ALIGN.alt - s); }
+  else return;
+  e.preventDefault();
+});
+$('aAz').addEventListener('input', ()=>{ const v = parseFloat($('aAz').value); if(isFinite(v)){ ALIGN.az = (v%360+360)%360; $('aAzC').textContent = azName(ALIGN.az); drawDial(); } });
+$('aAlt').addEventListener('input', ()=>{ const v = parseFloat($('aAlt').value); if(isFinite(v)){ ALIGN.alt = clamp(v, ALIGN_RIM, 90); drawDial(); } });
+$('aAz').addEventListener('change', ()=> alignSetTarget(parseFloat($('aAz').value)||0, ALIGN.alt));
+$('aAlt').addEventListener('change', ()=> alignSetTarget(ALIGN.az, parseFloat($('aAlt').value)||0));
+$('aFromSky').addEventListener('click', ()=>{
+  const f = computeFrame(state.t);
+  const alt = ALIGN.obj === 'Moon' ? f.moonAlt : f.sunAlt;
+  const az  = ALIGN.obj === 'Moon' ? f.moonAz  : f.sunAz;
+  alignSetTarget(az, alt);
+  $('aVerdict').className = 'verdict';
+  $('aVerdict').textContent = `Target set to where the ${ALIGN.obj.toLowerCase()} is at the moment SKY is showing.`;
+});
+document.querySelectorAll('#alignObj button').forEach(b => b.addEventListener('click', ()=>{
+  ALIGN.obj = b.dataset.obj;
+  document.querySelectorAll('#alignObj button').forEach(x => x.classList.toggle('on', x === b));
+  $('aIllWrap').hidden = ALIGN.obj !== 'Moon';
+  alignTolNote();
+  drawDial();
+}));
+['aTol','aIll'].forEach(id => $(id).addEventListener('input', alignTolNote));
+/* TOLERANCE, said honestly. "1°" means nothing until you know the disc is half a degree
+   wide — so the note converts it into disc widths every time it changes. */
+function alignTolNote(){
+  const tol = clamp(+$('aTol').value || 1, 0.05, 15);
+  const w = (tol/0.52).toFixed(tol < 1 ? 1 : 0);
+  const ill = ALIGN.obj === 'Moon' ? ` Moon phase is filtered to at least ${clamp(+$('aIll').value||0,0,100)}% lit.` : '';
+  $('aTolNote').textContent =
+    `A hit is the ${ALIGN.obj.toLowerCase()}'s centre within ${tol.toFixed(2).replace(/0$/,'')}° of that direction — ` +
+    `the disc is 0.5° wide, so about ${w} disc width${w === '1' ? '' : 's'} of slack.` + ill;
+}
+/* FRAMING — one line, read from the photographer panel's own focal length and sensor.
+   Nothing is rebuilt here; fovNow() is the same function the frame overlay uses. */
+function alignFrameNote(){
+  const { hFov, vFov, f } = fovNow();
+  const { sw, sh } = sensorNow();
+  $('aFrameNote').textContent =
+    `Framing (from Photographer mode): ${f}mm on ${sw.toFixed(1)}×${sh.toFixed(1)}mm = ${hFov.toFixed(2)}° × ${vFov.toFixed(2)}°. ` +
+    `The 0.5° disc is ${(0.52/vFov*100).toFixed(0)}% of frame height; a landmark within ${(hFov/2).toFixed(2)}° of the target still fits.`;
+}
+/* ---------- the search ---------- */
+function alignStop(){
+  if(ALIGN.job){ cancelAnimationFrame(ALIGN.job); ALIGN.job = null; }
+  ALIGN.running = false;
+  $('aGo').disabled = false; $('aGo').textContent = 'FIND THE TIMES';
+  $('aProg').hidden = true;
+}
+function alignSearch(){
+  if(ALIGN.running){ alignStop(); return; }
+  const v = $('aVerdict'); v.className = 'verdict';
+  const t0 = Date.parse($('aFrom').value + 'T00:00:00Z');
+  const t1 = Date.parse($('aTo').value + 'T23:59:59Z');
+  if(!isFinite(t0) || !isFinite(t1) || t1 <= t0){
+    v.className = 'verdict bad'; v.textContent = 'That date range is empty — the end date has to come after the start.';
+    return;
+  }
+  if(t1 - t0 > 5*366*864e5){
+    v.className = 'verdict bad'; v.textContent = 'Five years is the most this will search in one go — narrow the range.';
+    return;
+  }
+  const body = alignBody(), obsv = new A.Observer(state.obs.lat, state.obs.lon, state.obs.elev);
+  const tol = clamp(+$('aTol').value || 1, 0.05, 15);
+  const alt0 = ALIGN.alt, az0 = ALIGN.az;
+  const gate = Math.max(6, tol + 3);        // only bother refining minima that are already close
+  const f = ms => { const p = alignAltAz(body, obsv, ms); return alignSep(p.alt, p.az, alt0, az0); };
+  let ms = t0, p2 = null, p1 = null, tP = 0, t2 = 0;
+  let best = { sep: 1e9, ms: 0 }, maxAlt = -1e9, minAlt = 1e9, capped = false;
+  const hits = [];
+  const started = performance.now();
+  ALIGN.running = true;
+  $('aGo').textContent = 'SEARCHING — TAP TO STOP';
+  $('aProg').hidden = false; $('aProg').firstElementChild.style.width = '0%';
+  $('aResults').innerHTML = ''; $('aMore').hidden = true;
+  v.textContent = '';
+  const step = () => {
+    const budget = performance.now() + 12;
+    while(ms <= t1 && performance.now() < budget){
+      const p = alignAltAz(body, obsv, ms);
+      if(p.alt > maxAlt) maxAlt = p.alt;
+      if(p.alt < minAlt) minAlt = p.alt;
+      const s = alignSep(p.alt, p.az, alt0, az0);
+      if(s < best.sep) best = { sep: s, ms };
+      // a sample lower than both its neighbours brackets a closest approach
+      if(p1 !== null && p2 !== null && p1 <= p2 && p1 <= s && p1 < gate && !capped){
+        // golden section down to the second — the function is smooth and single-minimum here
+        let a = t2, b = ms; const gr = 0.6180339887;
+        let cL = b - (b-a)*gr, cR = a + (b-a)*gr, fL = f(cL), fR = f(cR);
+        while(b - a > 1000){
+          if(fL < fR){ b = cR; cR = cL; fR = fL; cL = b - (b-a)*gr; fL = f(cL); }
+          else { a = cL; cL = cR; fL = fR; cR = a + (b-a)*gr; fR = f(cR); }
+        }
+        const tm = Math.round((a+b)/2000)*1000;
+        const pp = alignAltAz(body, obsv, tm), sm = alignSep(pp.alt, pp.az, alt0, az0);
+        if(sm < best.sep) best = { sep: sm, ms: tm };
+        if(sm <= tol){
+          hits.push({ ms: tm, sep: sm, alt: pp.alt, az: pp.az,
+                      ill: body === A.Body.Moon ? alignIll(tm) : null });
+          if(hits.length >= ALIGN_MAX_HITS) capped = true;
+        }
+      }
+      p2 = p1; t2 = tP; p1 = s; tP = ms;
+      ms += ALIGN_STEP;
+    }
+    $('aProg').firstElementChild.style.width = (clamp((ms - t0)/(t1 - t0), 0, 1)*100).toFixed(1) + '%';
+    if(ms <= t1){ ALIGN.job = requestAnimationFrame(step); return; }
+    ALIGN.took = performance.now() - started;
+    ALIGN.hits = hits; ALIGN.shown = 0;
+    ALIGN.minIll = ALIGN.obj === 'Moon' ? clamp(+$('aIll').value || 0, 0, 100) : 0;
+    alignStop();
+    alignFinish({ best, maxAlt, minAlt, tol, capped, t0, t1 });
+  };
+  ALIGN.job = requestAnimationFrame(step);
+}
+/* WHAT THE SEARCH FOUND — including, and especially, when it found nothing. An empty list
+   with no explanation is the failure mode of every planner: from London the sun cannot reach
+   80°, ever, and the tool should say so rather than shrug. */
+function alignFinish(r){
+  const v = $('aVerdict'), obj = ALIGN.obj.toLowerCase();
+  const lat = state.obs.lat;
+  const shown = ALIGN.hits.filter(h => !(ALIGN.minIll > 0 && h.ill !== null && h.ill*100 < ALIGN.minIll));
+  const filtered = ALIGN.hits.length - shown.length;
+  ALIGN.view = shown;
+  const took = (ALIGN.took/1000).toFixed(2);
+  const months = ((r.t1 - r.t0)/(365.25*864e5/12));
+  const spanTxt = months >= 11.5 && months <= 12.5 ? '12 months'
+                : months >= 1 ? `${months.toFixed(months < 3 ? 1 : 0)} months` : `${Math.round((r.t1-r.t0)/864e5)} days`;
+  const searched = ` Searched ${spanTxt} in ${took}s.`;
+  if(shown.length){
+    const under = shown.filter(h => h.alt >= 0 && h.alt < state.obstDeg).length;
+    const below = shown.filter(h => h.alt < 0).length;
+    const blocked = (below ? ` ${below} below the horizon.` : '') +
+                    (under ? ` ${under} behind your ${state.obstDeg.toFixed(1)}° horizon.` : '');
+    v.className = 'verdict good';
+    v.textContent = `${shown.length}${r.capped ? '+' : ''} time${shown.length === 1 ? '' : 's'} within ${r.tol}° of ` +
+      `${ALIGN.az.toFixed(0)}° / ${ALIGN.alt.toFixed(1)}° — tap one to see it in SKY.` + blocked +
+      (filtered ? ` ${filtered} more at a thinner moon than you asked for.` : '') + searched;
+  }else if(filtered){
+    v.className = 'verdict bad';
+    v.textContent = `The geometry happens ${filtered} time${filtered === 1 ? '' : 's'}, but never with the moon at least ` +
+      `${ALIGN.minIll}% lit. Lower the phase filter to see them.` + searched;
+  }else if(ALIGN.alt > r.maxAlt + 0.1){
+    v.className = 'verdict bad';
+    v.textContent = `From ${Math.abs(lat).toFixed(2)}°${lat < 0 ? 'S' : 'N'} the ${obj} never climbs higher than ` +
+      `${r.maxAlt.toFixed(1)}° in this range, so ${ALIGN.alt.toFixed(1)}° is out of reach on any date — not a near miss, ` +
+      `a geometric impossibility. Ask for ${Math.floor(r.maxAlt)}° or less, or go closer to the equator.` + searched;
+  }else if(r.best.sep < 1e8){
+    v.className = 'verdict bad';
+    v.textContent = `No pass within ${r.tol}°. The closest the ${obj} came was ${r.best.sep.toFixed(2)}° off, on ` +
+      `${alignDate(r.best.ms)} at ${fmtLocal(r.best.ms)} — widen "within" to ${(Math.ceil(r.best.sep*4)/4).toFixed(2)}° ` +
+      `to include it, or move the target.` + searched;
+  }else{
+    v.className = 'verdict bad';
+    v.textContent = 'Nothing found in that range.' + searched;
+  }
+  alignFrameNote();
+  alignRender(true);
+  // the answer lands under the button that asked for it, which on a phone is off the fold —
+  // so the page goes to the answer rather than leaving the reader to find it
+  try{ v.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(e){}
+}
+function alignDate(ms){
+  try{
+    return new Intl.DateTimeFormat('en-GB', { timeZone: state.tz, weekday:'short', day:'numeric', month:'short', year:'numeric' }).format(new Date(ms));
+  }catch(e){ return new Date(ms).toISOString().slice(0,10); }
+}
+function alignRender(reset){
+  const box = $('aResults'), list = ALIGN.view || [];
+  if(reset){ box.innerHTML = ''; ALIGN.shown = 0; }
+  const to = Math.min(list.length, ALIGN.shown + ALIGN_PAGE);
+  let html = '';
+  for(let i = ALIGN.shown; i < to; i++){
+    const h = list[i];
+    const blocked = h.alt < 0 ? 'below the horizon'
+                  : (h.alt < state.obstDeg ? `behind your ${state.obstDeg.toFixed(1)}° horizon` : '');
+    html += `<button class="ares" type="button" data-ms="${h.ms}">` +
+      `<span class="ad">${alignDate(h.ms)}</span>` +
+      `<span class="at">${fmtLocal(h.ms)} <span class="ad" style="font-size:10px">${tzShort(h.ms)}</span></span>` +
+      `<span class="am"><b>${h.alt.toFixed(2)}°</b> alt · <b>${h.az.toFixed(1)}°</b> az · ${h.sep.toFixed(2)}° off` +
+      (h.ill !== null && h.ill !== undefined ? ` · <b>${(h.ill*100).toFixed(0)}%</b> lit` : '') +
+      (blocked ? ` · <span class="blk">${blocked}</span>` : '') + `</span></button>`;
+  }
+  box.insertAdjacentHTML('beforeend', html);
+  ALIGN.shown = to;
+  $('aMore').hidden = ALIGN.shown >= list.length;
+  if(!$('aMore').hidden) $('aMore').textContent = `show ${Math.min(ALIGN_PAGE, list.length - ALIGN.shown)} more of ${list.length}`;
+}
+// a new location (or date anchor) makes every row stale — drop them rather than let a list
+// computed for Madrid sit under the name "London"
+function alignClear(){
+  if(ALIGN.running) alignStop();
+  const had = ALIGN.view && ALIGN.view.length;
+  ALIGN.hits = []; ALIGN.view = []; ALIGN.shown = 0;
+  $('aResults').innerHTML = ''; $('aMore').hidden = true;
+  if(had){ $('aVerdict').className = 'verdict'; $('aVerdict').textContent = 'Location changed — search again for this place.'; }
+  if(state.tab === 'align') drawDial();
+}
+$('aMore').addEventListener('click', ()=> alignRender(false));
+$('aGo').addEventListener('click', alignSearch);
+/* THE PAYOFF. A row is not a readout, it is a door: set the clock to that second, give the
+   scrubber a ±3h window around it to explore, and land on SKY looking at the thing. */
+function alignJump(ms){
+  if(state.live) setLive(false);
+  state.playing = false; setPlayFace();
+  state.t = ms;
+  // a moon result needs the camera pointed at the moon — see the note in draw()
+  const hit = (ALIGN.view || []).find(h => h.ms === ms);
+  state.skyLook = (ALIGN.obj === 'Moon' && hit) ? { az: hit.az, alt: hit.alt } : null;
+  span = { t0: ms - 3*3600e3, t1: ms + 3*3600e3 };
+  state.range = 'align'; state.extended = true;
+  $('ext').classList.add('on'); $('ext').textContent = RANGE_LABEL.align;
+  placeMarkers(); syncScrub();
+  setTab('sky');
+  try{ $('sky').scrollIntoView({ block:'start', behavior:'smooth' }); }catch(e){ }
+}
+$('aResults').addEventListener('click', e=>{
+  const b = e.target.closest('.ares');
+  if(b) alignJump(+b.dataset.ms);
+});
+// defaults: from today, twelve months out — the window a photographer plans in
+(function alignInit(){
+  const d0 = new Date(nowMs()), d1 = new Date(nowMs() + 365*864e5);
+  $('aFrom').value = d0.toISOString().slice(0,10);
+  $('aTo').value = d1.toISOString().slice(0,10);
+  alignSetTarget(270, 0);
+  alignTolNote();
+})();
+
 // inside <summary>, so swallow the click or the panel would toggle shut
 function setTab(tab){
   // PATH and COSMOS want the whole global sweep; SKY wants the local window. Same clock either way.
@@ -5613,9 +6162,15 @@ function setTab(tab){
   $('viewSky').hidden = tab !== 'sky';
   $('viewPath').hidden = tab !== 'path';
   $('viewCosmos').hidden = tab !== 'cosmos';
+  $('viewAlign').hidden = tab !== 'align';
   $('tabSky').classList.toggle('on', tab === 'sky');
   $('tabPath').classList.toggle('on', tab === 'path');
   $('tabCosmos').classList.toggle('on', tab === 'cosmos');
+  $('tabAlign').classList.toggle('on', tab === 'align');
+  // ALIGN has no clock of its own — the transport, the when-bar and the countdown are hidden
+  // by this class alone, and come straight back on any other tab
+  document.body.classList.toggle('alignTab', tab === 'align');
+  if(tab === 'align'){ alignFrameNote(); requestAnimationFrame(drawDial); }
   // the chip follows the view it is sitting on: the canvas it must measure has just changed,
   // and so has the corner it must be kept clear of
   if(typeof syncChip === 'function') requestAnimationFrame(syncChip);
@@ -5663,6 +6218,7 @@ function setTab(tab){
 $('tabSky').addEventListener('click', ()=> setTab('sky'));
 $('tabPath').addEventListener('click', ()=> setTab('path'));
 $('tabCosmos').addEventListener('click', ()=> setTab('cosmos'));
+$('tabAlign').addEventListener('click', ()=> setTab('align'));
 
 $('mNovice').addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); setMode('novice'); });
 $('mPro').addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); setMode('pro'); });
@@ -5721,7 +6277,7 @@ let savedModeOverride = null, initialTab = 'sky';
   const qNow = q.get('now') ? Date.parse(q.get('now')) : NaN;
   if(isFinite(qNow)) nowOffset = qNow - Date.now();
   if(q.get('mode') === 'novice') savedModeOverride = 'novice';
-  if(q.get('tab') === 'path' || q.get('tab') === 'cosmos') initialTab = q.get('tab');
+  if(q.get('tab') === 'path' || q.get('tab') === 'cosmos' || q.get('tab') === 'align') initialTab = q.get('tab');
   $('lat').value = state.obs.lat; $('lon').value = state.obs.lon;
   $('date').value = state.date;
 })();
@@ -5737,7 +6293,10 @@ let savedModeOverride = null, initialTab = 'sky';
    Every read here is a layout read, so it runs on the events that can change the answer — tab
    switch, resize, rotation, a new place name, open/close — and never per frame. */
 const CHIP_MQ = (()=>{ try{ return matchMedia('(max-width:760px)'); }catch(e){ return null; } })();
-function chipHost(){ return state.tab === 'path' ? mapCv : state.tab === 'cosmos' ? cosCv : cv; }
+// ALIGN's host is the panel itself — it has no canvas, and the panel reserves a top strip
+// (see .alignPanel padding-top) so the chip never lands on a control
+function chipHost(){ return state.tab === 'path' ? mapCv : state.tab === 'cosmos' ? cosCv
+                          : state.tab === 'align' ? $('viewAlign') : cv; }
 function syncChip(){
   const ov = $('locOverlay'), chip = $('locChip'), wrapEl = document.querySelector('.wrap');
   const on = !!(CHIP_MQ && CHIP_MQ.matches);
@@ -5837,9 +6396,13 @@ function loop(now){
   const f = computeFrame(state.t);
   refreshStatus(now, f);
   paintNowClock();     // every frame, not on the 150ms DOM tick — see the note there
-  if(state.tab === 'sky') draw(f); else if(state.tab === 'cosmos') drawCosmos(); else drawMap();
+  if(state.tab === 'sky') draw(f);
+  else if(state.tab === 'cosmos') drawCosmos();
+  else if(state.tab === 'path') drawMap();
   if(now - lastDom > 150){
     lastDom = now;
+    // ALIGN's only moving part is where the two bodies sit right now — a dial, not a render
+    if(state.tab === 'align') drawDial();
     updateLiveBar();
     updateShadowNote();
     // the readout panel's live row — same NOW / SHOWING distinction as the when-bar clock,
