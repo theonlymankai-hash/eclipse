@@ -1512,7 +1512,7 @@ try{
   <div id="viewSolar" hidden>
     <div class="mapwrap"><canvas id="solar" role="application" aria-label="The solar system for the chosen date. Drag to orbit, pinch or wheel to zoom, tap a planet."></canvas>
       <div class="cosCtl" id="solCtl">
-        <button type="button" data-k="scale">READABLE</button><button type="button" data-k="orbits" class="on">ORBITS</button><button type="button" data-k="lines" class="on">LINES</button><button type="button" data-k="all">ALL</button><button type="button" data-k="inner">INNER</button><button type="button" data-k="top">TOP</button><button type="button" data-k="tilt">TILT</button><button type="button" data-k="edge">EDGE</button><button type="button" data-k="in" aria-label="zoom in">+</button><button type="button" data-k="out" aria-label="zoom out">−</button>
+        <button type="button" data-k="scale">READABLE</button><button type="button" data-k="orbits" class="on">ORBITS</button><button type="button" data-k="lines">LINES</button><button type="button" data-k="all">ALL</button><button type="button" data-k="inner">INNER</button><button type="button" data-k="top">TOP</button><button type="button" data-k="tilt">TILT</button><button type="button" data-k="edge">EDGE</button><button type="button" data-k="in" aria-label="zoom in">+</button><button type="button" data-k="out" aria-label="zoom out">−</button>
       </div>
     </div>
     <div id="solStrip" role="group" aria-label="pick a planet"></div>
@@ -8596,7 +8596,7 @@ function planClose(){ PL.open = false; const pp = $('planPanel'); if(pp) pp.hidd
    sun is a dot, which is the lesson. Offline like everything deterministic in this file. */
 const SOL = { yaw: -62, pitch: 38, zoom: 1, to: null, mode: 'readable', sel: null, focus: [0, 0, 0], focusTo: null,
               orbits: {}, stars: null, starKey: '', ptr: new Map(), pinch: 0, moved: false, downAt: 0, ecl: null,
-              open: false, movedAt: 0, everDrawn: false };
+              open: false, movedAt: 0, everDrawn: false, lines: false };   // figures off by default: they kill the vibe
 const SOL_BODIES = [
   { id: 'Mercury', body: 'Mercury', r: 2439.7, col: ['#c9bfb0', '#8a7f74', '#4a433c'], period: 87.97,  day: '59 Earth days', year: '88 days', moons: 0, tilt: 0.03,
     fact: 'Closest to the sun yet not the hottest — it has no air to hold the heat, so its nights drop to −180 °C.' },
