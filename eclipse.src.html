@@ -1512,7 +1512,7 @@ try{
   <div id="viewSolar" hidden>
     <div class="mapwrap"><canvas id="solar" role="application" aria-label="The solar system for the chosen date. Drag to orbit, pinch or wheel to zoom, tap a planet."></canvas>
       <div class="cosCtl" id="solCtl">
-        <button type="button" data-k="scale">READABLE</button><button type="button" data-k="all">ALL</button><button type="button" data-k="inner">INNER</button><button type="button" data-k="top">TOP</button><button type="button" data-k="tilt">TILT</button><button type="button" data-k="edge">EDGE</button><button type="button" data-k="in" aria-label="zoom in">+</button><button type="button" data-k="out" aria-label="zoom out">−</button>
+        <button type="button" data-k="scale">READABLE</button><button type="button" data-k="orbits" class="on">ORBITS</button><button type="button" data-k="lines" class="on">LINES</button><button type="button" data-k="all">ALL</button><button type="button" data-k="inner">INNER</button><button type="button" data-k="top">TOP</button><button type="button" data-k="tilt">TILT</button><button type="button" data-k="edge">EDGE</button><button type="button" data-k="in" aria-label="zoom in">+</button><button type="button" data-k="out" aria-label="zoom out">−</button>
       </div>
     </div>
     <div id="solStrip" role="group" aria-label="pick a planet"></div>
@@ -8650,7 +8650,7 @@ function solOrbit(b){
 
 /* ---------- the star backdrop: real sky, ecliptic frame ---------- */
 function solStars(w, h, C, pr){
-  const key = [w, h, pr, SOL.yaw.toFixed(1), SOL.pitch.toFixed(1)].join(',');
+  const key = [w, h, pr, SOL.yaw.toFixed(1), SOL.pitch.toFixed(1), SOL.lines].join(',');
   if(SOL.starKey === key && SOL.stars) return SOL.stars;
   const S = sidDecode(); if(!S.ready) return null;
   if(!SOL.sv){ // rotate every star once into the ecliptic frame
@@ -8667,7 +8667,7 @@ function solStars(w, h, C, pr){
   const Rs = Math.max(w, h) * 1.1, e = C.eye, rt = C.rt, up = C.upv, sv = SOL.sv;
   // the constellation figures, faint, so the zodiac reads as a band the planets sit in
   g.strokeStyle = 'rgba(120,140,190,0.24)'; g.lineWidth = 1; g.beginPath();
-  for(const sg of S.segs){ let pen = false;
+  if(SOL.lines !== false) for(const sg of S.segs){ let pen = false;
     for(let i = 0; i < sg.n; i++){ const a = sg.x[i], b = sg.y[i], cc = sg.z[i]; const R = solEclRot().rot;
       const vx = R[0][0] * a + R[1][0] * b + R[2][0] * cc, vy = R[0][1] * a + R[1][1] * b + R[2][1] * cc, vz = R[0][2] * a + R[1][2] * b + R[2][2] * cc;
       if(-(vx * e[0] + vy * e[1] + vz * e[2]) < 0.05){ pen = false; continue; }
@@ -8766,6 +8766,7 @@ function solDraw(){
   // orbits, faint, each tinted by its planet
   g.lineWidth = 1;
   for(const b of SOL_BODIES){
+    if(SOL.orbitsOff && SOL.sel !== b.id) continue;          // ORBITS off keeps only the chosen one
     const o = solOrbit(b), n = o.length / 3, sel = SOL.sel === b.id;
     g.strokeStyle = sel ? 'rgba(255,255,255,0.45)' : 'rgba(150,170,210,0.20)'; g.beginPath();
     for(let i = 0; i <= n; i++){ const j = (i % n) * 3, q = C.P([o[j], o[j + 1], o[j + 2]]); i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y); }
@@ -8969,6 +8970,8 @@ function solarSpan(k){ const c = nowMs(), y = 365.25 * 864e5; return k === 'sola
     else if(k === 'all'){ solSelect(null); SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: 1 }; }
     else if(k === 'in') SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: clamp(cur.zoom * 1.5, 0.35, 60) };
     else if(k === 'out') SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: clamp(cur.zoom / 1.5, 0.35, 60) };
+    else if(k === 'orbits'){ SOL.orbitsOff = !SOL.orbitsOff; b.classList.toggle('on', !SOL.orbitsOff); }
+    else if(k === 'lines'){ SOL.lines = SOL.lines === false; b.classList.toggle('on', SOL.lines !== false); }
     else if(k === 'scale'){ SOL.mode = SOL.mode === 'true' ? 'readable' : 'true'; b.textContent = SOL.mode === 'true' ? 'TRUE SCALE' : 'READABLE'; b.classList.toggle('on', SOL.mode === 'true'); SOL.focus = [0, 0, 0]; if(SOL.sel) solSelect(SOL.sel); else SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: 1 }; solCard(); }
   });
   $('tabSolar').addEventListener('click', () => setTab('solar'));
