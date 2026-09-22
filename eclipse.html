@@ -151,6 +151,40 @@
   #viewPath > .maplegend, #viewCosmos > .maplegend{order:60;}
   #viewPath > .note, #viewPath > #shadowNote,
   #viewCosmos > .note, #viewCosmos > .scaleNote{order:61;}
+  /* ==================== PLANETS — the orrery ==================== */
+  #viewSolar:not([hidden]){display:contents;}
+  #viewSolar > .mapwrap{order:2;}
+  #viewSolar > #solStrip{order:3;}
+  canvas#solar{display:block; width:100%; aspect-ratio:var(--cv-aspect); background:#05080f; border:1px solid var(--line); border-radius:0 6px 0 0; cursor:grab; touch-action:none;}
+  canvas#solar:active{cursor:grabbing;}
+  #viewSolar .mapwrap{position:relative;}
+  @media(max-width:760px){ #solCtl{position:static; margin-top:6px; justify-content:flex-start; max-width:none;} #solCtl button{flex:1 1 auto; min-width:0; padding:0 6px; height:38px; font-size:10px;} }
+  #solStrip{display:flex; gap:4px; overflow-x:auto; padding:6px 0 2px; scrollbar-width:none; -webkit-overflow-scrolling:touch;}
+  #solStrip::-webkit-scrollbar{display:none;}
+  #solStrip button{flex:0 0 auto; width:72px; min-height:82px; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 2px 5px; font:inherit; font-size:10px; letter-spacing:.06em; color:var(--dim); background:#0c0f15; border:1px solid var(--line); border-radius:6px; cursor:pointer;}
+  #solStrip button canvas{width:44px; height:44px;}
+  #solStrip button.on{color:var(--accent); border-color:var(--accent); background:#141822;}
+  #solStrip button:active{border-color:var(--accent);}
+  .solCard{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px 14px 14px; margin-top:8px;}
+  .solCard[hidden]{display:none;}
+  .solHead{display:flex; gap:12px; align-items:flex-start;}
+  .solHead .solPortrait{flex:0 0 64px; width:64px; height:64px;}
+  .solName{font-size:22px; letter-spacing:.06em; color:#fff; margin-bottom:4px;}
+  .solFact{font-size:13.5px; line-height:1.5; color:var(--ink);}
+  .solClose{margin-left:auto; flex:0 0 44px; width:44px; height:44px; font:inherit; font-size:22px; color:var(--dim); background:transparent; border:1px solid var(--line); border-radius:6px; cursor:pointer;}
+  .solGrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:8px; margin-top:12px;}
+  .solGrid span{display:flex; flex-direction:column; gap:1px; background:#0c0f15; border:1px solid var(--line); border-radius:6px; padding:8px 10px; min-width:0;}
+  .solGrid i{font-style:normal; font-size:10px; letter-spacing:.16em; color:var(--dim); text-transform:uppercase;}
+  .solGrid b{font-family:var(--mono); font-size:17px; font-weight:500; color:#fff;}
+  .solGrid u{text-decoration:none; font-size:11.5px; color:#aab2c4;}
+  .solSky{margin-top:12px; font-size:13.5px; line-height:1.5; color:var(--ink); display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center;}
+  .solSky i{font-style:normal; font-size:10px; letter-spacing:.16em; color:var(--dim);}
+  .solSky b{color:#fff; font-weight:500;}
+  #solGo{font:inherit; font-size:11px; letter-spacing:.1em; color:#0b0d11; background:var(--accent); border:0; border-radius:6px; min-height:40px; padding:0 14px; cursor:pointer; font-weight:600;}
+  body.solarTab .whenbar, body.solarTab .livebar, body.solarTab #snaps, body.solarTab #snapLine, body.solarTab #zoom, body.solarTab #eclBand, body.solarTab #maxTick, body.solarTab #secRead, body.solarTab #photo{display:none !important;}
+  /* seven tabs on a phone */
+  @media(max-width:430px){ .viewtabs{gap:3px;} .viewtabs button{font-size:9.5px; letter-spacing:.01em; padding:13px 0 12px;} }
+
   #viewCosmos > #auLearn{order:3;}
   .cosCtl{position:absolute; right:8px; bottom:8px; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; max-width:min(330px, calc(100% - 16px));}
   .cosCtl button{min-width:44px; height:40px; padding:0 11px; font:inherit; font-size:10.5px; letter-spacing:.1em; color:var(--ink); background:rgba(11,13,17,0.86); border:1px solid var(--line); border-radius:6px; cursor:pointer;}
@@ -1395,7 +1429,7 @@ try{
 <div class="wrap">
 
   <div class="tabs viewtabs">
-    <button id="tabSky" class="on">SKY</button><button id="tabPath">PATH</button><button id="tabCosmos">COSMOS</button><button id="tabAlign">ALIGN</button><button id="tabPlan">PLAN</button><button id="tabAurora">TONIGHT</button>
+    <button id="tabSky" class="on">SKY</button><button id="tabPath">PATH</button><button id="tabCosmos">COSMOS</button><button id="tabSolar">PLANETS</button><button id="tabAlign">ALIGN</button><button id="tabPlan">PLAN</button><button id="tabAurora">TONIGHT</button>
   </div>
   <!-- LOCATION CHIP — one for all three views. It sits here, as a sibling of the view
        wrappers rather than inside #viewSky, so PATH and COSMOS get it too; syncChip() lays it
@@ -1473,6 +1507,16 @@ try{
       <summary>illustrative scale</summary>
       <div class="note">Sun and moon sit along their <b>true directions</b> for this moment, the earth carries its true rotation, and the shadow lands at its true position; distances and sizes are compressed for clarity (at true scale the moon would be sub-pixel).</div>
     </details>
+  </div>
+  <!-- PLANETS — the solar system from the real ephemeris. Offline, like everything deterministic. -->
+  <div id="viewSolar" hidden>
+    <div class="mapwrap"><canvas id="solar" role="application" aria-label="The solar system for the chosen date. Drag to orbit, pinch or wheel to zoom, tap a planet."></canvas>
+      <div class="cosCtl" id="solCtl">
+        <button type="button" data-k="scale">READABLE</button><button type="button" data-k="all">ALL</button><button type="button" data-k="inner">INNER</button><button type="button" data-k="top">TOP</button><button type="button" data-k="tilt">TILT</button><button type="button" data-k="edge">EDGE</button><button type="button" data-k="in" aria-label="zoom in">+</button><button type="button" data-k="out" aria-label="zoom out">−</button>
+      </div>
+    </div>
+    <div id="solStrip" role="group" aria-label="pick a planet"></div>
+    <div class="solCard" id="solCard" hidden></div>
   </div>
   <!-- ALIGN — the inversion. SKY/PATH/COSMOS all take a time and give you a geometry; this
        takes a geometry and gives you the times. Same engine, same observer, same horizon
@@ -2232,6 +2276,7 @@ const NARROW = (()=>{ try{ return matchMedia('(max-width:600px)').matches; }catc
 const FOVS = NARROW ? [60, 20, 8, 4, 1.5]    // 4 = the phone landing framing
                     : [60, 20, 8, 5, 1.5];   // 8 = the desktop landing framing
 const SPEEDS = [1, 60, 600];
+const SOL_SPEEDS = [86400, 86400 * 30.44, 86400 * 365.25];   // PLANETS runs on days, months and years
 
 const PRESETS = [
   { name:'Zaragoza',          lat:41.65, lon:-0.88,  tz:'Europe/Madrid' },
@@ -2473,7 +2518,7 @@ let peakFrame = null;    // frame data at peak
 const RANGES = ['eclipse', 'ext', 'global'];
 // 'align' is not in RANGES — it is not a rung of the cycle, it is where an ALIGN result drops
 // the scrubber (±3h around that moment). Pressing the button once returns to the eclipse window.
-const RANGE_LABEL = { eclipse:'C1–C4', ext:'±3h', global:'GLOBAL', align:'±3h', plan:'DAY' };
+const RANGE_LABEL = { eclipse:'C1–C4', ext:'±3h', global:'GLOBAL', align:'±3h', plan:'DAY', solar:'±20 YR', solarY:'±1 YR' };
 // MARKERS vs THE THUMB. A range input's thumb does NOT travel the full width of its track:
 // its centre runs from half a thumb in on the left to half a thumb in on the right. The band
 // and the MAX tick used to be painted at a plain percentage of .scrubwrap, so they drifted
@@ -2565,7 +2610,8 @@ function applyRange(mode){
   state.skyLook = null;          // leaving an ALIGN window: the camera goes back to the sun
   state.freeLook = false;        // ...and so does a camera the visitor had dragged (SIDEREAL)
   state.extended = mode !== 'eclipse';
-  if(mode === 'plan') span = planDaySpan();      // PLAN: the whole local day, so the shadows can be walked round
+  if(mode === 'solar' || mode === 'solarY') span = solarSpan(mode);
+  else if(mode === 'plan') span = planDaySpan();      // PLAN: the whole local day, so the shadows can be walked round
   else if(mode === 'global') span = { t0: MAP.global.t0, t1: MAP.global.t1 };
   else span = { t0: eclWin.c1 - (mode === 'ext' ? 3*3600e3 : 0), t1: eclWin.c4 + (mode === 'ext' ? 3*3600e3 : 0) };
   state.t = clamp(state.t, span.t0, span.t1);
@@ -6444,7 +6490,7 @@ $('scrub').addEventListener('change', e=>{
 });
 $('ext').addEventListener('click', ()=>{
   // PLAN cycles its own three: the whole day, the eclipse window, the window ±3h
-  const R = state.tab === 'plan' ? ['plan', 'eclipse', 'ext'] : RANGES;
+  const R = state.tab === 'plan' ? ['plan', 'eclipse', 'ext'] : state.tab === 'solar' ? ['solar', 'solarY'] : RANGES;
   const i = R.indexOf(state.range || 'eclipse');
   applyRange(R[(i+1) % R.length]);
 });
@@ -6494,14 +6540,16 @@ const spdChevrons = n => {
 };
 function paintSpeed(){
   const n = SPEEDS.indexOf(state.speed) + 1 || 1;
-  $('spd').innerHTML = spdChevrons(n) + `<span class="spdn">${state.speed}×</span>`;
+  const sn = SOL_SPEEDS.indexOf(state.speed) + 1;
+  $('spd').innerHTML = spdChevrons(sn || n) + `<span class="spdn">${sn ? solSpeedLabel(state.speed) : state.speed + '×'}</span>`;
   $('spd').setAttribute('aria-label', state.speed === 1
     ? 'playback speed: real time — press to change'
     : `playback speed: ${state.speed} times real time — press to change`);
 }
 paintSpeed();
 $('spd').addEventListener('click', ()=>{
-  state.speed = SPEEDS[(SPEEDS.indexOf(state.speed)+1) % SPEEDS.length];
+  const L = state.tab === 'solar' ? SOL_SPEEDS : SPEEDS;
+  state.speed = L[(L.indexOf(state.speed)+1) % L.length];
   paintSpeed();
 });
 function setFov(v){
@@ -7309,7 +7357,10 @@ $('aResults').addEventListener('click', e=>{
 function setTab(tab){
   // PATH and COSMOS want the whole global sweep; SKY wants the local window. Same clock either way.
   const wide = t => t === 'path' || t === 'cosmos';
-  if(wide(tab) && !wide(state.tab)){
+  // PLANETS runs on years: its own range in, the sky range back out
+  if(tab === 'solar' && state.tab !== 'solar'){ if(!wide(state.tab) && state.range !== 'plan' && state.range !== 'align') state.skyRange = state.range || 'eclipse'; applyRange('solar'); }
+  else if(state.tab === 'solar' && tab !== 'solar'){ applyRange(wide(tab) ? 'global' : (state.skyRange || 'eclipse')); }
+  else if(wide(tab) && !wide(state.tab)){
     if(state.range !== 'plan' && state.range !== 'align') state.skyRange = state.range || 'eclipse';
     applyRange('global');
   }else if(!wide(tab) && wide(state.tab)){
@@ -7329,6 +7380,10 @@ function setTab(tab){
   $('viewAlign').hidden = tab !== 'align';
   $('viewAurora').hidden = tab !== 'aurora';
   $('viewPlan').hidden = tab !== 'plan';
+  $('viewSolar').hidden = tab !== 'solar';
+  $('tabSolar').classList.toggle('on', tab === 'solar');
+  document.body.classList.toggle('solarTab', tab === 'solar');
+  if(tab === 'solar') solOpen(); else solClose();
   $('tabPlan').classList.toggle('on', tab === 'plan');
   if(tab === 'plan') planOpen(); else planClose();
   $('tabSky').classList.toggle('on', tab === 'sky');
@@ -8796,6 +8851,374 @@ function planClose(){ PL.open = false; const pp = $('planPanel'); if(pp) pp.hidd
   window.addEventListener('resize', () => { PL.dirty = true; });
 })();
 
+/* ==================== PLANETS — the solar system, as it actually is ====================
+   Every position here is the real ephemeris for the scrubbed date: astronomy-engine's
+   HelioVector, the same integrator the eclipse itself is computed with. Nothing is keyframed,
+   so a date fifty years out is as true as today, and the moon is where the moon is.
+
+   Two scales, both labelled, because the honest picture is unusable and the usable picture
+   is a lie: READABLE compresses distance with a log and enlarges the bodies so the whole
+   family fits on a phone; TRUE draws it to scale — where the planets are sub-pixel and the
+   sun is a dot, which is the lesson. Offline like everything deterministic in this file. */
+const SOL = { yaw: -62, pitch: 38, zoom: 1, to: null, mode: 'readable', sel: null, focus: [0, 0, 0], focusTo: null,
+              orbits: {}, stars: null, starKey: '', ptr: new Map(), pinch: 0, moved: false, downAt: 0, ecl: null,
+              open: false, movedAt: 0, everDrawn: false };
+const SOL_BODIES = [
+  { id: 'Mercury', body: 'Mercury', r: 2439.7, col: ['#c9bfb0', '#8a7f74', '#4a433c'], period: 87.97,  day: '59 Earth days', year: '88 days', moons: 0, tilt: 0.03,
+    fact: 'Closest to the sun yet not the hottest — it has no air to hold the heat, so its nights drop to −180 °C.' },
+  { id: 'Venus',   body: 'Venus',   r: 6051.8, col: ['#f3e3b4', '#d6b26a', '#8a6a34'], period: 224.7,  day: '243 Earth days (backwards)', year: '225 days', moons: 0, tilt: 177,
+    fact: 'Its day is longer than its year, and it spins the wrong way. Under the clouds it is 465 °C everywhere, day and night.' },
+  { id: 'Earth',   body: 'Earth',   r: 6371,   col: ['#9bd3ff', '#2f7ad1', '#0f2f66'], period: 365.25, day: '24 hours', year: '365.25 days', moons: 1, tilt: 23.4,
+    fact: 'The only place we know where water sits on the surface as a liquid. The tilt you see is why there are seasons.' },
+  { id: 'Mars',    body: 'Mars',    r: 3389.5, col: ['#f0a070', '#c1552a', '#5a2414'], period: 686.98, day: '24 h 37 min', year: '687 days', moons: 2, tilt: 25.2,
+    fact: 'A day almost exactly like ours and seasons too — but the air is 1% as thick, and the tallest volcano in the solar system is here.' },
+  { id: 'Jupiter', body: 'Jupiter', r: 69911,  col: ['#f2dcb8', '#c8956a', '#6b4630'], period: 4332.6, day: '9 h 56 min', year: '11.9 years', moons: 95, tilt: 3.1, bands: true,
+    fact: 'Heavier than all the other planets put together, and it spins so fast its day is under ten hours. The red spot is a storm bigger than Earth.' },
+  { id: 'Saturn',  body: 'Saturn',  r: 58232,  col: ['#f6e7c1', '#d8b981', '#7d6236'], period: 10759,  day: '10 h 34 min', year: '29.5 years', moons: 146, tilt: 26.7, rings: true, bands: true,
+    fact: 'The rings are mostly water ice, hundreds of thousands of kilometres across and in places only ten metres thick.' },
+  { id: 'Uranus',  body: 'Uranus',  r: 25362,  col: ['#d8f4f8', '#7fcbd6', '#2d6b7c'], period: 30687,  day: '17 h 14 min', year: '84 years', moons: 28, tilt: 97.8,
+    fact: 'It rolls round the sun on its side — knocked over, probably, by something the size of Earth long ago. Each pole gets 42 years of daylight.' },
+  { id: 'Neptune', body: 'Neptune', r: 24622,  col: ['#8fb6ff', '#3d63d8', '#1a2a7a'], period: 60190,  day: '16 h 6 min', year: '165 years', moons: 16, tilt: 28.3,
+    fact: 'Found with maths before anyone saw it — Uranus was being tugged off course. Its winds are the fastest known, about 2,000 km/h.' },
+  { id: 'Pluto',   body: 'Pluto',   r: 1188,   col: ['#e8d9c8', '#b59d86', '#5c4a3c'], period: 90560,  day: '6.4 Earth days', year: '248 years', moons: 5, tilt: 120,
+    fact: 'Smaller than our moon, on a tilted orbit that sometimes brings it inside Neptune’s. A dwarf planet since 2006 — still worth the trip.' },
+];
+const SOL_SUN_R = 695700, SOL_AU = 149597870.7, SOL_C = 299792.458;
+
+/* ---------- geometry ---------- */
+function solEclRot(){ return SOL.ecl || (SOL.ecl = A.Rotation_EQJ_ECL()); }
+function solHelio(body, t){ const v = A.RotateVector(solEclRot(), A.HelioVector(A.Body[body], t)); return [v.x, v.y, v.z]; }
+// readable distance: a log that keeps the inner four apart and the outer five on one screen
+const solRad = r => SOL.mode === 'true' ? r : Math.log(1 + r / 0.3);
+function solMap(p){ const r = Math.hypot(p[0], p[1], p[2]); if(r < 1e-9) return [0, 0, 0]; const k = solRad(r) / r; return [p[0] * k, p[1] * k, p[2] * k]; }
+function solCam(w, h){
+  const y = SOL.yaw * D2R, p = SOL.pitch * D2R, cp = Math.cos(p);
+  const eye = [cp * Math.cos(y), cp * Math.sin(y), Math.sin(p)];
+  let rt = vCross([0, 0, 1], eye); rt = vLen(rt) < 1e-6 ? [1, 0, 0] : vNorm(rt);
+  const upv = vCross(eye, rt);
+  const span = SOL.mode === 'true' ? 31.5 : solRad(31.5);          // Neptune's orbit fills the frame at zoom 1
+  const S = SOL.zoom * Math.min(w, h * 1.35) / (2 * span) ;
+  const f = SOL.focus;
+  return { eye, rt, upv, S, P(p){ const q = [p[0] - f[0], p[1] - f[1], p[2] - f[2]]; return { x: w / 2 + vDot(q, rt) * S, y: h / 2 - vDot(q, upv) * S, z: vDot(q, eye) }; } };
+}
+// display radius of a body in px: readable enlarges by a gentle power so Mercury is still a disc
+function solBodyPx(b, C){
+  if(SOL.mode === 'true') return Math.max(0.6, b.r / SOL_AU * C.S);
+  return clamp(Math.pow(b.r / 6371, 0.42) * 5.2 * Math.pow(SOL.zoom, 0.5), 2.5, 60);
+}
+function solOrbit(b){
+  const key = b.id + ':' + SOL.mode;
+  if(SOL.orbits[key]) return SOL.orbits[key];
+  const N = b.period > 5000 ? 360 : 240, pts = new Float64Array(N * 3), t0 = state.t;
+  for(let i = 0; i < N; i++){ const t = A.MakeTime(new Date(t0 + b.period * 864e5 * i / N)); const p = solMap(solHelio(b.body, t)); pts[i * 3] = p[0]; pts[i * 3 + 1] = p[1]; pts[i * 3 + 2] = p[2]; }
+  return SOL.orbits[key] = pts;
+}
+
+/* ---------- the star backdrop: real sky, ecliptic frame ---------- */
+function solStars(w, h, C, pr){
+  const key = [w, h, pr, SOL.yaw.toFixed(1), SOL.pitch.toFixed(1)].join(',');
+  if(SOL.starKey === key && SOL.stars) return SOL.stars;
+  const S = sidDecode(); if(!S.ready) return null;
+  if(!SOL.sv){ // rotate every star once into the ecliptic frame
+    const R = solEclRot().rot, n = S.n, x = new Float32Array(n), y = new Float32Array(n), z = new Float32Array(n);
+    for(let i = 0; i < n; i++){ const a = S.vx[i], b = S.vy[i], c = S.vz[i];
+      x[i] = R[0][0] * a + R[1][0] * b + R[2][0] * c; y[i] = R[0][1] * a + R[1][1] * b + R[2][1] * c; z[i] = R[0][2] * a + R[1][2] * b + R[2][2] * c; }
+    SOL.sv = { x, y, z };
+  }
+  let c = SOL.stars; if(!c) c = SOL.stars = document.createElement('canvas');
+  if(c.width !== Math.round(w * pr) || c.height !== Math.round(h * pr)){ c.width = Math.round(w * pr); c.height = Math.round(h * pr); }
+  const g = c.getContext('2d'); g.setTransform(pr, 0, 0, pr, 0, 0);
+  const bg = g.createRadialGradient(w * 0.5, h * 0.5, 0, w * 0.5, h * 0.5, Math.max(w, h) * 0.75);
+  bg.addColorStop(0, '#0a0d19'); bg.addColorStop(1, '#03040a'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+  const Rs = Math.max(w, h) * 1.1, e = C.eye, rt = C.rt, up = C.upv, sv = SOL.sv;
+  // the constellation figures, faint, so the zodiac reads as a band the planets sit in
+  g.strokeStyle = 'rgba(120,140,190,0.24)'; g.lineWidth = 1; g.beginPath();
+  for(const sg of S.segs){ let pen = false;
+    for(let i = 0; i < sg.n; i++){ const a = sg.x[i], b = sg.y[i], cc = sg.z[i]; const R = solEclRot().rot;
+      const vx = R[0][0] * a + R[1][0] * b + R[2][0] * cc, vy = R[0][1] * a + R[1][1] * b + R[2][1] * cc, vz = R[0][2] * a + R[1][2] * b + R[2][2] * cc;
+      if(-(vx * e[0] + vy * e[1] + vz * e[2]) < 0.05){ pen = false; continue; }
+      const X = w / 2 + (vx * rt[0] + vy * rt[1] + vz * rt[2]) * Rs, Y = h / 2 - (vx * up[0] + vy * up[1] + vz * up[2]) * Rs;
+      pen ? g.lineTo(X, Y) : g.moveTo(X, Y); pen = true; } }
+  g.stroke();
+  for(let i = 0; i < S.n; i++){
+    const m = S.mag[i]; if(m > 5.6) continue;
+    const vx = sv.x[i], vy = sv.y[i], vz = sv.z[i];
+    if(-(vx * e[0] + vy * e[1] + vz * e[2]) < 0.05) continue;
+    const X = w / 2 + (vx * rt[0] + vy * rt[1] + vz * rt[2]) * Rs, Y = h / 2 - (vx * up[0] + vy * up[1] + vz * up[2]) * Rs;
+    if(X < -2 || Y < -2 || X > w + 2 || Y > h + 2) continue;
+    const a = clamp(1.15 - (m + 1) / 6.2, 0.2, 1), r = m < 1 ? 2.0 : m < 2.5 ? 1.4 : m < 4 ? 1.0 : 0.75;
+    g.fillStyle = 'rgba(' + S.cr[i] + ',' + S.cg[i] + ',' + S.cb[i] + ',' + a.toFixed(2) + ')';
+    g.beginPath(); g.arc(X, Y, r, 0, 7); g.fill();
+  }
+  // the ecliptic itself: the line the planets keep to
+  g.strokeStyle = 'rgba(232,179,74,0.10)'; g.setLineDash([2, 6]); g.beginPath(); let pen = false;
+  for(let a = 0; a <= 360; a += 2){ const vx = Math.cos(a * D2R), vy = Math.sin(a * D2R);
+    if(-(vx * e[0] + vy * e[1]) < 0.05){ pen = false; continue; }
+    const X = w / 2 + (vx * rt[0] + vy * rt[1]) * Rs, Y = h / 2 - (vx * up[0] + vy * up[1]) * Rs; pen ? g.lineTo(X, Y) : g.moveTo(X, Y); pen = true; }
+  g.stroke(); g.setLineDash([]);
+  SOL.starKey = key; return c;
+}
+
+/* ---------- painting a planet ---------- */
+function solDisc(g, x, y, r, b, sunDir2, sunDepth, alpha){
+  const [hi, mid, lo] = b.col;
+  const k = clamp(0.55 + 0.45 * sunDepth, 0.12, 1);                 // sun behind the body from where we stand → crescent-dark
+  const gx = x + sunDir2[0] * r * 0.55 * k, gy = y + sunDir2[1] * r * 0.55 * k;
+  const gr = g.createRadialGradient(gx, gy, r * 0.05, x - sunDir2[0] * r * 0.3, y - sunDir2[1] * r * 0.3, r * 1.15);
+  gr.addColorStop(0, hi); gr.addColorStop(0.45, mid); gr.addColorStop(1, lo);
+  g.globalAlpha = alpha; g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+  if(b.bands && r > 7){
+    g.save(); g.beginPath(); g.arc(x, y, r, 0, 7); g.clip();
+    const n = b.id === 'Jupiter' ? 9 : 6;
+    for(let i = 0; i < n; i++){ const yy = y - r + (i + 0.5) * 2 * r / n, hh = 2 * r / n * (0.45 + 0.3 * ((i * 7) % 3) / 2);
+      g.fillStyle = (i % 2 ? 'rgba(120,70,40,' : 'rgba(255,240,210,') + (0.10 + 0.05 * (i % 3)).toFixed(2) + ')'; g.fillRect(x - r, yy - hh / 2, 2 * r, hh); }
+    if(b.id === 'Jupiter'){ g.fillStyle = 'rgba(200,80,50,0.55)'; g.beginPath(); g.ellipse(x + r * 0.35, y + r * 0.28, r * 0.22, r * 0.11, 0, 0, 7); g.fill(); }
+    g.restore();
+  }
+  if(b.id === 'Earth' && r > 6){
+    g.save(); g.beginPath(); g.arc(x, y, r, 0, 7); g.clip(); g.fillStyle = 'rgba(90,160,80,0.55)';
+    for(const [ox, oy, rx, ry] of [[-0.35, -0.2, 0.32, 0.22], [0.25, 0.1, 0.22, 0.35], [-0.1, 0.45, 0.28, 0.14]]){ g.beginPath(); g.ellipse(x + ox * r, y + oy * r, rx * r, ry * r, 0.4, 0, 7); g.fill(); }
+    g.fillStyle = 'rgba(255,255,255,0.35)'; for(const [ox, oy, rx, ry] of [[0.1, -0.5, 0.5, 0.1], [-0.3, 0.2, 0.3, 0.08]]){ g.beginPath(); g.ellipse(x + ox * r, y + oy * r, rx * r, ry * r, -0.3, 0, 7); g.fill(); }
+    g.restore();
+  }
+  // terminator: the shadowed side, deeper when the sun is behind
+  const sh = g.createRadialGradient(x - sunDir2[0] * r * 0.9, y - sunDir2[1] * r * 0.9, r * 0.1, x - sunDir2[0] * r * 0.5, y - sunDir2[1] * r * 0.5, r * 1.3);
+  sh.addColorStop(0, 'rgba(2,3,8,' + (0.85 * (1 - k * 0.5)).toFixed(2) + ')'); sh.addColorStop(0.55, 'rgba(2,3,8,' + (0.35 * (1 - k * 0.5)).toFixed(2) + ')'); sh.addColorStop(1, 'rgba(2,3,8,0)');
+  g.fillStyle = sh; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+  g.globalAlpha = 1;
+}
+function solRings(g, C, b, centre, r, half){
+  // the ring plane: Saturn's equator, tilted 26.7° from its orbit. Fixed direction in space (roughly toward ecliptic +y), which is why the rings open and close over 29 years
+  const t = b.tilt * D2R, n = [0, Math.sin(t), Math.cos(t)];
+  let u = vCross(n, [1, 0, 0]); u = vNorm(u); const v = vCross(n, u);
+  const pc = C.P(centre), inner = r * 1.25, outer = r * 2.3;
+  const ring = (rk, col, wid) => {
+    g.strokeStyle = col; g.lineWidth = wid; g.beginPath(); let pen = false;
+    for(let a = 0; a <= 360; a += 4){ const ca = Math.cos(a * D2R), sa = Math.sin(a * D2R);
+      const p = [centre[0], centre[1], centre[2]]; const q = [(u[0] * ca + v[0] * sa), (u[1] * ca + v[1] * sa), (u[2] * ca + v[2] * sa)];
+      // ring points in world units: scale so that at this camera they sit rk px from the centre
+      const X = pc.x + (vDot(q, C.rt)) * rk, Y = pc.y - (vDot(q, C.upv)) * rk, Z = vDot(q, C.eye);
+      if((Z > 0) !== half){ pen = false; continue; }
+      pen ? g.lineTo(X, Y) : g.moveTo(X, Y); pen = true; }
+    g.stroke();
+  };
+  g.lineCap = 'butt';
+  ring((inner + outer) / 2, 'rgba(214,190,140,0.55)', outer - inner);
+  ring(inner + (outer - inner) * 0.62, 'rgba(60,45,30,0.55)', Math.max(1, r * 0.09));      // the Cassini division
+  ring(outer - 1, 'rgba(240,225,190,0.5)', 1);
+}
+
+/* ---------- the frame ---------- */
+function solDraw(){
+  const cv = $('solar'); if(!cv) return;
+  const w = cv.clientWidth, h = cv.clientHeight; if(!w || !h) return;
+  const pr = Math.min(devicePixelRatio || 1, 2);
+  if(cv.width !== Math.round(w * pr) || cv.height !== Math.round(h * pr)){ cv.width = Math.round(w * pr); cv.height = Math.round(h * pr); }
+  // eased camera
+  if(SOL.to){ const T = SOL.to, dy = (((T.yaw - SOL.yaw) + 540) % 360) - 180;
+    SOL.yaw += dy * 0.14; SOL.pitch += (T.pitch - SOL.pitch) * 0.14; SOL.zoom += (T.zoom - SOL.zoom) * 0.14;
+    if(Math.abs(dy) < 0.2 && Math.abs(T.pitch - SOL.pitch) < 0.2 && Math.abs(T.zoom - SOL.zoom) / SOL.zoom < 0.01){ SOL.yaw = T.yaw; SOL.pitch = T.pitch; SOL.zoom = T.zoom; SOL.to = null; } }
+  const t = A.MakeTime(new Date(state.t));
+  const pos = {}; for(const b of SOL_BODIES) pos[b.id] = solHelio(b.body, t);
+  const gm = A.GeoMoon(t), gmv = A.RotateVector(solEclRot(), gm); const moonRel = [gmv.x, gmv.y, gmv.z];
+  // follow the selected body (its real position moves every frame)
+  if(SOL.sel){ const tgt = solMap(pos[SOL.sel]); SOL.focus = SOL.focusTo ? SOL.focus.map((v, i) => v + (tgt[i] - v) * 0.14) : tgt; if(SOL.focusTo && Math.hypot(SOL.focus[0] - tgt[0], SOL.focus[1] - tgt[1], SOL.focus[2] - tgt[2]) < 1e-4) SOL.focusTo = null; }
+  else if(SOL.focusTo){ SOL.focus = SOL.focus.map(v => v * 0.86); if(Math.hypot(...SOL.focus) < 1e-4){ SOL.focus = [0, 0, 0]; SOL.focusTo = null; } }
+  const C = solCam(w, h), g = cv.getContext('2d');
+  g.setTransform(pr, 0, 0, pr, 0, 0);
+  const stars = solStars(w, h, C, pr);
+  if(stars) g.drawImage(stars, 0, 0, w, h); else { g.fillStyle = '#05070f'; g.fillRect(0, 0, w, h); }
+
+  // orbits, faint, each tinted by its planet
+  g.lineWidth = 1;
+  for(const b of SOL_BODIES){
+    const o = solOrbit(b), n = o.length / 3, sel = SOL.sel === b.id;
+    g.strokeStyle = sel ? 'rgba(255,255,255,0.45)' : 'rgba(150,170,210,0.20)'; g.beginPath();
+    for(let i = 0; i <= n; i++){ const j = (i % n) * 3, q = C.P([o[j], o[j + 1], o[j + 2]]); i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y); }
+    g.stroke();
+  }
+  // the asteroid belt — decorative, deterministic, between Mars and Jupiter
+  if(SOL.mode === 'readable' && SOL.zoom < 4){ let seed = 4242; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+    g.fillStyle = 'rgba(190,180,170,0.35)';
+    for(let i = 0; i < 420; i++){ const a = rnd() * 6.2832, rr = solRad(2.2 + rnd() * 1.1), q = C.P([Math.cos(a) * rr, Math.sin(a) * rr, (rnd() - 0.5) * 0.06]); g.fillRect(q.x, q.y, 1, 1); } }
+
+  // bodies, painter's order
+  const items = [{ id: 'Sun', z: C.P([0, 0, 0]).z }];
+  for(const b of SOL_BODIES) items.push({ id: b.id, b, p: solMap(pos[b.id]), z: C.P(solMap(pos[b.id])).z });
+  items.sort((a, b) => a.z - b.z);
+  const sunPx = SOL.mode === 'true' ? Math.max(1.2, SOL_SUN_R / SOL_AU * C.S) : clamp(14 * Math.pow(SOL.zoom, 0.5), 9, 90);
+  g.font = '600 ' + Math.round(clamp(w / 70, 10, 13)) + 'px ' + getComputedStyle(document.body).getPropertyValue('--mono'); g.textBaseline = 'middle'; g.textAlign = 'left';
+  for(const it of items){
+    if(it.id === 'Sun'){
+      const q = C.P([0, 0, 0]);
+      g.save(); g.globalCompositeOperation = 'lighter';
+      const glow = g.createRadialGradient(q.x, q.y, sunPx * 0.6, q.x, q.y, sunPx * 4.5);
+      glow.addColorStop(0, 'rgba(255,225,150,0.75)'); glow.addColorStop(0.35, 'rgba(255,170,60,0.18)'); glow.addColorStop(1, 'rgba(255,140,40,0)');
+      g.fillStyle = glow; g.beginPath(); g.arc(q.x, q.y, sunPx * 4.5, 0, 7); g.fill(); g.restore();
+      const sg = g.createRadialGradient(q.x - sunPx * 0.3, q.y - sunPx * 0.3, sunPx * 0.1, q.x, q.y, sunPx);
+      sg.addColorStop(0, '#fff8e0'); sg.addColorStop(0.6, '#ffd66a'); sg.addColorStop(1, '#f2a23a');
+      g.fillStyle = sg; g.beginPath(); g.arc(q.x, q.y, sunPx, 0, 7); g.fill();
+      if(SOL.mode === 'true' || sunPx > 12){ g.fillStyle = 'rgba(255,230,170,0.8)'; g.fillText('Sun', q.x + sunPx + 6, q.y); }
+      continue;
+    }
+    const b = it.b, q = C.P(it.p), r = solBodyPx(b, C);
+    if(q.x < -r - 40 || q.y < -r - 40 || q.x > w + r + 40 || q.y > h + r + 40) continue;
+    const sun = vNorm([-it.p[0], -it.p[1], -it.p[2]]);
+    const s2 = [vDot(sun, C.rt), -vDot(sun, C.upv)], s2n = Math.hypot(s2[0], s2[1]) || 1;
+    if(b.rings && r > 3) solRings(g, C, b, it.p, r, false);
+    solDisc(g, q.x, q.y, r, b, [s2[0] / s2n, s2[1] / s2n], vDot(sun, C.eye), 1);
+    if(b.rings && r > 3) solRings(g, C, b, it.p, r, true);
+    if(b.id === 'Earth'){
+      // the moon: true direction; readable mode pushes it out so it is not inside the disc
+      const md = SOL.mode === 'true' ? 1 : (r * 2.6) / (C.S * Math.hypot(moonRel[0], moonRel[1], moonRel[2]));
+      const mp = [it.p[0] + moonRel[0] * md, it.p[1] + moonRel[1] * md, it.p[2] + moonRel[2] * md], mq = C.P(mp), mr = SOL.mode === 'true' ? Math.max(0.5, 1737 / SOL_AU * C.S) : Math.max(1.4, r * 0.27);
+      solDisc(g, mq.x, mq.y, mr, { col: ['#e8e8e8', '#a9a9a9', '#4a4a4a'] }, [s2[0] / s2n, s2[1] / s2n], vDot(sun, C.eye), 1);
+    }
+    if(SOL.sel === b.id){ g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 1.2; g.beginPath(); g.arc(q.x, q.y, r + 6, 0, 7); g.stroke(); }
+    const lab = b.id + (SOL.mode === 'true' && r < 1.5 ? ' ·' : '');
+    g.fillStyle = 'rgba(230,236,250,0.85)'; g.lineWidth = 3; g.strokeStyle = 'rgba(3,4,10,0.8)';
+    g.strokeText(lab, q.x + r + 6, q.y); g.fillText(lab, q.x + r + 6, q.y);
+    it.sx = q.x; it.sy = q.y; it.sr = r;
+  }
+  SOL.hit = items.filter(i => i.b);
+
+  // the date, large — this is the number the visitor is driving
+  const mono = getComputedStyle(document.body).getPropertyValue('--mono');
+  let dstr = ''; try{ dstr = new Intl.DateTimeFormat('en-GB', { timeZone: state.tz, day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(state.t)); }catch(e){ dstr = new Date(state.t).toDateString(); }
+  const fs = Math.round(clamp(w / 22, 20, 34));
+  g.font = '500 ' + fs + 'px ' + mono; g.textAlign = 'right'; g.textBaseline = 'top';
+  g.lineWidth = 4; g.strokeStyle = 'rgba(3,4,10,0.85)'; g.strokeText(dstr, w - 12, 10); g.fillStyle = '#e8ecf5'; g.fillText(dstr, w - 12, 10);
+  g.font = '500 ' + Math.round(fs * 0.42) + 'px ' + mono; g.fillStyle = 'rgba(232,179,74,0.9)';
+  g.fillText(SOL.mode === 'true' ? (w < 520 ? 'TRUE SCALE' : 'TRUE SCALE · distances and sizes real') : (w < 520 ? 'READABLE · compressed' : 'READABLE · distances compressed, bodies enlarged · directions real'), w - 12, 14 + fs);
+  if(SOL.mode === 'true'){ g.fillStyle = 'rgba(201,209,224,0.7)'; g.fillText('at this scale the sun is ' + (sunPx < 2 ? 'a dot' : Math.round(sunPx * 2) + ' px') + ' and Earth is ' + (solBodyPx(SOL_BODIES[2], C) * 2).toFixed(2) + ' px wide', w - 12, 14 + fs * 1.5); }
+  g.textAlign = 'left';
+}
+
+/* ---------- learn: the card ---------- */
+function solTonight(b){
+  // where is it in THIS sky in the coming night: best moment = highest while the sun is down
+  const o = new A.Observer(state.obs.lat, state.obs.lon, state.obs.elev), now = nowMs();
+  let best = null, at = null;
+  for(let t = now; t < now + 26 * 3600e3; t += 15 * 60000){
+    const tt = A.MakeTime(new Date(t)), es = A.Equator(A.Body.Sun, tt, o, true, true), hs = A.Horizon(tt, o, es.ra, es.dec, 'normal');
+    if(hs.altitude > -6) continue;
+    const ep = A.Equator(A.Body[b.body], tt, o, true, true), hp = A.Horizon(tt, o, ep.ra, ep.dec, 'normal');
+    if(!best || hp.altitude > best.alt){ best = { alt: hp.altitude, az: hp.azimuth }; at = t; }
+  }
+  const tt = A.MakeTime(new Date(now)), ep = A.Equator(A.Body[b.body], tt, o, true, true), hz = A.Horizon(tt, o, ep.ra, ep.dec, 'normal');
+  return { now: { alt: hz.altitude, az: hz.azimuth }, best, at };
+}
+function solCard(){
+  const host = $('solCard'); if(!host) return;
+  const b = SOL_BODIES.find(x => x.id === SOL.sel);
+  if(!b || !SOL.open){ host.hidden = true; return; }
+  host.hidden = false;
+  const t = A.MakeTime(new Date(state.t)), hp = solHelio(b.body, t), he = solHelio('Earth', t);
+  const rs = Math.hypot(...hp), re = Math.hypot(hp[0] - he[0], hp[1] - he[1], hp[2] - he[2]);
+  const lt = re * SOL_AU / SOL_C, ltS = lt < 90 ? Math.round(lt) + ' seconds' : lt < 5400 ? (lt / 60).toFixed(1) + ' minutes' : (lt / 3600).toFixed(1) + ' hours';
+  const tn = solTonight(b), ptsN = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'], cp = az => ptsN[Math.round((((az % 360) + 360) % 360) / 22.5) % 16];
+  const isEarth = b.id === 'Earth';
+  const sky = isEarth ? '' : tn.best && tn.best.alt > (state.obstDeg || 0) + 2
+    ? '<b>' + (tn.at ? fmtLocal(tn.at).slice(0, 5) : '') + '</b> tonight: ' + Math.round(tn.best.alt) + '° up in the ' + cp(tn.best.az) + (b.id === 'Uranus' || b.id === 'Neptune' || b.id === 'Pluto' ? ' — binoculars or a telescope' : ' — naked eye')
+    : 'not above your horizon while it is dark tonight' + (tn.best && tn.best.alt > 0 ? ' (peaks at only ' + Math.round(tn.best.alt) + '°)' : '');
+  host.innerHTML = '<div class="solHead"><canvas class="solPortrait" data-id="' + b.id + '" width="96" height="96"></canvas><div><div class="solName">' + b.id + '</div><div class="solFact">' + b.fact + '</div></div><button type="button" class="solClose" aria-label="close">×</button></div>' +
+    '<div class="solGrid">' +
+    '<span><i>from the sun now</i><b>' + rs.toFixed(2) + ' AU</b><u>' + Math.round(rs * SOL_AU / 1e6).toLocaleString('en-GB') + ' million km</u></span>' +
+    (isEarth ? '<span><i>sunlight takes</i><b>' + (rs * SOL_AU / SOL_C / 60).toFixed(1) + ' min</b><u>to reach us</u></span>' : '<span><i>from us now</i><b>' + re.toFixed(2) + ' AU</b><u>light takes ' + ltS + '</u></span>') +
+    '<span><i>a day</i><b>' + b.day + '</b></span><span><i>a year</i><b>' + b.year + '</b></span>' +
+    '<span><i>size vs Earth</i><b>' + (b.r / 6371 < 1 ? (b.r / 6371).toFixed(2) + '×' : (b.r / 6371).toFixed(1) + '×') + '</b><u>' + Math.round(b.r * 2).toLocaleString('en-GB') + ' km across</u></span>' +
+    '<span><i>moons</i><b>' + b.moons + '</b></span>' +
+    (b.tilt ? '<span><i>tilt</i><b>' + b.tilt + '°</b></span>' : '') +
+    '</div>' +
+    (isEarth ? '' : '<div class="solSky"><i>IN YOUR SKY</i> ' + sky + (tn.best && tn.best.alt > (state.obstDeg || 0) + 2 ? ' <button type="button" id="solGo">SHOW IN SKY ›</button>' : '') + '</div>');
+  const pc = host.querySelector('.solPortrait'); solPortrait(pc, b);
+  host.querySelector('.solClose').onclick = () => solSelect(null);
+  const go = $('solGo'); if(go) go.onclick = () => {
+    if(state.live) setLive(false); state.playing = false; setPlayFace();
+    state.t = tn.at; span = { t0: tn.at - 3 * 3600e3, t1: tn.at + 3 * 3600e3 }; state.range = 'align'; state.extended = true;
+    $('ext').classList.add('on'); $('ext').textContent = RANGE_LABEL.align;
+    state.skyLook = { az: tn.best.az, alt: Math.min(tn.best.alt, 60) }; state.freeLook = true; setFov(60);
+    placeMarkers(); syncScrub(); setTab('sky');
+    try{ $('sky').scrollIntoView({ block: 'start', behavior: 'smooth' }); }catch(e){}
+  };
+}
+function solPortrait(c, b){
+  const g = c.getContext('2d'), r = 36, x = 48, y = 48; g.clearRect(0, 0, 96, 96);
+  if(b.rings){ g.strokeStyle = 'rgba(214,190,140,0.75)'; g.lineWidth = 9; g.beginPath(); g.ellipse(x, y, r * 1.9, r * 0.55, -0.35, Math.PI * 0.9, Math.PI * 1.95); g.stroke(); }
+  solDisc(g, x, y, r, b, [-0.6, -0.5], 0.6, 1);
+  if(b.rings){ g.strokeStyle = 'rgba(214,190,140,0.75)'; g.lineWidth = 9; g.beginPath(); g.ellipse(x, y, r * 1.9, r * 0.55, -0.35, -Math.PI * 0.1, Math.PI * 0.9); g.stroke(); }
+}
+function solStrip(){
+  const host = $('solStrip'); if(!host || host.childElementCount) return;
+  for(const b of SOL_BODIES){
+    const btn = document.createElement('button'); btn.type = 'button'; btn.dataset.id = b.id; btn.setAttribute('aria-label', b.id);
+    const c = document.createElement('canvas'); c.width = 96; c.height = 96; solPortrait(c, b);
+    btn.appendChild(c); const s = document.createElement('span'); s.textContent = b.id; btn.appendChild(s); host.appendChild(btn);
+  }
+  host.addEventListener('click', e => { const b = e.target.closest('button'); if(b) solSelect(SOL.sel === b.dataset.id ? null : b.dataset.id); });
+}
+function solSelect(id){
+  SOL.sel = id; SOL.focusTo = true;
+  $('solStrip').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.id === id));
+  if(id){ const b = SOL_BODIES.find(x => x.id === id), r = Math.hypot(...solHelio(b.body, A.MakeTime(new Date(state.t))));
+    // zoom so the orbit neighbourhood reads: a quarter of the frame per AU of (mapped) radius, capped
+    const want = SOL.mode === 'true' ? clamp(31.5 / Math.max(0.6, r) * 0.7, 1, 40) : clamp(solRad(31.5) / Math.max(0.6, solRad(r)) * 0.55, 1, 6);
+    SOL.to = { yaw: SOL.yaw, pitch: SOL.pitch, zoom: want }; }
+  else SOL.to = { yaw: SOL.yaw, pitch: SOL.pitch, zoom: 1 };
+  solCard();
+}
+
+/* ---------- the tab ---------- */
+function solSpeedLabel(v){ return v >= 86400 * 360 ? '1yr/s' : v >= 86400 * 30 ? '1mo/s' : v >= 86400 ? '1d/s' : v + '×'; }
+function solDock(){
+  const p = $('solCard'), tb = document.querySelector('.timebar');
+  if(!p || !tb || p.dataset.docked) return;
+  tb.insertAdjacentElement('afterend', p); p.dataset.docked = '1';
+  try{ p.style.order = getComputedStyle(tb).order; }catch(e){}
+}
+function solOpen(){
+  if(SOL.open) return; SOL.open = true; solDock(); solStrip(); solCard();
+  // the orrery opens on TODAY, not on the eclipse: this view is about the whole sky-clock
+  if(!SOL.everDrawn){ state.t = clamp(nowMs(), span ? span.t0 : 0, span ? span.t1 : 9e15); syncScrub(); }
+  if(SOL_SPEEDS.indexOf(state.speed) < 0){ SOL.oldSpeed = state.speed; state.speed = SOL_SPEEDS[0]; paintSpeed(); }
+}
+function solClose(){ if(!SOL.open) return; SOL.open = false; const p = $('solCard'); if(p) p.hidden = true; if(SOL_SPEEDS.indexOf(state.speed) >= 0){ state.speed = SOL.oldSpeed || 60; paintSpeed(); } }
+function solarSpan(k){ const c = nowMs(), y = 365.25 * 864e5; return k === 'solarY' ? { t0: c - y, t1: c + y } : { t0: c - 20 * y, t1: c + 20 * y }; }
+(function(){
+  const cv = $('solar'); if(!cv) return;
+  const zoomAt = k => { SOL.to = null; SOL.zoom = clamp(SOL.zoom * k, 0.35, 60); };
+  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); SOL.ptr.set(e.pointerId, [e.clientX, e.clientY]); SOL.moved = false; SOL.downAt = performance.now();
+    if(SOL.ptr.size === 2){ const p = [...SOL.ptr.values()]; SOL.pinch = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]); } });
+  cv.addEventListener('pointermove', e => {
+    const o = SOL.ptr.get(e.pointerId); if(!o) return;
+    if(SOL.ptr.size === 1){ const dx = e.clientX - o[0], dy = e.clientY - o[1]; if(!SOL.moved && Math.hypot(dx, dy) < 6) return; SOL.moved = true; SOL.to = null;
+      const k = 0.35; SOL.yaw = ((SOL.yaw - dx * k + 540) % 360) - 180; SOL.pitch = clamp(SOL.pitch + dy * k, -89, 89); SOL.ptr.set(e.pointerId, [e.clientX, e.clientY]); }
+    else { SOL.ptr.set(e.pointerId, [e.clientX, e.clientY]); const p = [...SOL.ptr.values()], d = Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]); if(SOL.pinch > 0 && d > 0) zoomAt(d / SOL.pinch); SOL.pinch = d; SOL.moved = true; }
+  });
+  const up = e => { const had = SOL.ptr.has(e.pointerId); SOL.ptr.delete(e.pointerId);
+    if(!had || SOL.moved || SOL.ptr.size || e.type !== 'pointerup' || performance.now() - SOL.downAt > 500) return;
+    // tap: pick the nearest body within reach
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; let best = null, bd = 30;
+    for(const it of (SOL.hit || [])){ if(it.sx == null) continue; const d = Math.hypot(it.sx - x, it.sy - y) - it.sr; if(d < bd){ bd = d; best = it; } }
+    solSelect(best ? best.id : null);
+  };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('wheel', e => { e.preventDefault(); zoomAt(Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+  $('solCtl').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; const k = b.dataset.k;
+    const cur = SOL.to || { yaw: SOL.yaw, pitch: SOL.pitch, zoom: SOL.zoom };
+    if(k === 'top') SOL.to = { yaw: cur.yaw, pitch: 89, zoom: cur.zoom };
+    else if(k === 'tilt') SOL.to = { yaw: -62, pitch: 38, zoom: cur.zoom };
+    else if(k === 'edge') SOL.to = { yaw: cur.yaw, pitch: 4, zoom: cur.zoom };
+    else if(k === 'inner'){ solSelect(null); SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: SOL.mode === 'true' ? 18 : 2.6 }; }
+    else if(k === 'all'){ solSelect(null); SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: 1 }; }
+    else if(k === 'in') SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: clamp(cur.zoom * 1.5, 0.35, 60) };
+    else if(k === 'out') SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: clamp(cur.zoom / 1.5, 0.35, 60) };
+    else if(k === 'scale'){ SOL.mode = SOL.mode === 'true' ? 'readable' : 'true'; b.textContent = SOL.mode === 'true' ? 'TRUE SCALE' : 'READABLE'; b.classList.toggle('on', SOL.mode === 'true'); SOL.focus = [0, 0, 0]; if(SOL.sel) solSelect(SOL.sel); else SOL.to = { yaw: cur.yaw, pitch: cur.pitch, zoom: 1 }; solCard(); }
+  });
+  $('tabSolar').addEventListener('click', () => setTab('solar'));
+})();
+
+
 
 /* ==================== ORBITAL — passes ====================
    Aurora is weather; this is mechanics. A bright satellite's position is known to the second
@@ -9569,7 +9992,7 @@ let savedModeOverride = null, initialTab = 'sky';
   const qNow = q.get('now') ? Date.parse(q.get('now')) : NaN;
   if(isFinite(qNow)) nowOffset = qNow - Date.now();
   if(q.get('mode') === 'novice') savedModeOverride = 'novice';
-  if(q.get('tab') === 'path' || q.get('tab') === 'cosmos' || q.get('tab') === 'align' || q.get('tab') === 'aurora' || q.get('tab') === 'plan') initialTab = q.get('tab');
+  if(q.get('tab') === 'path' || q.get('tab') === 'cosmos' || q.get('tab') === 'align' || q.get('tab') === 'aurora' || q.get('tab') === 'plan' || q.get('tab') === 'solar') initialTab = q.get('tab');
   $('lat').value = state.obs.lat; $('lon').value = state.obs.lon;
   $('date').value = state.date;
 })();
@@ -9588,7 +10011,7 @@ const CHIP_MQ = (()=>{ try{ return matchMedia('(max-width:760px)'); }catch(e){ r
 // ALIGN's host is the panel itself — it has no canvas, and the panel reserves a top strip
 // (see .alignPanel padding-top) so the chip never lands on a control
 function chipHost(){ return state.tab === 'path' ? mapCv : state.tab === 'cosmos' ? cosCv
-                          : state.tab === 'align' ? $('viewAlign') : state.tab === 'aurora' ? $('viewAurora') : state.tab === 'plan' ? $('plMap') : cv; }
+                          : state.tab === 'align' ? $('viewAlign') : state.tab === 'aurora' ? $('viewAurora') : state.tab === 'plan' ? $('plMap') : state.tab === 'solar' ? $('solar') : cv; }
 function syncChip(){
   const ov = $('locOverlay'), chip = $('locChip'), wrapEl = document.querySelector('.wrap');
   const on = !!(CHIP_MQ && CHIP_MQ.matches);
@@ -9692,6 +10115,7 @@ function loop(now){
   else if(state.tab === 'cosmos') drawCosmos();
   else if(state.tab === 'path') drawMap();
   else if(state.tab === 'plan') planDraw(f);
+  else if(state.tab === 'solar') solDraw();
   if(now - lastDom > 150){
     lastDom = now;
     // ALIGN's only moving part is where the two bodies sit right now — a dial, not a render
